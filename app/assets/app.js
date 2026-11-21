@@ -75,6 +75,8 @@
         clearTimeout(toastT);
         toastT = setTimeout(() => { e.hidden = true; }, ms || (action ? 7000 : Math.min(5000, 2000 + msg.length * 30)));
     }
+    /** Inhalt ersetzen, leere Teile (null, false) fallen weg statt als Text „null“ zu erscheinen */
+    const fill = (node, ...kids) => node.replaceChildren(...kids.flat().filter(k => k != null && k !== false));
     const N = s => s;    // markiert Texte, die erst später übersetzt werden (für tools/check-i18n.js)
     const announce = s => { const l = $('#live'); l.textContent = ''; setTimeout(() => { l.textContent = s; }, 30); };
 
@@ -1089,7 +1091,7 @@
                 nameIn = el('input', { type: 'text', value: v.name || '', maxlength: 60 });
                 nameIn.addEventListener('change', () => { v.name = nameIn.value.trim().slice(0, 60); tidy(); paint(); });
             }
-            body.replaceChildren(
+            fill(body,
                 tabs,
                 note(v ? t('Eine eigene Fassung dieser Liste. Gilt überall, wo die Liste vorkommt, solange ihr Reiter gewählt ist.')
                     : t('Die eingebaute Liste. Häkchen weg: bleibt stehen, wird aber nicht gezogen. Papierkorb: ganz weg. Eigenes wird einsortiert.')),
@@ -1141,7 +1143,7 @@
             const off = new Set(cur.off || []);
             const rows = cur.items.map(x => Object.assign({}, x, off.has(x.t) ? { off: true } : {}));
             const save = rows => { cur.items = rows.map(cleanIt); cur.off = rows.filter(r => r.off).map(r => r.t); saveNames(); lastSpin = null; };
-            body.replaceChildren(
+            fill(body,
                 note(t('Für „Wer ist dran?“, „Gruppen einteilen“, „Ämter verteilen“ und eigene Räder mit Teilnehmern. Häkchen weg, wer heute fehlt. Alles bleibt nur auf diesem Gerät.')),
                 tabs,
                 field(t('Name der Liste'), nameIn),
@@ -1324,7 +1326,7 @@
         const body = el('div.settings');
         const s = sheet(t('Farben und Schrift'), body, { onClose: () => render() });
         const paint = () => {
-            body.replaceChildren(
+            fill(body,
                 UI_LANGS.length > 1 ? section(t('Sprache'), seg(UI_LANGS.map(l => [l, langName(l)]), set.lang, async v => {
                     set.lang = v; saveSet(); await loadContent(contentLang()); applyTexts(); openGame(game.id, true); s.close();
                 }, 'c3'), note(t('Sprache der Bedienung und der eingebauten Listen.'))) : null,
