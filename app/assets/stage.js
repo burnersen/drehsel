@@ -365,7 +365,7 @@
                 if (short) {
                     const r0 = Ri * (n <= 8 ? .72 : .8);
                     const arc = 2 * r0 * Math.sin(Math.min(a, Math.PI * .9) / 2);
-                    let px = Math.min(Ri * .26, arc * .62, (Ri - hubR) * .42) * scale;
+                    let px = Math.min(Ri * .3, arc * .7, (Ri - hubR) * .46) * scale;
                     c.font = fw + ' ' + px + 'px ' + ff;
                     const wmax = Math.max(...this.items.map(x => c.measureText(x.t).width), 1);
                     if (wmax > arc * .86) px *= arc * .86 / wmax;
@@ -373,7 +373,7 @@
                 } else {
                     const len = Ri * .9 - hubR * 1.25;
                     const hgt = 2 * Ri * .62 * Math.sin(Math.min(a, Math.PI * .5) / 2) * .78;
-                    let base = Math.min(Ri * .13, hgt) * scale;
+                    let base = Math.min(Ri * .16, hgt * 1.08) * scale;
                     c.font = fw + ' ' + base + 'px ' + ff;
                     const pxs = this.items.map(x => { const w = c.measureText(x.t).width; return w > len ? base * len / w : base; });
                     // Eine gemeinsame Größe, außer ein einzelner langer Eintrag würde alle winzig machen
@@ -566,7 +566,7 @@
             this.fitList = [];
             this.groups = [];
             this.board = null; this.diceBox = null; this.ball = null;
-            const view = { wheel: this.vWheel, reels: this.vReels, card: this.vReels, dice: this.vDice, bingo: this.vBingo, abc: this.vAbc, teams: this.vTeams, duties: this.vDuties }[m.view] || this.vWheel;
+            const view = { wheel: this.vWheel, reels: this.vReels, card: this.vReels, solo: this.vReels, dice: this.vDice, bingo: this.vBingo, abc: this.vAbc, teams: this.vTeams, duties: this.vDuties }[m.view] || this.vWheel;
             if (m.empty) r.append(this.vEmpty(m));
             else view.call(this, m);
             if (m.timer) r.append(this.timerEl(m.timer));
@@ -677,7 +677,7 @@
             const slot = m.slots[k] || {};
             const sel = m.res ? m.res[k] || [] : null;
             const box = el('div.res' + (cls ? '.' + cls : ''), { 'data-slot': m.apart ? String(k) : null, title: m.apart ? this.t('Antippen zieht nur hier neu') : null });
-            if (slot.label) box.append(el('div.lab', { text: slot.label }));
+            if (slot.label && m.labels !== false && m.view !== 'solo') box.append(el('div.lab', { text: slot.label }));
             const val = el('div.val');
             box.append(val);
             this.fillVal(val, sel, slot, m, k);
@@ -768,10 +768,13 @@
         }
         /* --- Walzen und Karte --- */
         vReels(m) {
-            const box = el('div.reels' + (m.view === 'card' ? '.card' : ''));
+            // Karte, oder „Nur Ergebnis“: dann steht nichts als das Ergebnis da, über die ganze Fläche
+            const solo = m.view === 'solo';
+            const box = el('div.reels.card' + (solo ? '.solo' : ''));
             m.slots.forEach((s, k) => box.append(this.resBox(m, k, 'reel')));
             this.reelBox = box;
             this.root.append(this.group(box, m, m.slots.map((_, k) => k)));
+            if (solo) return;
             const cats = this.cats(m);
             if (cats) this.root.append(cats);
             if (m.note) this.root.append(el('p.note', { text: m.note }));
@@ -957,9 +960,10 @@
             const show = (node, text) => {
                 const tag = node.firstElementChild && node.firstElementChild.tagName === 'B' ? 'b' : 'span';
                 node.replaceChildren(el(tag, { text }));
-                node.classList.remove('covered', 'wait', 'balls', 'colored');
-                node.classList.remove('roll'); void node.offsetWidth; node.classList.add('roll');
+                node.classList.remove('covered', 'wait', 'balls', 'colored', 'roll');
+                // erst messen und mittig setzen, dann die kleine Rollbewegung starten: sonst misst bigFit die verschobene Lage
                 bigFit(node, 4000, f);
+                void node.offsetWidth; node.classList.add('roll');
             };
             while (done.some(x => !x)) {
                 await raf();
