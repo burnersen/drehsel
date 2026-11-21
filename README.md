@@ -12,17 +12,17 @@
 
 **[⬇️ Neuestes Release herunterladen](../../releases/latest)** · **[🌐 tech.burnersen.de](https://tech.burnersen.de/)** · **[☕ Spendier mir einen Kaffee](https://ko-fi.com/burnersen)**
 
-Gemacht für alle, die Gruppen beschäftigen: Betreuung im Seniorenheim, Kita, Schule, Familie. Das Ergebnis steht so groß auf dem Bildschirm, wie Platz da ist, in gut lesbaren Schriften und Farben, auf Wunsch auch vorgelesen. Am Tablet, am Fernseher oder mit dem Beamer.
+Gemacht für alle, die Gruppen beschäftigen: Betreuung im Seniorenheim, Kita, Schule, Familie. Das Ergebnis steht bildschirmfüllend da, so groß, dass man es auch von hinten im Raum liest, in gut lesbaren Schriften und Farben, auf Wunsch auch vorgelesen. Am Tablet, am Fernseher oder mit dem Beamer.
 
 <p align="center">
-  <img src="docs/de/spiel.png" alt="Stadt-Land-Fluss: links das Rad mit den Buchstaben, rechts riesengroß der gezogene Buchstabe M, darunter die Kategorien" width="720">
+  <img src="docs/de/spiel.png" alt="Stadt-Land-Fluss: links zwei Räder für Buchstabe und Kategorie, rechts riesengroß der Buchstabe S und die Kategorie Fluss" width="720">
 </p>
 
 <table>
   <tr>
     <td align="center" width="33%"><img src="docs/de/auswahl.png" alt="Spiel wählen: Kacheln mit allen Spielen, Filter für Senioren, Kinder, Gruppen und Werkzeuge" width="250"><br><sub>28 Spiele und Werkzeuge</sub></td>
     <td align="center" width="33%"><img src="docs/de/walzen.png" alt="Geschichten-Walzen: Wer? Wo? Was passiert? in drei großen Feldern" width="250"><br><sub>Walzen für mehrere Dinge auf einmal</sub></td>
-    <td align="center" width="33%"><img src="docs/de/bingo.png" alt="Bingo: große Kugel mit der Zahl 28, daneben die Tafel mit allen gezogenen Zahlen" width="250"><br><sub>Bingo mit Tafel und Ansage</sub></td>
+    <td align="center" width="33%"><img src="docs/de/bingo.png" alt="Bingo: große Kugel mit der Zahl 20, daneben die Tafel mit allen gezogenen Zahlen" width="250"><br><sub>Bingo mit Tafel und Ansage</sub></td>
   </tr>
   <tr>
     <td align="center"><img src="docs/de/erinnerung.png" alt="Erinnerungsrad: eine Frage über die ganze Fläche" width="250"><br><sub>Karte für lange Texte</sub></td>
@@ -32,12 +32,15 @@ Gemacht für alle, die Gruppen beschäftigen: Betreuung im Seniorenheim, Kita, S
   <tr>
     <td align="center"><img src="docs/de/farben.png" alt="Farben und Schrift: Farbwelten für hell und dunkel" width="250"><br><sub>Farbwelten für hell und dunkel</sub></td>
     <td align="center"><img src="docs/de/mischer.png" alt="Farbmischer mit Vorschau: Farbton, Sättigung, Helligkeit" width="250"><br><sub>Farbmischer für alle Farben</sub></td>
-    <td align="center"><img src="docs/de/vorfuehren.png" alt="Vorführmodus: nur Rad und Ergebnis auf schwarzem Hintergrund" width="250"><br><sub>Vorführmodus für Fernseher und Beamer</sub></td>
+    <td align="center"><img src="docs/de/vorfuehren.png" alt="Vorführmodus: Buchstabe und Kategorie bildschirmfüllend auf schwarzem Hintergrund" width="250"><br><sub>Vorführmodus für Fernseher und Beamer</sub></td>
   </tr>
   <tr>
     <td align="center"><img src="docs/de/handy.png" alt="Am Handy: oben Buchstabe, unten Kategorie" width="200"><br><sub>Am Handy</sub></td>
     <td align="center"><img src="docs/de/eigene.png" alt="Neues Rad: Name, Symbol und Einträge" width="200"><br><sub>Eigene Räder in einer Minute</sub></td>
     <td align="center"><img src="docs/de/drucken.png" alt="Drucken: Vorschau von zwei Bingo-Karten, daneben die Einstellungen" width="250"><br><sub>Bingo-Karten drucken, jede anders</sub></td>
+  </tr>
+  <tr>
+    <td align="center" colspan="3"><img src="docs/de/listen.png" alt="Liste bearbeiten: Reiter Standard und Kinder, jeder Eintrag mit Häkchen, Stift und Papierkorb, eigene Einträge einsortiert" width="440"><br><sub>Jede Liste anpassen, mehrere Fassungen als Reiter</sub></td>
   </tr>
 </table>
 
@@ -51,7 +54,7 @@ Gemacht für alle, die Gruppen beschäftigen: Betreuung im Seniorenheim, Kita, S
 
 | Für alle | Senioren | Kinder | Werkzeuge |
 |---|---|---|---|
-| Stadt-Land-Fluss (mit Sanduhr und Kategorien) | Erinnerungsrad (72 Fragen von früher) | Geschichten-Walzen (Wer? Wo? Was passiert?) | Buchstaben (ohne Wiederholung, schwierige abwählbar) |
+| Stadt-Land-Fluss (Buchstabe und Kategorie, Sanduhr) | Erinnerungsrad (72 Fragen von früher) | Geschichten-Walzen (Wer? Wo? Was passiert?) | Buchstaben (ohne Wiederholung, schwierige abwählbar) |
 | Nennt etwas mit … (Buchstabe und Kategorie) | Sprichwörter ergänzen (86, mit Auflösung) | Bewegungsrad (40 Übungen zum Toben) | Zahlen (Bereich, Schrittweite, mit oder ohne Zurücklegen) |
 | Bingo (1 bis 75, Tafel, Ansage) | Sitzgymnastik (35 Übungen, Sanduhr) | Hand, Fuß und Farbe | Würfel (1 bis 9, mit Augen und Summe) |
 | Begriffe raten (verdeckt, erklären, vormachen, malen) | Liederrad (Volkslieder) | Rechen-Rad (Plus, Minus, Mal, Geteilt) | Lotto 6 aus 49 |
@@ -63,19 +66,23 @@ Jedes Spiel lässt sich anpassen, und eigene Räder kommen beliebig dazu.
 ## So geht's
 
 - **Drehen:** oben auf „Drehen“, aufs Rad oder irgendwo auf die Fläche tippen. Mit Schwung über das Rad wischen dreht in diese Richtung. Am Rechner gehen Leertaste, Enter und Pfeiltasten, also auch ein Präsentations-Klicker.
+- **Bildschirmfüllend:** Das Rad dreht über die ganze Fläche, bleibt kurz stehen, dann steht das Ergebnis über die ganze Fläche. Erst das nächste Antippen dreht wieder. Umstellbar unter Menü → Farben und Schrift → Anzeige.
 - **Schneller fertig:** während es dreht noch einmal antippen.
-- **Darstellung:** Rad zum Zuschauen, Walzen für mehrere Dinge auf einmal, Karte für lange Texte wie Fragen. Umschalten unter „Anpassen“ (Regler-Knopf oben).
+- **Darstellung:** Rad zum Zuschauen, Walzen für mehrere Dinge auf einmal, Karte für lange Texte wie Fragen, Tafel zum Abhaken wie beim Bingo. Umschalten unter „Anpassen“ (Regler-Knopf oben).
+- **Zusammen oder einzeln:** Bei mehreren Walzen, etwa Buchstabe und Kategorie, zieht ein Antippen alles neu. Auf Wunsch zieht das Antippen einer Walze nur sie neu (am Rechner auch mit den Tasten 1 bis 6). Eine Walze kann auch nur als Leiste darunter stehen, etwa die Kategorien zum Aufschreiben.
 - **Ziehen:** mit Wiederholung, jeder einmal und dann von vorn, oder jeder nur einmal bis zur neuen Runde (wie beim Bingo). Bei „jeder einmal“ zeigt das Rad nur noch, was im Topf ist.
 - **Auflösung:** Sprichwörter, Reime und Rechenaufgaben zeigen die Antwort erst beim Antippen.
 - **Verdeckt:** bei „Begriffe raten“ sieht den Begriff nur, wer ihn antippt.
 - **Sanduhr:** auf Wunsch je Spiel, startet nach dem Drehen von selbst, mit Gong am Ende.
-- **Vorlesen:** über die Sprachausgabe des Geräts, beim Bingo von Haus aus an.
-- **Rückgängig und Verlauf:** unten rechts, dort auch „Neue Runde“.
+- **Vorlesen:** von Haus aus aus. Eingeschaltet liest Drehsel mit der besten Stimme, die das Gerät hat, Buchstaben so, wie man sie sagt („Buchstabe: Emm. Kategorie: Tier.“). Die Stimme lässt sich wählen. Die Siri-Stimmen gibt Apple für Webseiten leider nicht frei.
+- **Rückgängig und Verlauf:** unten rechts, dort auch „Neue Runde“. Die zuletzt gezogenen Ergebnisse lassen sich auf Wunsch unten einblenden, von Haus aus bleibt der Platz dem aktuellen Ergebnis.
 - **Fairer Zufall:** das Ergebnis kommt aus dem echten Zufallsgenerator des Geräts, gleichmäßig verteilt. Das Rad dreht nur noch dorthin.
 
 ## Gut lesbar
 
-- **Das Ergebnis wird so groß, wie Platz da ist.** Wörter werden dabei nie getrennt.
+- **Randvoll:** Buchstaben, Zahlen und Wörter werden nach ihren echten Umrissen eingepasst, nicht nach der Textzeile mit ihrem Platz für Ober- und Unterlängen. Ein einzelner Buchstabe füllt so fast die ganze Fläche, am Handy genauso wie am Fernseher. Wörter werden nie getrennt.
+- **Mehrere Ergebnisse** stehen neben- oder untereinander, je nachdem, wo alle größer werden. Die Aufteilung richtet sich nach der Länge der Einträge und springt beim nächsten Drehen nicht.
+- **Würfel mit dicken Augen**, gut zu zählen auch von hinten im Raum.
 - **Fünf Schriften, alle eingebaut:** Atkinson Hyperlegible (vom Braille Institute für Menschen mit Sehschwäche), Fibel (nach Andika, für Leseanfänger), Lexend, Nunito und die Schrift des Geräts.
 - **Farbwelten:** Klassisch, Ruhig, Weinrot, Schlicht und Bunt für hell, Nacht, Wald, Gelb auf Schwarz, Weiß auf Schwarz und Bunt dunkel für dunkel. Hell oder dunkel fest oder wie das Gerät.
 - **Farbmischer:** Hintergrund, Flächen, Schrift, Akzent, Rand und jede Feldfarbe im Rad selbst einstellen, mit Vorschau, Farbwähler und Farbcode.
@@ -85,7 +92,11 @@ Jedes Spiel lässt sich anpassen, und eigene Räder kommen beliebig dazu.
 ## Eigene Listen
 
 - **Neues Rad:** Name, Symbol, Einträge eintippen oder einfügen. Mehrere Walzen für Kombinationen.
-- **Eingebaute Listen anpassen:** einzelne Einträge ausblenden und eigene ergänzen. Zurücksetzen holt alles wieder.
+- **Jede Liste anpassen:** jeder Eintrag mit Häkchen (bleibt stehen, wird aber nicht gezogen), Stift zum Ändern und Papierkorb zum Löschen, auch die eingebauten. Neues wird an seinem Platz im Alphabet einsortiert, als wäre es schon immer da gewesen. Mehrere Einträge auf einmal einfügen geht auch. Gelöschtes lässt sich zurückholen.
+- **Mehrere Fassungen als Reiter:** „Neue Liste“ legt zu jeder Liste weitere Fassungen an, leer oder als Kopie, etwa eine für Kinder und eine für Erwachsene oder eigene Fragen der Bärengruppe. Ein Tipp auf den Reiter schaltet um.
+- **Jede Walze, jede Liste:** unter „Anpassen“ kann jede Walze eine andere eingebaute Liste nehmen oder eine ganz eigene nur für dieses Spiel. Beim Stadt-Land-Fluss etwa die Kategorien für Senioren oder eigene.
+- **Eigene Buchstaben und Silben:** zum Alphabet kommen auf Wunsch SCH, ST, EI oder was gebraucht wird.
+- **Teilnehmer:** mehrere Namenslisten, etwa je Gruppe, umschalten per Reiter. Wer heute fehlt, bekommt das Häkchen weg.
 - **Als eigenes Rad kopieren:** jedes eingebaute Spiel samt Einträgen, danach frei veränderbar.
 - **Textdateien importieren und exportieren**, auch Listen aus WhatsApp, E-Mail oder einer Excel-Spalte einfügen.
 - **Per Link teilen:** das Rad steckt im Link hinter dem `#`. Dieser Teil geht nie an den Server, gespeichert wird nichts.
@@ -122,7 +133,8 @@ Unter Menü → Drucken (oder „Drucken …“ beim Anpassen eines Spiels) ents
 
 ## Fernseher, Beamer, Apple TV
 
-- **Vorführmodus** (Knopf mit den vier Ecken oder Taste F): nur noch Rad und Ergebnis, randvoll, Bildschirm bleibt an. Antippen dreht, oben links geht es zurück.
+- **Vorführmodus** (Knopf mit den vier Ecken oder Taste F): nur noch Rad und Ergebnis, randvoll, auf Wunsch auf Schwarz, Bildschirm bleibt an. Antippen dreht, oben links geht es zurück. Überschriften und Leisten wachsen mit dem Bildschirm mit.
+- **iPhone:** Safari lässt Webseiten nicht ins echte Vollbild. Als App auf dem Home-Bildschirm (Teilen → „Zum Home-Bildschirm“) verschwinden alle Leisten.
 - **iPad auf Apple TV:** iPad quer halten und im Kontrollzentrum die Drehsperre einschalten. Das iPad hat ein anderes Format als der Fernseher (etwa 4:3 statt 16:9), deshalb bleiben beim Spiegeln links und rechts Ränder. Mit schwarzem Hintergrund im Vorführmodus fallen sie kaum auf. Als App installiert verschwinden zusätzlich die Leisten von Safari.
 - Ein eigenes 16:9-Bild für den Fernseher können nur Apps aus dem App Store senden, eine Web-App kommt da nicht ran.
 
@@ -197,7 +209,7 @@ app/views/     die Hauptseite, auch Vorlage für die Offline-Datei
 app/assets/    die App im Browser:
                engine.js  Zufall, Ziehen, Verlauf, Gruppen, Ämter, Teilen, Bingo-Karten, Rechenblätter, eingebaute Spiele
                pdf.js     PDF ohne fremde Bibliothek, mit Vorschau; print.js die Druckvorlagen
-               stage.js   Rad, Walzen, Karte, Würfel, Bingo-Tafel, Sanduhr
+               stage.js   Rad, Walzen, Karte, Würfel, Bingo-Tafel, Sanduhr, randvolle Einpassung der Ergebnisse
                look.js    Farbwelten und Kontrast-Automatik
                app.js     Bedienung, Fenster, Einstellungen, eigene Räder, Sicherung
                i18n-en.js Übersetzung, Schriften (WOFF2), Symbole, Service Worker, CSS

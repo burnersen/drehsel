@@ -12,10 +12,10 @@
 
 **[⬇️ Download the latest release](../../releases/latest)** · **[🌐 tech.burnersen.de](https://tech.burnersen.de/en/)** · **[☕ Buy me a coffee](https://ko-fi.com/burnersen)**
 
-Made for everyone who keeps groups busy: care homes, nurseries, schools, families. The result fills all the space there is, in easy-to-read fonts and colours, and can be read aloud. On a tablet, a TV or a projector.
+Made for everyone who keeps groups busy: care homes, nurseries, schools, families. The result fills the whole screen, big enough to read from the back of the room, in easy-to-read fonts and colours, and can be read aloud. On a tablet, a TV or a projector.
 
 <p align="center">
-  <img src="docs/en/game.png" alt="Name, Place, Animal: the letter wheel on the left, the drawn letter huge on the right, categories below" width="720">
+  <img src="docs/en/game.png" alt="Name, Place, Animal: two wheels for letter and category on the left, the letter S and the category River huge on the right" width="720">
 </p>
 
 <table>
@@ -32,12 +32,15 @@ Made for everyone who keeps groups busy: care homes, nurseries, schools, familie
   <tr>
     <td align="center"><img src="docs/en/colours.png" alt="Colours and text: colour themes for light and dark" width="250"><br><sub>Colour themes for light and dark</sub></td>
     <td align="center"><img src="docs/en/mixer.png" alt="Colour mixer with preview: hue, saturation, lightness" width="250"><br><sub>Colour mixer for every colour</sub></td>
-    <td align="center"><img src="docs/en/presentation.png" alt="Presentation mode: just the wheel and the result on black" width="250"><br><sub>Presentation mode for TV and projector</sub></td>
+    <td align="center"><img src="docs/en/presentation.png" alt="Presentation mode: letter and category filling the screen on black" width="250"><br><sub>Presentation mode for TV and projector</sub></td>
   </tr>
   <tr>
     <td align="center"><img src="docs/en/phone.png" alt="On a phone: letter at the top, category below" width="200"><br><sub>On a phone</sub></td>
     <td align="center"><img src="docs/en/own.png" alt="New wheel: name, symbol and entries" width="200"><br><sub>Your own wheels in a minute</sub></td>
     <td align="center"><img src="docs/en/print.png" alt="Print: preview of two bingo cards, settings next to it" width="250"><br><sub>Print bingo cards, each one different</sub></td>
+  </tr>
+  <tr>
+    <td align="center" colspan="3"><img src="docs/en/lists.png" alt="Editing a list: tabs Standard and Children, every entry with tick box, pencil and bin, your own entries sorted in" width="440"><br><sub>Adjust every list, several versions as tabs</sub></td>
   </tr>
 </table>
 
@@ -47,7 +50,7 @@ Made for everyone who keeps groups busy: care homes, nurseries, schools, familie
 
 | For everyone | Seniors | Children | Tools |
 |---|---|---|---|
-| Name, Place, Animal (with timer and categories) | Memory wheel (72 questions about the old days) | Story reels (Who? Where? What happens?) | Letters (no repeats, tricky ones can be left out) |
+| Name, Place, Animal (letter and category, timer) | Memory wheel (72 questions about the old days) | Story reels (Who? Where? What happens?) | Letters (no repeats, tricky ones can be left out) |
 | Name something with … (letter and category) | Finish the proverb (with answers) | Movement wheel (40 ideas to get moving) | Numbers (range, step, with or without repeats) |
 | Bingo (1 to 75, board, spoken numbers) | Chair exercises (35, with timer) | Hand, foot and colour | Dice (1 to 9, with pips and total) |
 | Guess the word (hidden; explain, act, draw) | Song wheel (old songs) | Maths wheel (plus, minus, times, divided) | Lottery 6 from 49 |
@@ -59,19 +62,23 @@ Every game can be adjusted, and you can add as many wheels of your own as you li
 ## How it works
 
 - **Spin:** tap “Spin” at the top, the wheel, or anywhere on the play area. A quick swipe across the wheel spins it that way. On a computer, space, Enter and the arrow keys work, so a presentation clicker does too.
+- **Filling the screen:** the wheel spins across the whole screen, pauses briefly, then the result fills the whole screen. Only the next tap spins again. Change it under Menu → Colours and text → Display.
 - **Faster:** tap again while it spins.
-- **Display:** wheel to watch, reels for several things at once, card for long texts such as questions. Switch under “Adjust” (slider button at the top).
+- **Display:** wheel to watch, reels for several things at once, card for long texts such as questions, board to tick off like in bingo. Switch under “Adjust” (slider button at the top).
+- **Together or one at a time:** with several reels, such as letter and category, one tap draws everything again. If you like, tapping a reel draws only that one (on a computer also with the keys 1 to 6). A reel can also just be shown as a strip below, for example the categories to write down.
 - **Drawing:** with repeats, each once and then start again, or each only once until a new round (as in bingo). With “each once” the wheel only shows what is still in the pot.
 - **Answers:** proverbs, rhymes and sums show the answer only after a tap.
 - **Hidden:** in “Guess the word” only the person who taps sees the word.
 - **Timer:** per game if you like, starts by itself after the spin, with a gong at the end.
-- **Read aloud:** via the device's speech output, on by default for bingo.
-- **Undo and history:** bottom right, where you also find “New round”.
+- **Read aloud:** off by default. When it is on, Drehsel uses the best voice on the device and says letters the way you say them (“Letter: M. Category: animal.”). You can choose the voice. Unfortunately Apple does not make the Siri voices available to websites.
+- **Undo and history:** bottom right, where you also find “New round”. The most recent results can be shown at the bottom if you like, by default the space belongs to the current result.
 - **Fair randomness:** the result comes from the device's real random number generator, evenly distributed. The wheel only spins to it.
 
 ## Easy to read
 
-- **The result is as big as the space allows.** Words are never split.
+- **Filling the space:** letters, numbers and words are fitted by their real outlines, not by the line of text with its room for ascenders and descenders. A single letter fills almost the whole area, on a phone as much as on a TV. Words are never split.
+- **Several results** sit side by side or one above the other, whichever makes them all bigger. The layout follows the length of the entries and does not jump at the next spin.
+- **Dice with big pips**, easy to count from the back of the room.
 - **Five fonts, all built in:** Atkinson Hyperlegible (made by the Braille Institute for people with low vision), Fibel (based on Andika, for beginning readers), Lexend, Nunito and the device's own font.
 - **Colour themes:** Classic, Calm, Burgundy, Plain and Colourful for light, Night, Forest, Yellow on black, White on black and Colourful dark for dark. Light or dark fixed or like the device.
 - **Colour mixer:** set background, panels, text, accent, rim and every field colour on the wheel yourself, with preview, colour picker and colour code.
@@ -81,7 +88,11 @@ Every game can be adjusted, and you can add as many wheels of your own as you li
 ## Your own lists
 
 - **New wheel:** name, symbol, type or paste the entries. Several reels for combinations.
-- **Adjust built-in lists:** hide single entries and add your own. Reset brings everything back.
+- **Adjust every list:** every entry has a tick box (stays in the list but is not drawn), a pencil to change it and a bin to delete it, built-in ones included. New entries are sorted into their place in the alphabet, as if they had always been there. Adding several at once works too. Deleted entries can be brought back.
+- **Several versions as tabs:** “New list” creates further versions of any list, empty or as a copy, for example one for children and one for adults, or your group's own questions. One tap on the tab switches.
+- **Every reel, every list:** under “Adjust” every reel can use another built-in list or one entirely of your own just for this game. In Name, Place, Animal for example the categories for seniors or your own.
+- **Your own letters and syllables:** add SH, CH, TH or whatever you need to the alphabet.
+- **Players:** several lists of names, for example one per group, switched by tabs. Untick whoever is away today.
 - **Copy as your own wheel:** any built-in game with its entries, then change it freely.
 - **Import and export text files**, or paste lists from WhatsApp, e-mail or a column in Excel.
 - **Share via link:** the wheel is inside the link after the `#`. That part never reaches the server, nothing is stored.
@@ -118,7 +129,8 @@ Menu → Print (or “Print …” when adjusting a game) creates an A4 PDF righ
 
 ## TV, projector, Apple TV
 
-- **Presentation mode** (button with four corners or key F): only the wheel and the result, filling the screen, and the screen stays on. Tap to spin, top left takes you back.
+- **Presentation mode** (button with four corners or key F): only the wheel and the result, filling the screen, on black if you like, and the screen stays on. Tap to spin, top left takes you back. Headings and strips grow with the screen.
+- **iPhone:** Safari does not let websites go truly full screen. Added to the home screen as an app (Share → “Add to Home Screen”), all bars disappear.
 - **iPad on Apple TV:** hold the iPad sideways and turn on rotation lock in Control Centre. The iPad has a different shape from the TV (about 4:3 instead of 16:9), so mirroring leaves borders left and right. With the black background in presentation mode they are hardly noticeable. Installed as an app, Safari's bars disappear as well.
 - Only App Store apps can send a separate 16:9 picture to the TV, a web app cannot.
 
@@ -193,7 +205,7 @@ app/views/     the main page, also the template for the offline file
 app/assets/    the app in the browser:
                engine.js  randomness, drawing, history, groups, jobs, sharing, bingo cards, maths sheets, built-in games
                pdf.js     PDF without outside libraries, with preview; print.js the print templates
-               stage.js   wheel, reels, card, dice, bingo board, timer
+               stage.js   wheel, reels, card, dice, bingo board, timer, fitting results to fill the space
                look.js    colour themes and automatic contrast
                app.js     controls, windows, settings, own wheels, backup
                i18n-en.js translation, fonts (WOFF2), icons, service worker, CSS

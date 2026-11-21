@@ -19,7 +19,7 @@ error_reporting(E_ALL);
 ini_set('display_errors', '0');
 date_default_timezone_set('Europe/Berlin');
 
-define('DR_VERSION', '1.1.0');
+define('DR_VERSION', '1.2.0');
 define('DR_ROOT', __DIR__);
 define('DR_APP', DR_ROOT . '/app');
 define('DR_DATA_DIR', DR_ROOT . '/data');
