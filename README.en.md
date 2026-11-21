@@ -20,8 +20,8 @@ Made for everyone who keeps groups busy: care homes, nurseries, schools, familie
 
 <table>
   <tr>
-    <td align="center" width="33%"><img src="docs/en/choose.png" alt="Choose a game: tiles with all games, filters for seniors, children, groups and tools" width="250"><br><sub>28 games and tools</sub></td>
-    <td align="center" width="33%"><img src="docs/en/reels.png" alt="Story reels: Who? Where? What happens? in three large fields" width="250"><br><sub>Reels for several things at once</sub></td>
+    <td align="center" width="33%"><img src="docs/en/choose.png" alt="Choose a game: tiles with all games, filters for seniors, children, groups and tools" width="250"><br><sub>30 games and tools</sub></td>
+    <td align="center" width="33%"><img src="docs/en/reels.png" alt="Story reels: Who? Where? What happens? in three large fields" width="250"><br><sub>Several things at once</sub></td>
     <td align="center" width="33%"><img src="docs/en/bingo.png" alt="Bingo: a big ball with the number, next to it the board with all numbers drawn" width="250"><br><sub>Bingo with board and spoken numbers</sub></td>
   </tr>
   <tr>
@@ -50,6 +50,7 @@ Made for everyone who keeps groups busy: care homes, nurseries, schools, familie
 
 | For everyone | Seniors | Children | Tools |
 |---|---|---|---|
+| **Generator** (just the result, filling the screen) | | | **Wheel of fortune** (one wheel as big as the screen) |
 | Name, Place, Animal (letter and category, timer) | Memory wheel (72 questions about the old days) | Story reels (Who? Where? What happens?) | Letters (no repeats, tricky ones can be left out) |
 | Name something with … (letter and category) | Finish the proverb (with answers) | Movement wheel (40 ideas to get moving) | Numbers (range, step, with or without repeats) |
 | Bingo (1 to 75, board, spoken numbers) | Chair exercises (35, with timer) | Hand, foot and colour | Dice (1 to 9, with pips and total) |
@@ -64,7 +65,8 @@ Every game can be adjusted, and you can add as many wheels of your own as you li
 - **Spin:** tap “Spin” at the top, the wheel, or anywhere on the play area. A quick swipe across the wheel spins it that way. On a computer, space, Enter and the arrow keys work, so a presentation clicker does too.
 - **Filling the screen:** the wheel spins across the whole screen, pauses briefly, then the result fills the whole screen. Only the next tap spins again. Change it under Menu → Colours and text → Display.
 - **Faster:** tap again while it spins.
-- **Display:** wheel to watch, reels for several things at once, card for long texts such as questions, board to tick off like in bingo. Switch under “Adjust” (slider button at the top).
+- **Generator and wheel of fortune:** feed them yourself with numbers from and to, letters, any built-in list, your own entries or names. The generator shows nothing but the result, across the whole screen, the wheel spins as big as the screen is.
+- **Display:** wheel to watch, card with a heading (also for several things at once and long texts such as questions), “Result only” with nothing else, board to tick off like in bingo. Switch under “Adjust” (slider button at the top).
 - **Together or one at a time:** with several reels, such as letter and category, one tap draws everything again. If you like, tapping a reel draws only that one (on a computer also with the keys 1 to 6). A reel can also just be shown as a strip below, for example the categories to write down.
 - **Drawing:** with repeats, each once and then start again, or each only once until a new round (as in bingo). With “each once” the wheel only shows what is still in the pot.
 - **Answers:** proverbs, rhymes and sums show the answer only after a tap.
@@ -205,7 +207,7 @@ app/views/     the main page, also the template for the offline file
 app/assets/    the app in the browser:
                engine.js  randomness, drawing, history, groups, jobs, sharing, bingo cards, maths sheets, built-in games
                pdf.js     PDF without outside libraries, with preview; print.js the print templates
-               stage.js   wheel, reels, card, dice, bingo board, timer, fitting results to fill the space
+               stage.js   wheel, card, dice, bingo board, timer, fitting results to fill the space
                look.js    colour themes and automatic contrast
                app.js     controls, windows, settings, own wheels, backup
                i18n-en.js translation, fonts (WOFF2), icons, service worker, CSS
@@ -245,7 +247,7 @@ On GitHub the “Prüfen” action checks every pull request. A tag such as `1.0
 
 Drehsel is free and made in my spare time. If it makes you happy and you'd like to say thanks, you can [leave a small tip on Ko-fi](https://ko-fi.com/burnersen). Completely voluntary, and either way: thank you!
 
-**More from me:** [Suchsel](https://suchsel.burnersen.de) (word search puzzles with your own words, printable), [Kaufen](https://tech.burnersen.de/en/tools/kaufen-en/) (shared shopping lists) and more on [tech.burnersen.de](https://tech.burnersen.de/en/).
+**More from me:** [Suchsel](https://suchsel.burnersen.de) (word search puzzles with your own words, printable), [Kaufen](https://kaufen.burnersen.de) (shared shopping lists) and more on [tech.burnersen.de](https://tech.burnersen.de/en/).
 
 ## Licence
 

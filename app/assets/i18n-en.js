@@ -200,7 +200,7 @@
         'Über Drehsel': 'About Drehsel', 'Version {v}': 'Version {v}', 'Drehsel': 'Drehsel',
         'Glücksrad, Losbox und Würfel für Spiele mit Senioren und Kindern. Kostenlos, ohne Werbung, ohne Anmeldung. Freie Software, die du auch selbst hosten kannst.': 'Spinning wheel, lucky draw and dice for games with seniors and children. Free, no ads, no sign-up. Free software you can also host yourself.',
         'Mehr kostenlose Programme': 'More free programs', 'Wortsuchrätsel mit eigenen Wörtern, zum Ausdrucken': 'Word search puzzles with your own words, printable',
-        'Gemeinsame Einkaufslisten zum Selbsthosten': 'Shared shopping lists to host yourself', 'Alle Programme und Anleitungen': 'All programs and guides',
+        'Gemeinsame Einkaufslisten, gleich im Browser nutzen': 'Shared shopping lists, ready to use in your browser', 'Alle Programme und Anleitungen': 'All programs and guides',
         'Drehsel online': 'Drehsel online', 'Drehsel auf GitHub': 'Drehsel on GitHub', 'Quelltext, Anleitung zum Selbsthosten, Wünsche und Fehler melden': 'Source code, self-hosting guide, wishes and bug reports',
         'Spendier mir einen Kaffee': 'Buy me a coffee', 'Drehsel ist kostenlos und entsteht in meiner Freizeit': 'Drehsel is free and made in my spare time',
         'Lizenz: GNU AGPL v3. Schriften: Atkinson Hyperlegible Next, Andika (als „Fibel“), Lexend und Nunito unter der SIL Open Font License.': 'Licence: GNU AGPL v3. Fonts: Atkinson Hyperlegible Next, Andika (as “Fibel”), Lexend and Nunito under the SIL Open Font License.',

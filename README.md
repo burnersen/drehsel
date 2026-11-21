@@ -20,8 +20,8 @@ Gemacht für alle, die Gruppen beschäftigen: Betreuung im Seniorenheim, Kita, S
 
 <table>
   <tr>
-    <td align="center" width="33%"><img src="docs/de/auswahl.png" alt="Spiel wählen: Kacheln mit allen Spielen, Filter für Senioren, Kinder, Gruppen und Werkzeuge" width="250"><br><sub>28 Spiele und Werkzeuge</sub></td>
-    <td align="center" width="33%"><img src="docs/de/walzen.png" alt="Geschichten-Walzen: Wer? Wo? Was passiert? in drei großen Feldern" width="250"><br><sub>Walzen für mehrere Dinge auf einmal</sub></td>
+    <td align="center" width="33%"><img src="docs/de/auswahl.png" alt="Spiel wählen: Kacheln mit allen Spielen, Filter für Senioren, Kinder, Gruppen und Werkzeuge" width="250"><br><sub>30 Spiele und Werkzeuge</sub></td>
+    <td align="center" width="33%"><img src="docs/de/walzen.png" alt="Geschichten-Walzen: Wer? Wo? Was passiert? in drei großen Feldern" width="250"><br><sub>Mehrere Dinge auf einmal</sub></td>
     <td align="center" width="33%"><img src="docs/de/bingo.png" alt="Bingo: große Kugel mit der Zahl 20, daneben die Tafel mit allen gezogenen Zahlen" width="250"><br><sub>Bingo mit Tafel und Ansage</sub></td>
   </tr>
   <tr>
@@ -54,6 +54,7 @@ Gemacht für alle, die Gruppen beschäftigen: Betreuung im Seniorenheim, Kita, S
 
 | Für alle | Senioren | Kinder | Werkzeuge |
 |---|---|---|---|
+| **Generator** (nur das Ergebnis, bildschirmfüllend) | | | **Glücksrad** (ein Rad, so groß wie der Bildschirm) |
 | Stadt-Land-Fluss (Buchstabe und Kategorie, Sanduhr) | Erinnerungsrad (72 Fragen von früher) | Geschichten-Walzen (Wer? Wo? Was passiert?) | Buchstaben (ohne Wiederholung, schwierige abwählbar) |
 | Nennt etwas mit … (Buchstabe und Kategorie) | Sprichwörter ergänzen (86, mit Auflösung) | Bewegungsrad (40 Übungen zum Toben) | Zahlen (Bereich, Schrittweite, mit oder ohne Zurücklegen) |
 | Bingo (1 bis 75, Tafel, Ansage) | Sitzgymnastik (35 Übungen, Sanduhr) | Hand, Fuß und Farbe | Würfel (1 bis 9, mit Augen und Summe) |
@@ -68,7 +69,8 @@ Jedes Spiel lässt sich anpassen, und eigene Räder kommen beliebig dazu.
 - **Drehen:** oben auf „Drehen“, aufs Rad oder irgendwo auf die Fläche tippen. Mit Schwung über das Rad wischen dreht in diese Richtung. Am Rechner gehen Leertaste, Enter und Pfeiltasten, also auch ein Präsentations-Klicker.
 - **Bildschirmfüllend:** Das Rad dreht über die ganze Fläche, bleibt kurz stehen, dann steht das Ergebnis über die ganze Fläche. Erst das nächste Antippen dreht wieder. Umstellbar unter Menü → Farben und Schrift → Anzeige.
 - **Schneller fertig:** während es dreht noch einmal antippen.
-- **Darstellung:** Rad zum Zuschauen, Walzen für mehrere Dinge auf einmal, Karte für lange Texte wie Fragen, Tafel zum Abhaken wie beim Bingo. Umschalten unter „Anpassen“ (Regler-Knopf oben).
+- **Generator und Glücksrad:** zum selbst Füttern mit Zahlen von bis, Buchstaben, jeder eingebauten Liste, eigenen Einträgen oder Namen. Der Generator zeigt nichts als das Ergebnis, über den ganzen Bildschirm, das Glücksrad dreht so groß, wie der Bildschirm ist.
+- **Darstellung:** Rad zum Zuschauen, Karte mit Überschrift (auch für mehrere Dinge auf einmal und lange Texte wie Fragen), „Nur Ergebnis“ ganz ohne alles andere, Tafel zum Abhaken wie beim Bingo. Umschalten unter „Anpassen“ (Regler-Knopf oben).
 - **Zusammen oder einzeln:** Bei mehreren Walzen, etwa Buchstabe und Kategorie, zieht ein Antippen alles neu. Auf Wunsch zieht das Antippen einer Walze nur sie neu (am Rechner auch mit den Tasten 1 bis 6). Eine Walze kann auch nur als Leiste darunter stehen, etwa die Kategorien zum Aufschreiben.
 - **Ziehen:** mit Wiederholung, jeder einmal und dann von vorn, oder jeder nur einmal bis zur neuen Runde (wie beim Bingo). Bei „jeder einmal“ zeigt das Rad nur noch, was im Topf ist.
 - **Auflösung:** Sprichwörter, Reime und Rechenaufgaben zeigen die Antwort erst beim Antippen.
@@ -209,7 +211,7 @@ app/views/     die Hauptseite, auch Vorlage für die Offline-Datei
 app/assets/    die App im Browser:
                engine.js  Zufall, Ziehen, Verlauf, Gruppen, Ämter, Teilen, Bingo-Karten, Rechenblätter, eingebaute Spiele
                pdf.js     PDF ohne fremde Bibliothek, mit Vorschau; print.js die Druckvorlagen
-               stage.js   Rad, Walzen, Karte, Würfel, Bingo-Tafel, Sanduhr, randvolle Einpassung der Ergebnisse
+               stage.js   Rad, Karte, Würfel, Bingo-Tafel, Sanduhr, randvolle Einpassung der Ergebnisse
                look.js    Farbwelten und Kontrast-Automatik
                app.js     Bedienung, Fenster, Einstellungen, eigene Räder, Sicherung
                i18n-en.js Übersetzung, Schriften (WOFF2), Symbole, Service Worker, CSS
@@ -249,7 +251,7 @@ Auf GitHub prüft die Action „Prüfen“ jeden Pull Request. Ein Tag wie `1.0.
 
 Drehsel ist kostenlos und entsteht in meiner Freizeit. Wenn es dir Freude macht und du Danke sagen möchtest, kannst du [ein kleines Trinkgeld bei Ko-fi dalassen](https://ko-fi.com/burnersen). Völlig freiwillig, und in jedem Fall: danke!
 
-**Mehr von mir:** [Suchsel](https://suchsel.burnersen.de) (Wortsuchrätsel mit eigenen Wörtern, zum Ausdrucken), [Kaufen](https://tech.burnersen.de/tools/kaufen/) (gemeinsame Einkaufslisten) und alles Weitere auf [tech.burnersen.de](https://tech.burnersen.de/).
+**Mehr von mir:** [Suchsel](https://suchsel.burnersen.de) (Wortsuchrätsel mit eigenen Wörtern, zum Ausdrucken), [Kaufen](https://kaufen.burnersen.de) (gemeinsame Einkaufslisten) und alles Weitere auf [tech.burnersen.de](https://tech.burnersen.de/).
 
 ## Lizenz
 

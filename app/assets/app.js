@@ -13,7 +13,7 @@
     const LINKS = {
         play: 'https://drehsel.burnersen.de/', github: 'https://github.com/burnersen/drehsel', web: 'https://tech.burnersen.de/',
         kofi: 'https://ko-fi.com/burnersen', suchsel: 'https://suchsel.burnersen.de/',
-        kaufen: { de: 'https://tech.burnersen.de/tools/kaufen/', en: 'https://tech.burnersen.de/en/tools/kaufen-en/' },
+        kaufen: 'https://kaufen.burnersen.de/',
     };
 
     /* ---------- Speicher ---------- */
@@ -1797,7 +1797,7 @@
             el('h3', { text: t('Mehr kostenlose Programme') }),
             el('div.menu', null,
                 a('grid', 'Suchsel', t('Wortsuchrätsel mit eigenen Wörtern, zum Ausdrucken'), LINKS.suchsel),
-                a('list', 'Kaufen', t('Gemeinsame Einkaufslisten zum Selbsthosten'), LINKS.kaufen[set.lang] || LINKS.kaufen.en),
+                a('list', 'Kaufen', t('Gemeinsame Einkaufslisten, gleich im Browser nutzen'), LINKS.kaufen),
                 a('globe', 'tech.burnersen.de', t('Alle Programme und Anleitungen'), LINKS.web)),
             el('h3', { text: t('Drehsel') }),
             el('div.menu', null,

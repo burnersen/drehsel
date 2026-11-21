@@ -153,7 +153,9 @@
         // etwas Luft zum Rand, damit nichts klebt
         const pad = Math.min(W, H) * .045;
         const S = 100 * Math.min((W - 2 * pad) / m.w, (H - 2 * pad) / m.h) * scale;
-        if (!(S > s * scale * 1.01)) return plain();
+        // Zahlen und Rechenaufgaben nie umbrechen („11 +“ oben, „7“ unten liest sich falsch), sonst gilt, was größer ist
+        const oneLine = /^[\d\s+\-−×:=.,]+$/.test(kid.textContent.trim());
+        if (!oneLine && !(S > s * scale * 1.01)) return plain();
         box.classList.add('ink');
         box.style.fontSize = S.toFixed(2) + 'px';
         // Die Grundlinie kommt aus dem echten Layout: ein Punkt ohne Größe sitzt genau auf ihr
@@ -174,7 +176,7 @@
         boxes: die Kästen, samples: je Kasten ein typischer Text. W, H: die freie Fläche. Liefert { dir, w: [Anteile] } */
     function arrange(samples, W, H, cs, gap, head) {
         const n = samples.length;
-        const asp = samples.map(t => { const m = ink(t || 'M', cs); return m ? Math.max(.5, Math.min(6, m.w / m.h)) : 1; });
+        const asp = samples.map(t => { if (typeof t === 'number') return t; const m = ink(t || 'M', cs); return m ? Math.max(.5, Math.min(6, m.w / m.h)) : 1; });
         // nebeneinander: alle gleich groß, wenn die Breite nach Seitenverhältnis verteilt wird
         const Hr = Math.max(1, H - head), Wr = Math.max(1, W - gap * (n - 1));
         const sRow = Math.min(Hr, Wr / asp.reduce((a, b) => a + b, 0));
@@ -185,7 +187,7 @@
         const capped = use.map(u => Math.min(u, lo));
         const sCol = Math.min(...capped.map((h, i) => Math.min(h, use[i])));
         const free = Hc - capped.reduce((a, b) => a + b, 0);
-        if (sRow >= sCol * 1.04) return { dir: 'row', w: asp };
+        if (sRow >= sCol * 1.15) return { dir: 'row', w: asp };
         return { dir: 'column', w: capped.map(h => h + free / n + head) };
     }
     const css = (name, from) => getComputedStyle(from || doc.documentElement).getPropertyValue(name).trim();
@@ -627,6 +629,12 @@
                 this.diceBox.style.setProperty('--die', Math.floor(best * .86) + 'px');
             }
             if (this.board) this.layoutBoard();
+            for (const v of this.root.querySelectorAll('.val.balls')) {
+                const n = v.children.length, bw = v.clientWidth, bh = v.clientHeight;
+                let best = 1, bs = 0;
+                for (let c = 1; c <= n; c++) { const s2 = Math.min(bw / c, bh / Math.ceil(n / c)); if (s2 > bs) { bs = s2; best = c; } }
+                v.style.gridTemplateColumns = 'repeat(' + best + ', auto)';
+            }
             for (const g of this.groups) this.arrangeGroup(g);
             for (const w of this.wheels) w.resize();
             this.refit();
@@ -646,11 +654,18 @@
             const r = arrange(g.samples, W, H, cs, num(getComputedStyle(box).columnGap) || num(getComputedStyle(box).rowGap) || 10, head);
             box.style.flexDirection = r.dir;
             kids.forEach((k, i) => { k.style.flex = (r.w[i] || 1).toFixed(3) + ' 1 0'; });
+            // nebeneinander: jede Überschrift muss ganz hineinpassen, und kein Kasten wird schmaler als ein knappes Viertel
+            if (r.dir === 'row') kids.forEach(k => {
+                const l = k.querySelector('.lab');
+                const need = Math.max(W * .22, l ? l.scrollWidth + num(bs.paddingLeft) + num(bs.paddingRight) + 8 : 0);
+                k.style.minWidth = Math.min(need, W / kids.length) + 'px';
+            });
+            else kids.forEach(k => { k.style.minWidth = ''; });
         }
         /** Ein typischer Eintrag je Walze: die Länge, die drei von vier Einträgen nicht überschreiten */
         sampleOf(m, k) {
             const s = m.slots[k] || {};
-            if (s.hide) return this.t('Verdeckt');
+            if (s.hide) return 1.6;     // verdeckt: Auge und zwei Zeilen, fast quadratisch
             const all = (m.all[k] || []).map(x => (x.p ? x.p + ' ' : '') + x.t);
             if (!all.length) return this.h.sample ? this.h.sample(k) : 'MMM';
             const byLen = all.slice().sort((a, b) => a.length - b.length);
@@ -685,7 +700,7 @@
             if (ans) {
                 const open = m.rev;
                 const a = el('div.ans' + (open ? '.open' : ''), { 'data-cover': open ? null : String(k) });
-                if (open) { a.append(el('span', { text: (sel[0].q ? '= ' : '') + ans })); this.addFit(a, () => Math.min(box.clientHeight * .3, 600)); }
+                if (open) { a.append(el('span', { text: (sel[0].q ? '= ' : '') + ans })); this.addFit(a, 4000, 'big'); }
                 else a.append(icon('eye'), el('span', { text: this.t('Antippen für die Auflösung') }));
                 box.append(a);
             }
@@ -699,7 +714,7 @@
             if (slot.hide && !(m.open && m.open[k])) {
                 val.classList.add('covered');
                 val.append(el('span', null, icon('eye'), el('b', { text: this.t('Verdeckt') }), el('small', { text: this.t('Antippen zum Aufdecken') })));
-                this.addFit(val, 140);
+                this.addFit(val, 400);
                 return;
             }
             if (sel.length > 1) {
