@@ -117,7 +117,13 @@
     function itemsOf(slot, ctx) {
         const s = slot.src || {};
         switch (s.type) {
-            case 'items': return Array.isArray(s.items) ? s.items : [];
+            case 'items': {
+                const items = Array.isArray(s.items) ? s.items : [];
+                // abgewählte Einträge bleiben in der Liste stehen, werden aber nicht gezogen
+                if (!Array.isArray(s.off) || !s.off.length) return items;
+                const off = new Set(s.off);
+                return items.filter(x => !off.has(x.t));
+            }
             case 'list': { const l = ctx.list(s.list); return l ? l.items : []; }
             case 'names': return ctx.names();
             case 'letters': {
@@ -401,7 +407,12 @@
             case 'math': return { type: 'math', ops: (Array.isArray(s.ops) ? s.ops : ['+']).filter(o => '+-×:'.indexOf(o) >= 0).slice(0, 4), max: [10, 20, 100, 1000].indexOf(+s.max) >= 0 ? +s.max : 20 };
             case 'names': return { type: 'names' };
             case 'list': return { type: 'list', list: clip(s.list, 40) };
-            default: return { type: 'items', items: (Array.isArray(s.items) ? s.items : []).slice(0, 5000).map(x => typeof x === 'string' ? parseLine(x) : x && parseLine(itemLine({ t: clip(x.t, 200), a: x.a && clip(x.a, 300), c: /^#[0-9a-f]{6}$/i.test(x.c || '') ? x.c : '' }))).filter(Boolean) };
+            default: {
+                const out = { type: 'items', items: (Array.isArray(s.items) ? s.items : []).slice(0, 5000).map(x => typeof x === 'string' ? parseLine(x) : x && parseLine(itemLine({ t: clip(x.t, 200), a: x.a && clip(x.a, 300), c: /^#[0-9a-f]{6}$/i.test(x.c || '') ? x.c : '' }))).filter(Boolean) };
+                const off = (Array.isArray(s.off) ? s.off : []).filter(x => typeof x === 'string' && out.items.some(i => i.t === x)).slice(0, 5000);
+                if (off.length) out.off = off;
+                return out;
+            }
         }
     }
     function cleanGame(g) {

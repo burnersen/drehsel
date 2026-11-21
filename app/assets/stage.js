@@ -571,9 +571,11 @@
             else view.call(this, m);
             if (m.timer) r.append(this.timerEl(m.timer));
             if (m.extra) r.append(m.extra);
-            // Rad: nach dem Drehen übernimmt das Ergebnis die ganze Fläche, kurz nachdem das Rad steht
-            if (m.view === 'wheel' && m.big && m.res && !m.empty) {
-                if (this.spunAt && performance.now() - this.spunAt < 600) { this.bigT = setTimeout(() => this.setBig(true), 1300); r.classList.add('landed'); }
+            // Rad bildschirmfüllend: Es dreht über die ganze Fläche, bleibt kurz stehen, damit man den Zeiger sieht,
+            // dann übernimmt das Ergebnis die ganze Fläche. Erst das nächste Antippen dreht wieder.
+            if (m.view === 'wheel' && m.big && !m.empty) {
+                if (!m.res) r.classList.add('wfull');
+                else if (this.spunAt && performance.now() - this.spunAt < 600) { r.classList.add('wfull', 'landed'); this.bigT = setTimeout(() => this.setBig(true), 1100); }
                 else r.classList.add('big');
             }
             this.spunAt = 0;
@@ -581,9 +583,11 @@
         }
         setBig(on) {
             clearTimeout(this.bigT);
-            if (this.root.classList.contains('big') === !!on) return;
-            this.root.classList.toggle('big', !!on);
-            this.root.classList.remove('landed');
+            const r = this.root, full = !on && !!(this.model && this.model.big && this.model.view === 'wheel');
+            if (r.classList.contains('big') === !!on && r.classList.contains('wfull') === full) return;
+            r.classList.toggle('big', !!on);
+            r.classList.toggle('wfull', full);
+            r.classList.remove('landed');
             this.layout();
         }
         orient() {
@@ -601,7 +605,8 @@
                 // Räder so groß wie möglich: quer höchstens gut die Hälfte der Breite, hochkant gut die Hälfte der Höhe.
                 // Mehrere Räder stehen dabei neben- oder untereinander, je nachdem, wo sie größer werden.
                 const n = Math.max(1, m.slots.length), gap = 8;
-                const aw = o === 'land' ? W * .56 : W, ah = o === 'land' ? H : H * .56;
+                const full = this.root.classList.contains('wfull');
+                const aw = o === 'land' && !full ? W * .56 : W, ah = o === 'land' || full ? H : H * .56;
                 const opts = [];
                 for (let c = 1; c <= n; c++) {
                     const r = Math.ceil(n / c), s = Math.min((aw - gap * (c - 1)) / c, (ah - gap * (r - 1)) / r);
@@ -609,7 +614,7 @@
                 }
                 // Fast so groß, aber deutlich weniger Platz weg vom Ergebnis: dann lieber diese Anordnung
                 const top = Math.max(...opts.map(x => x.s));
-                const best = opts.filter(x => x.s >= top * .8).sort((x, y) => x.ext - y.ext)[0];
+                const best = full ? opts.find(x => x.s === top) : opts.filter(x => x.s >= top * .8).sort((x, y) => x.ext - y.ext)[0];
                 const sz = Math.floor(best.s);
                 this.root.style.setProperty('--wsz', sz + 'px');
                 this.root.style.setProperty('--wcols', String(best.c));
@@ -619,7 +624,7 @@
                 const n = this.diceBox.children.length, bw = this.diceBox.clientWidth, bh = this.diceBox.clientHeight;
                 let best = 0;
                 for (let cols = 1; cols <= n; cols++) { const rows = Math.ceil(n / cols); best = Math.max(best, Math.min(bw / cols, bh / rows)); }
-                this.diceBox.style.setProperty('--die', Math.floor(best * .78) + 'px');
+                this.diceBox.style.setProperty('--die', Math.floor(best * .86) + 'px');
             }
             if (this.board) this.layoutBoard();
             for (const g of this.groups) this.arrangeGroup(g);
