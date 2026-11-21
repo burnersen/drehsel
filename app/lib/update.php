@@ -5,7 +5,7 @@
    Nach außen geht dabei nur die Frage an GitHub, nichts Persönliches. */
 defined('DR_VERSION') || exit;
 
-const DR_UPDATE_URL = 'https://api.github.com/repos/burnersen/mixer/releases/latest';
+const DR_UPDATE_URL = 'https://api.github.com/repos/burnersen/drehsel/releases/latest';
 
 function drUpdUrl(): string {
     $cfg = drConfig();

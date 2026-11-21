@@ -45,14 +45,16 @@
             id: /^[a-z0-9]{1,16}$/.test(l && l.id || '') ? l.id : 'n' + i + Date.now().toString(36),
             name: String(l && l.name || '').replace(/\s+/g, ' ').trim().slice(0, 60),
             items: DR.parseItems((Array.isArray(l && l.items) ? l.items : []).map(x => typeof x === 'string' ? x : DR.itemLine(x)).join('\n')),
+            off: (l && Array.isArray(l.off) ? l.off : []).filter(x => typeof x === 'string').slice(0, 5000),
         }));
         return lists.length ? { lists, cur: lists.some(l => l.id === d.cur) ? d.cur : lists[0].id } : null;
     };
     let nl = cleanNl(load('nl', null)) || { lists: [{ id: 'n0', name: '', items: DR.parseItems((load('names', []) || []).map(DR.itemLine).join('\n')) }], cur: 'n0' };
     const curNl = () => nl.lists.find(l => l.id === nl.cur) || nl.lists[0];
-    let names = curNl().items;
+    /** Wer heute mitspielt: alle aus der Liste, die gerade gilt, außer den abgewählten (etwa wer heute fehlt) */
+    const activeNames = () => { const l = curNl(); const off = new Set(l.off || []); return l.items.filter(x => !off.has(x.t)); };
     const saveOwn = () => save('games', own), saveOv = () => save('ov', ov), saveLo = () => save('lo', lo);
-    const saveNames = () => { curNl().items = names; save('nl', nl); drop('names'); };
+    const saveNames = () => { save('nl', nl); drop('names'); };
 
     /* ---------- Übersetzung: Schlüssel ist der deutsche Text ---------- */
     function t(s, vars) {
@@ -166,7 +168,7 @@
     const ownList = id => content[contentLang()] && content[contentLang()][id];
     const alphabet = () => { const l = ownList('alphabet') || baseList('alphabet'); return l && l.items.length ? l.items.map(x => x.t).join(' ').match(/\S+/g) : 'A B C D E F G H I J K L M N O P Q R S T U V W X Y Z'.split(' '); };
     const extraLetters = () => { const l = ownList('alphabet-extra'); return l ? l.items.map(x => x.t).join(' ').match(/\S+/g) || [] : []; };
-    const ctx = { list: listFor, names: () => names, alphabet, extra: extraLetters };
+    const ctx = { list: listFor, names: activeNames, alphabet, extra: extraLetters };
 
     /* ---------- Spiele: eingebaute mit Anpassungen, eigene ---------- */
     const clone = o => JSON.parse(JSON.stringify(o));
@@ -779,7 +781,8 @@
                     });
                     lastSpin = null; paint();
                 }, one ? 'c4' : 'c3'),
-                note(t('Rad zum Zuschauen, Walzen für mehrere Dinge auf einmal, Karte für lange Texte wie Fragen, Tafel zum Abhaken wie beim Bingo.'))));
+                note(one ? t('Rad zum Zuschauen, Walzen für mehrere Dinge auf einmal, Karte für lange Texte wie Fragen, Tafel zum Abhaken wie beim Bingo.')
+                    : t('Rad zum Zuschauen, Walzen für mehrere Dinge auf einmal, Karte für lange Texte wie Fragen.'))));
             }
             // Mehrere Walzen: alle auf einmal oder jede für sich
             if (g.slots.length > 1 && ['wheel', 'reels', 'card'].indexOf(g.view) >= 0) {
@@ -903,7 +906,7 @@
             sec.append(el('div.row', null, el('span', { text: t('{n} Einträge', { n: items.length }) }), btn(t('Bearbeiten'), () => editSlotItems(g.id, k, repaint), 'edit')));
             if (isB) sec.append(listChooser(g, sl, k, repaint));
         } else if (src.type === 'names') {
-            sec.append(el('div.row', null, el('span', { text: t('{n} Namen', { n: names.length }) + (curNl().name ? ' · ' + curNl().name : '') }), btn(t('Namen bearbeiten'), showNames, 'people')));
+            sec.append(el('div.row', null, el('span', { text: t('{n} Namen', { n: activeNames().length }) + (curNl().name ? ' · ' + curNl().name : '') }), btn(t('Namen bearbeiten'), showNames, 'people')));
         } else if (src.type === 'letters') {
             const ex = src.ex || '';
             const abc = alphabet().concat(src.um ? extraLetters() : []);
@@ -1129,33 +1132,27 @@
         let s;
         const paint = () => {
             const cur = curNl();
-            const ta = el('textarea.names', { rows: 10, placeholder: t('Ein Name pro Zeile'), value: DR.itemsToText(names) });
-            const count = el('p.note');
-            const upd = () => { names = DR.parseItems(ta.value); count.textContent = t('{n} Namen', { n: names.length }); };
-            ta.addEventListener('input', () => { upd(); saveNames(); });
-            upd();
-            // Mehrere Listen, etwa eine je Gruppe: eine davon gilt gerade
-            const pick = el('select', { 'aria-label': t('Liste') }, nl.lists.map((l, i) => el('option', { value: l.id, selected: l.id === cur.id }, l.name || t('Liste {n}', { n: i + 1 }))));
-            pick.addEventListener('change', () => { saveNames(); nl.cur = pick.value; names = curNl().items; save('nl', nl); lastSpin = null; paint(); });
+            // Mehrere Listen als Reiter, etwa eine je Gruppe: ein Tipp, und diese gilt
+            const tabs = el('div.chips.tabs', { role: 'tablist' },
+                nl.lists.map((l, i) => el('button.chip' + (l.id === cur.id ? '.on' : ''), { type: 'button', role: 'tab', 'aria-selected': String(l.id === cur.id), onclick: () => { nl.cur = l.id; saveNames(); lastSpin = null; paint(); } }, l.name || t('Liste {n}', { n: i + 1 }))),
+                el('button.chip.add', { type: 'button', onclick: () => { const id = 'n' + Date.now().toString(36); nl.lists.push({ id, name: '', items: [], off: [] }); nl.cur = id; saveNames(); lastSpin = null; paint(); setTimeout(() => nameIn.focus(), 50); } }, icon('plus'), el('span', { text: t('Neue Liste') })));
             const nameIn = el('input', { type: 'text', value: cur.name, maxlength: 60, placeholder: t('Name der Liste, z. B. Bärengruppe') });
-            nameIn.addEventListener('change', () => { cur.name = nameIn.value.trim().slice(0, 60); save('nl', nl); paint(); });
+            nameIn.addEventListener('change', () => { cur.name = nameIn.value.trim().slice(0, 60); saveNames(); paint(); });
+            const off = new Set(cur.off || []);
+            const rows = cur.items.map(x => Object.assign({}, x, off.has(x.t) ? { off: true } : {}));
+            const save = rows => { cur.items = rows.map(cleanIt); cur.off = rows.filter(r => r.off).map(r => r.t); saveNames(); lastSpin = null; };
             body.replaceChildren(
-                note(t('Die Namen gelten für „Wer ist dran?“, „Gruppen einteilen“, „Ämter verteilen“ und eigene Räder mit Teilnehmern. Sie bleiben nur auf diesem Gerät.')),
-                section(t('Liste'), nl.lists.length > 1 ? pick : null, nameIn,
-                    el('div.btns.small', null,
-                        btn(t('Neue Liste'), () => { saveNames(); const id = 'n' + Date.now().toString(36); nl.lists.push({ id, name: '', items: [] }); nl.cur = id; names = []; save('nl', nl); lastSpin = null; paint(); }, 'plus'),
-                        nl.lists.length > 1 ? btn(t('Liste löschen'), () => confirmDlg(t('Liste löschen?'), t('„{n}“ mit allen Namen wird von diesem Gerät gelöscht.', { n: cur.name || t('Liste') }), t('Löschen'), () => {
-                            nl.lists = nl.lists.filter(l => l.id !== cur.id); nl.cur = nl.lists[0].id; names = curNl().items; save('nl', nl); lastSpin = null; paint();
-                        }), 'trash') : null)),
-                ta, count,
+                note(t('Für „Wer ist dran?“, „Gruppen einteilen“, „Ämter verteilen“ und eigene Räder mit Teilnehmern. Häkchen weg, wer heute fehlt. Alles bleibt nur auf diesem Gerät.')),
+                tabs,
+                field(t('Name der Liste'), nameIn),
+                listEditor(rows, save, true),
                 el('div.btns', null,
-                    btn(t('Sortieren'), () => { ta.value = DR.itemsToText(DR.parseItems(ta.value).sort((a, b) => a.t.localeCompare(b.t, set.lang))); upd(); saveNames(); }),
-                    btn(t('Aus Datei'), () => pickFile('.txt,.csv,text/plain', txt => { ta.value = (ta.value.trim() ? ta.value.trim() + '\n' : '') + DR.itemsToText(DR.parseItems(txt)); upd(); saveNames(); }), 'upload'),
-                    btn(t('Leeren'), () => confirmDlg(t('Alle Namen löschen?'), t('Die Liste der Teilnehmer wird geleert.'), t('Leeren'), () => { ta.value = ''; upd(); saveNames(); })),
+                    nl.lists.length > 1 ? btn(t('Diese Liste löschen'), () => confirmDlg(t('Liste löschen?'), t('„{n}“ mit allen Namen wird von diesem Gerät gelöscht.', { n: cur.name || t('Liste') }), t('Löschen'), () => {
+                        nl.lists = nl.lists.filter(l => l.id !== cur.id); nl.cur = nl.lists[0].id; saveNames(); lastSpin = null; paint();
+                    }), 'trash', 'danger') : null,
                     btn(t('Fertig'), () => s.close(), 'check', 'primary')));
-            if (!isTouch() && !names.length) setTimeout(() => ta.focus(), 50);
         };
-        s = sheet(t('Teilnehmer'), body, { cls: 'narrow', onClose: () => { saveNames(); lastSpin = null; render(); } });
+        s = sheet(t('Teilnehmer'), body, { cls: 'wide', onClose: () => { saveNames(); lastSpin = null; render(); } });
         paint();
     }
 
@@ -1364,7 +1361,7 @@
         const fill = () => {
             const v = voicesFor(), best = v[0];
             sel.replaceChildren(el('option', { value: '' }, best ? t('Automatisch: {n}', { n: best.name }) : t('Automatisch')),
-                v.map(x => el('option', { value: x.voiceURI, selected: x.voiceURI === set.voice }, x.name + (voiceScore(x) < 0 ? ' · ' + t('einfach') : '') + (x.localService === false ? ' · ' + t('online') : ''))));
+                ...v.map(x => el('option', { value: x.voiceURI, selected: x.voiceURI === set.voice }, x.name + (voiceScore(x) < -20 ? ' · ' + t('einfache Stimme') : '') + (x.localService === false ? ' · ' + t('braucht Internet') : ''))));
             if (!set.voice || !v.some(x => x.voiceURI === set.voice)) sel.value = '';
         };
         fill();
@@ -1493,7 +1490,7 @@
         const st = {};
         for (const g of DR.GAMES.concat(own)) { const x = load('st_' + g.id, null); if (x) st[g.id] = x; }
         saveNames();
-        return { app: 'drehsel', v: 2, at: new Date().toISOString(), set, own, ov, lo, names, nl, st };
+        return { app: 'drehsel', v: 2, at: new Date().toISOString(), set, own, ov, lo, names: activeNames(), nl, st };
     }
     function restore(d) {
         if (!d || d.app !== 'drehsel') throw new Error('bad');
@@ -1503,8 +1500,8 @@
         if (d.ov && typeof d.ov === 'object') { ov = Object.assign(ov, d.ov); saveOv(); }
         if (d.lo && typeof d.lo === 'object') { lo = Object.assign(lo, d.lo); saveLo(); }
         const got = cleanNl(d.nl);
-        if (got) { nl = got; names = curNl().items; save('nl', nl); }
-        else if (Array.isArray(d.names) && d.names.length) { names = DR.parseItems(d.names.map(x => DR.itemLine(x)).join('\n')); saveNames(); }
+        if (got) { nl = got; saveNames(); }
+        else if (Array.isArray(d.names) && d.names.length) { curNl().items = DR.parseItems(d.names.map(x => DR.itemLine(x)).join('\n')); curNl().off = []; saveNames(); }
         if (d.set && typeof d.set === 'object') {
             for (const k in DEF) if (d.set[k] !== undefined && typeof d.set[k] === typeof DEF[k]) set[k] = d.set[k];
             set.look = Object.assign({}, DEF.look, set.look); set.fs = Object.assign({}, DEF.fs, set.fs);
@@ -1753,15 +1750,20 @@
                 [t('Schneller fertig'), t('Während es dreht, noch einmal antippen: dann steht das Ergebnis sofort da.')],
                 [t('Auflösung'), t('Steht unter dem Ergebnis „Antippen für die Auflösung“, zeigt das erste Antippen die Antwort, das nächste dreht weiter.')],
                 [t('Verdeckt'), t('Bei „Begriffe raten“ ist der Begriff verdeckt. Antippen deckt ihn auf und wieder zu, so sieht ihn nur, wer erklärt.')],
+                [t('Bildschirmfüllend'), t('Das Rad dreht über die ganze Fläche, danach steht das Ergebnis über die ganze Fläche. Erst das nächste Antippen dreht wieder. Umstellen unter Menü → Farben und Schrift → Anzeige.')],
+                [t('Einzeln ziehen'), t('Bei mehreren Walzen, etwa Buchstabe und Kategorie, lässt sich unter „Anpassen“ einstellen, dass Antippen einer Walze nur sie neu zieht. Am Rechner gehen dafür auch die Tasten 1 bis 6.')],
                 [t('Sanduhr'), t('Antippen startet und hält an, lange drücken setzt zurück.')],
                 [t('Rückgängig'), t('Unten rechts: die letzte Drehung zurücknehmen oder den Verlauf ansehen und eine neue Runde beginnen.')]]),
             el('h3', { text: t('Anpassen') }),
-            p(t('Der Regler-Knopf oben öffnet die Einstellungen des Spiels: Darstellung (Rad, Walzen, Karte), welche Einträge drin sind, ob etwas wiederkommen darf, Sanduhr und Vorlesen. Eingebaute Listen lassen sich ergänzen und einzelne Einträge ausblenden.')),
+            p(t('Der Regler-Knopf oben öffnet die Einstellungen des Spiels: Darstellung (Rad, Walzen, Karte, Tafel), welche Liste drin ist, ob etwas wiederkommen darf, Sanduhr und Vorlesen. Jede Walze kann auch eine andere eingebaute Liste nehmen oder eine ganz eigene.')),
             el('h3', { text: t('Eigene Listen') }),
-            p(t('Menü → Neues Rad: Namen geben, Einträge eintippen oder einfügen, fertig. Unter Menü → Sicherung und Listen lassen sich Textdateien importieren und exportieren. Alles bleibt nur auf diesem Gerät.')),
+            p(t('Jede Liste lässt sich bearbeiten: Häkchen weg heißt, der Eintrag bleibt stehen, wird aber nicht gezogen. Der Papierkorb nimmt ihn ganz raus. Neues wird an seinem Platz im Alphabet einsortiert. „Neue Liste“ legt weitere Fassungen an, etwa für Kinder und für Erwachsene, umgeschaltet wird mit einem Tipp auf den Reiter.')),
+            p(t('Menü → Neues Rad: Namen geben, Einträge eintippen oder einfügen, fertig. Unter Menü → Teilnehmer gibt es mehrere Namenslisten, etwa je Gruppe. Unter Menü → Sicherung und Listen lassen sich Textdateien importieren und exportieren. Alles bleibt nur auf diesem Gerät.')),
             el('h3', { text: t('Fernseher, Beamer, Apple TV') }),
-            p(t('Der Vorführmodus (Knopf mit den vier Ecken) zeigt nur noch Rad und Ergebnis, randvoll. Antippen dreht, oben links geht es zurück. Beim Spiegeln vom iPad auf den Fernseher das iPad quer halten und im Kontrollzentrum die Drehsperre einschalten. Das iPad hat ein anderes Format als der Fernseher, deshalb bleiben links und rechts Ränder. Mit schwarzem Hintergrund fallen sie kaum auf. Als App installiert verschwinden auch die Leisten des Browsers.')),
+            p(t('Der Vorführmodus (Knopf mit den vier Ecken) zeigt nur noch Rad und Ergebnis, randvoll. Auf dem iPhone geht echtes Vollbild nur, wenn Drehsel als App auf dem Home-Bildschirm liegt. Antippen dreht, oben links geht es zurück. Beim Spiegeln vom iPad auf den Fernseher das iPad quer halten und im Kontrollzentrum die Drehsperre einschalten. Das iPad hat ein anderes Format als der Fernseher, deshalb bleiben links und rechts Ränder. Mit schwarzem Hintergrund fallen sie kaum auf. Als App installiert verschwinden auch die Leisten des Browsers.')),
             p(t('Am Rechner mit Beamer drehen Leertaste, Enter und Pfeiltasten, also auch ein Präsentations-Klicker. F schaltet den Vorführmodus um, Esc beendet ihn.')),
+            el('h3', { text: t('Vorlesen') }),
+            p(t('Von Haus aus aus. Eingeschaltet wird unter Menü → Farben und Schrift → Vorlesen, dort lässt sich auch die Stimme wählen. Drehsel nimmt von selbst die beste Stimme des Geräts. Die Siri-Stimmen gibt Apple für Webseiten nicht frei.')),
             el('h3', { text: t('Gut lesbar') }),
             p(t('Unter Menü → Farben und Schrift gibt es fertige Farbwelten, einen Farbmischer für eigene Farben, fünf Schriften und Regler für die Größen. Die Schrift wird überall automatisch so eingestellt, dass sie auf ihrem Untergrund gut lesbar bleibt.'))), { cls: 'narrow' });
     }
