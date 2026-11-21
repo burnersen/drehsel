@@ -74,7 +74,7 @@ svg { width: 1.4rem; height: 1.4rem; fill: none; stroke: currentColor; stroke-wi
 .btn.big { min-height: 3.4rem; font-size: 1.1rem; width: 100%; }
 .btn.small { min-height: 2.2rem; padding: .3rem .75rem; font-size: .92rem; }
 .btn svg { width: 1.2rem; height: 1.2rem; }
-.btn.spin { padding: .55rem 1.1rem .55rem .85rem; font-size: 1.05rem; box-shadow: var(--shadow); }
+.btn.spin { padding: .55rem 1.1rem .55rem .85rem; font-size: 1.05rem; box-shadow: var(--shadow); white-space: nowrap; flex: none; }
 .btn.spin svg { fill: currentColor; stroke-width: 1.5; }
 .btn.spin.busy svg { animation: spinpulse .6s ease-in-out infinite alternate; }
 @media (max-width: 420px) {

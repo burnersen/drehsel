@@ -1,0 +1,29 @@
+# Prüft jeden Pull Request und jeden Push auf main: PHP-Syntax, Logik, Listen, Übersetzungen und ob sich die Release-Dateien bauen lassen.
+name: Prüfen
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: PHP-Syntax
+        run: for f in index.php app/lib/*.php app/views/*.php tools/*.php; do php -l "$f" || exit 1; done
+      - name: Logik
+        run: node tools/test-engine.js
+      - name: Eingebaute Listen
+        run: node tools/check-lists.js
+      - name: Übersetzungen
+        run: node tools/check-i18n.js
+      - name: Release-Dateien bauen
+        run: php tools/build-release.php

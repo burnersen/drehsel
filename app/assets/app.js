@@ -125,8 +125,10 @@
         const off = new Set(o.off || []);
         return { id, name: b.name, items: b.items.filter(x => !off.has(x.t)).concat(o.add || []) };
     }
-    const alphabet = () => { const l = baseList('alphabet'); return l && l.items.length ? l.items.map(x => x.t).join(' ').match(/\S+/g) : 'A B C D E F G H I J K L M N O P Q R S T U V W X Y Z'.split(' '); };
-    const extraLetters = () => { const l = baseList('alphabet-extra'); return l ? l.items.map(x => x.t).join(' ').match(/\S+/g) || [] : []; };
+    // Buchstaben nur aus der Sprache, die gerade gilt: Englisch hat keine Umlaute
+    const ownList = id => content[contentLang()] && content[contentLang()][id];
+    const alphabet = () => { const l = ownList('alphabet') || baseList('alphabet'); return l && l.items.length ? l.items.map(x => x.t).join(' ').match(/\S+/g) : 'A B C D E F G H I J K L M N O P Q R S T U V W X Y Z'.split(' '); };
+    const extraLetters = () => { const l = ownList('alphabet-extra'); return l ? l.items.map(x => x.t).join(' ').match(/\S+/g) || [] : []; };
     const ctx = { list: listFor, names: () => names, alphabet, extra: extraLetters };
 
     /* ---------- Spiele: eingebaute mit Anpassungen, eigene ---------- */
@@ -209,10 +211,12 @@
         setTimeout(() => s.wrap.remove(), 180);
         if (s.onClose) s.onClose();
     }
+    /** Fenster schließen: sofort weg, den Eintrag im Verlauf des Browsers räumt history.back() danach auf (ohne ein zweites Fenster zu schließen) */
     function closeSheet(s) {
         if (s.closed) return;
-        if (sheets[sheets.length - 1] === s && history.state && history.state.dr) history.back();
-        else removeSheet(s);
+        const top = sheets[sheets.length - 1] === s;
+        removeSheet(s);
+        if (top && history.state && history.state.dr) { skipPop++; history.back(); }
     }
     let skipPop = 0;
     addEventListener('popstate', () => {

@@ -309,6 +309,8 @@
                     // Eine gemeinsame Größe, außer ein einzelner langer Eintrag würde alle winzig machen
                     pxs.sort((x, y) => x - y);
                     const common = Math.max(pxs[Math.floor(pxs.length * .2)] || base, minPx);
+                    // Zu klein zum Lesen? Dann lieber ein ruhiges Rad ohne Beschriftung, das Ergebnis steht ja groß daneben
+                    if (common < 15 * d) { this.labelCache = { L: [], short: false, none: true }; return; }
                     for (let i = 0; i < n; i++) {
                         const t = this.items[i].t;
                         c.font = fw + ' ' + common + 'px ' + ff;
@@ -324,6 +326,7 @@
                 }
                 this.labelCache = { L, short };
             }
+            if (this.labelCache.none) return;
             c.save();
             c.textBaseline = 'middle';
             for (let i = 0; i < n; i++) {
@@ -553,7 +556,7 @@
         fillVal(val, sel, slot, m, k) {
             val.replaceChildren();
             val.classList.remove('balls', 'covered', 'wait');
-            if (!sel) { val.classList.add('wait'); val.append(el('span', { text: m.hint || '?' })); this.addFit(val, 64); return; }
+            if (!sel) { val.classList.add('wait'); val.append(el('span', { text: k ? '?' : m.hint || '?' })); this.addFit(val, k ? 120 : 52); return; }
             if (slot.hide) val.dataset.open = String(k); else delete val.dataset.open;
             if (slot.hide && !(m.open && m.open[k])) {
                 val.classList.add('covered');
