@@ -143,7 +143,7 @@ function drManifest(): array {
         'description' => drT('Glücksrad, Losbox und Würfel für Spiele mit Senioren und Kindern. Eigene Listen, groß und gut lesbar, auch offline.',
             'Spinning wheel, lucky draw and dice for games with seniors and children. Your own lists, big and easy to read, works offline.'),
         'start_url' => './', 'scope' => './', 'display' => 'standalone', 'orientation' => 'any', 'lang' => drLang(),
-        'background_color' => '#f4f1fb', 'theme_color' => '#6741d9', 'categories' => ['games', 'education', 'entertainment', 'kids'],
+        'background_color' => '#f5f0e6', 'theme_color' => '#1f3a5f', 'categories' => ['games', 'education', 'entertainment', 'kids'],
         'icons' => [
             ['src' => drAssetUrl('icon-192.png'), 'sizes' => '192x192', 'type' => 'image/png', 'purpose' => 'any'],
             ['src' => drAssetUrl('icon-512.png'), 'sizes' => '512x512', 'type' => 'image/png', 'purpose' => 'any'],

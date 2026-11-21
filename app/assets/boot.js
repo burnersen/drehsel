@@ -1,12 +1,16 @@
-/* Drehsel – läuft vor dem ersten Bild: Design, Schrift und Größe so, wie zuletzt eingestellt, damit nichts aufblitzt. */
+/* Drehsel – läuft vor dem ersten Bild: Farben, Schrift und Größe so, wie zuletzt eingestellt, damit nichts aufblitzt.
+   Die fertig ausgerechneten Farben legt app.js unter dr_paint ab. */
 (() => {
     try {
-        const s = JSON.parse(localStorage.getItem('dr_set')) || {};
         const r = document.documentElement;
-        const dark = s.theme === 'dark' || (s.theme !== 'light' && s.theme !== 'contrast' && matchMedia('(prefers-color-scheme: dark)').matches);
-        r.dataset.theme = s.theme === 'contrast' ? 'contrast' : dark ? 'dark' : 'light';
+        const s = JSON.parse(localStorage.getItem('dr_set')) || {};
+        const p = JSON.parse(localStorage.getItem('dr_paint')) || null;
+        const mode = p && p.mode === 'light' ? 'light' : p && p.mode === 'dark' ? 'dark' : matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        r.dataset.theme = mode;
+        const vars = p && p[mode];
+        if (vars) for (const k in vars) r.style.setProperty(k, vars[k]);
         r.dataset.font = s.font || 'atkinson';
-        if (s.scale) r.style.setProperty('--ui', String(s.scale));
+        if (s.fs && s.fs.ui) r.style.setProperty('--ui', String(s.fs.ui));
         if (s.lang) r.lang = s.lang;
     } catch (e) {}
 })();

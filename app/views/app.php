@@ -15,14 +15,14 @@ $drLists = [];
 foreach (drListLangs() as $l) $drLists[$l] = $drInline ? '' : drListUrl($l);
 $drScripts = [];
 foreach (drUiLangs() as $l) if ($l !== 'de') $drScripts[] = 'i18n-' . $l . '.js';
-array_push($drScripts, 'engine.js', 'stage.js', 'app.js');
+array_push($drScripts, 'engine.js', 'look.js', 'stage.js', 'app.js');
 ?><!DOCTYPE html>
 <html lang="<?= drLang() ?>" data-v="<?= h(DR_VERSION) ?>" data-lists="<?= h(json_encode($drLists, JSON_UNESCAPED_SLASHES)) ?>" data-langs="<?= h(json_encode(drUiLangs())) ?>"<?= $drInline ? ' data-offline="1"' : '' ?>>
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="description" content="<?= h(drT('Drehsel: Glücksrad, Losbox und Würfel für Spiele mit Senioren und Kindern. Stadt-Land-Fluss, Bingo, Erinnerungsfragen, Sprichwörter, Bewegung und eigene Listen. Groß, gut lesbar, kostenlos, ohne Werbung und auch offline als App.', 'Drehsel: spinning wheel, lucky draw and dice for games with seniors and children. Categories, bingo, memory questions, proverbs, exercise and your own lists. Big, easy to read, free, ad-free and works offline as an app.')) ?>">
-<meta name="theme-color" content="#6741d9">
+<meta name="theme-color" content="#f5f0e6">
 <meta name="color-scheme" content="light dark">
 <meta name="application-name" content="Drehsel">
 <meta name="mobile-web-app-capable" content="yes">

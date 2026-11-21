@@ -1,0 +1,951 @@
+# Drehsel – eingebaute Listen (Deutsch)
+#
+# [id] Name beginnt eine Liste, darunter steht ein Eintrag pro Zeile.
+# Text | Auflösung   zeigt die Auflösung erst beim Antippen.
+# Am Zeilenende #rrggbb gibt dem Feld im Rad eine eigene Farbe.
+# Zeilen mit # und Leerzeichen am Anfang sind Bemerkungen.
+# Die ids gelten in allen Sprachen gleich, siehe en.txt.
+
+[alphabet] Alphabet
+A B C D E F G H I J K L M N O P Q R S T U V W X Y Z
+
+[alphabet-extra] Umlaute
+Ä Ö Ü
+
+[slf-klassisch] Stadt-Land-Fluss klassisch
+Stadt
+Land
+Fluss
+Vorname
+Tier
+Beruf
+Pflanze
+
+[slf-senioren] Kategorien für Senioren
+Stadt
+Land
+Fluss
+Vorname
+Tier
+Beruf
+Blume
+Baum
+Obst oder Gemüse
+Gericht
+Getränk
+Kleidungsstück
+Musikinstrument
+Werkzeug
+Haushaltsgegenstand
+Küchengerät
+Gewürz oder Kraut
+Vogel
+Fisch
+Sportart
+Spiel
+Hobby
+Märchenfigur
+Lied oder Schlager
+Sänger oder Sängerin
+Schauspieler oder Schauspielerin
+Automarke
+Berg oder Gebirge
+Insel
+Hauptstadt
+Körperteil
+Farbe
+Süßigkeit
+Möbelstück
+Etwas im Garten
+Etwas Rundes
+Etwas Weiches
+Etwas aus Holz
+Etwas, das man verschenken kann
+Etwas, das man im Urlaub braucht
+
+[slf-kinder] Kategorien für Kinder
+Tier
+Vorname
+Essen
+Obst oder Gemüse
+Farbe
+Spielzeug
+Getränk
+Kleidung
+Körperteil
+Fahrzeug
+Beruf
+Pflanze
+Süßigkeit
+Etwas im Kinderzimmer
+Etwas Rundes
+Märchenfigur
+Sportart
+Etwas in der Schule
+Musikinstrument
+Möbelstück
+Etwas, das fliegen kann
+Etwas, das schwimmen kann
+Etwas Weiches
+Etwas Lautes
+Etwas Grünes
+Etwas in der Küche
+Insekt
+Stadt
+Land
+
+[abc-themen] Themen für die ABC-Runde
+Obst und Gemüse
+Tiere
+Vornamen
+Städte
+Länder
+Berufe
+Blumen und Pflanzen
+Essen und Trinken
+Dinge im Haushalt
+Kleidung
+Sportarten
+Hobbys
+Musikinstrumente
+Dinge im Garten
+Fahrzeuge
+Dinge in der Küche
+Süßigkeiten und Gebäck
+Gewürze und Kräuter
+Märchenfiguren
+Dinge am Strand
+Werkzeuge
+Körperteile
+Dinge im Badezimmer
+Getränke
+Dinge aus dem Supermarkt
+Dinge, die man verschenken kann
+Spiele
+Vögel
+Bäume
+Dinge aus Holz
+Dinge, die rund sind
+Dinge in der Schule
+Dinge im Winter
+Dinge im Sommer
+Feste und Feiertage
+Möbel
+Gerichte und Speisen
+Schöne Wörter
+Dinge im Wald
+Dinge, die man anziehen kann
+
+[erinnerung] Erinnerungsfragen
+Wie hieß deine Schule, und wie bist du dorthin gekommen?
+Wer war deine liebste Lehrerin oder dein liebster Lehrer?
+Was gab es bei euch sonntags zu essen?
+Was war dein Lieblingsessen als Kind?
+Welches Spiel hast du als Kind am liebsten gespielt?
+Wie sah dein Kinderzimmer aus?
+Hattest du ein Haustier? Wie hieß es?
+Wohin ging deine erste Urlaubsreise?
+Wie sah dein erstes Fahrrad aus?
+Was war dein erstes Auto?
+Welchen Beruf wolltest du als Kind einmal haben?
+Wo war deine erste Arbeitsstelle?
+Wofür hast du deinen ersten Lohn ausgegeben?
+Welches Lied erinnert dich an deine Jugend?
+Wo bist du früher tanzen gegangen?
+Welcher Film hat dich besonders beeindruckt?
+Wie habt ihr früher Weihnachten gefeiert?
+Wie wurden bei euch Geburtstage gefeiert?
+Was hast du in den Sommerferien gemacht?
+Welche Süßigkeit gab es früher, die es heute nicht mehr gibt?
+Wie sah der Laden aus, in dem ihr eingekauft habt?
+Was hat ein Brötchen früher gekostet?
+Welche Sendung hast du gern im Radio gehört oder im Fernsehen geschaut?
+Wann hast du zum ersten Mal einen Fernseher gesehen?
+Wie hast du deinen Partner oder deine Partnerin kennengelernt?
+Wie war dein Hochzeitstag?
+Welches Kleidungsstück hast du besonders gern getragen?
+Welche Frisur war in deiner Jugend modern?
+Welches Hobby hattest du in deiner Jugend?
+Welchen Sport hast du gern gemacht?
+Was hast du mit deinen Geschwistern oder Freunden angestellt?
+Wer war dein bester Freund oder deine beste Freundin?
+Welchen Streich hast du einmal gespielt?
+Was habt ihr gemacht, wenn es geschneit hat?
+Was hat deine Mutter oft zu dir gesagt?
+Was hast du von deinem Vater gelernt?
+Was hat deine Großmutter am besten gekocht?
+Welches Gericht kannst du besonders gut?
+Wie wurde bei euch früher Wäsche gewaschen?
+Wie wurde eure Wohnung geheizt?
+Welche Arbeit im Haushalt musstest du als Kind erledigen?
+Wie sah euer Garten aus?
+Welche Blumen magst du am liebsten?
+In welcher Stadt hast du am längsten gewohnt?
+Welche Reise war deine schönste?
+Was war das Mutigste, das du je getan hast?
+Worauf bist du in deinem Leben stolz?
+Welches Buch hast du gern gelesen?
+Welches Märchen kennst du noch?
+Welches Gedicht hast du in der Schule gelernt?
+Welches Spielzeug hast du dir als Kind gewünscht?
+Was hast du von deinem ersten Taschengeld gekauft?
+Was war früher ein ganz besonderer Ausflug?
+Wie bist du früher zur Arbeit gekommen?
+Welche Musik hörst du heute noch gern?
+Welche Sängerin oder welchen Schauspieler fandest du toll?
+Was hat dich als Kind zum Lachen gebracht?
+Welcher Geruch erinnert dich an früher?
+Wie roch es in der Küche deiner Kindheit?
+Welches Fest im Jahr mochtest du am liebsten?
+Was habt ihr an Silvester gemacht?
+Wie war dein erster Schultag?
+Was war in deiner Schultüte?
+Welches Fach mochtest du in der Schule am liebsten?
+Welche Tiere gab es bei euch auf dem Hof oder in der Nachbarschaft?
+Was hast du in deiner Freizeit am liebsten gemacht?
+Welcher Rat hat dir im Leben geholfen?
+Was würdest du einem jungen Menschen heute raten?
+Welcher Tag in deinem Leben war besonders schön?
+Wie habt ihr euch früher ohne Telefon verabredet?
+Welches Gesellschaftsspiel habt ihr in der Familie gespielt?
+Welchen Ausflugsort mochtest du besonders?
+
+[sprichwoerter] Sprichwörter
+Morgenstund hat | Gold im Mund
+Wer andern eine Grube gräbt, | fällt selbst hinein
+Übung macht | den Meister
+Was Hänschen nicht lernt, | lernt Hans nimmermehr
+Der Apfel fällt nicht | weit vom Stamm
+Lügen haben | kurze Beine
+Viele Köche | verderben den Brei
+Wer zuletzt lacht, | lacht am besten
+Ohne Fleiß | kein Preis
+Eile mit | Weile
+Reden ist Silber, | Schweigen ist Gold
+Aller Anfang | ist schwer
+Wer rastet, | der rostet
+Ende gut, | alles gut
+Kleider machen | Leute
+Hunde, die bellen, | beißen nicht
+Wer A sagt, | muss auch B sagen
+Ein Unglück kommt | selten allein
+Steter Tropfen | höhlt den Stein
+Wo ein Wille ist, | ist auch ein Weg
+Doppelt genäht | hält besser
+Gut Ding | will Weile haben
+Wer nicht wagt, | der nicht gewinnt
+Wie man sich bettet, | so liegt man
+Wer im Glashaus sitzt, | soll nicht mit Steinen werfen
+Den Letzten | beißen die Hunde
+Wer den Pfennig nicht ehrt, | ist des Talers nicht wert
+Andere Länder, | andere Sitten
+Der frühe Vogel | fängt den Wurm
+Besser spät | als nie
+Geteiltes Leid | ist halbes Leid
+Geteilte Freude | ist doppelte Freude
+Hochmut kommt | vor dem Fall
+In der Kürze | liegt die Würze
+Kommt Zeit, | kommt Rat
+Lieber den Spatz in der Hand | als die Taube auf dem Dach
+Man soll den Tag nicht | vor dem Abend loben
+Not macht | erfinderisch
+Ordnung ist | das halbe Leben
+Probieren geht | über Studieren
+Rom wurde auch nicht | an einem Tag erbaut
+Scherben bringen | Glück
+Stille Wasser | sind tief
+Was du heute kannst besorgen, | das verschiebe nicht auf morgen
+Wenn die Katze aus dem Haus ist, | tanzen die Mäuse
+Wer zuerst kommt, | mahlt zuerst
+Zeit ist | Geld
+Alte Liebe | rostet nicht
+Auch ein blindes Huhn | findet mal ein Korn
+Der Klügere | gibt nach
+Die dümmsten Bauern | haben die dicksten Kartoffeln
+Einem geschenkten Gaul | schaut man nicht ins Maul
+Es ist noch kein Meister | vom Himmel gefallen
+Gelegenheit | macht Diebe
+Hunger ist | der beste Koch
+Irren ist | menschlich
+Jeder ist | seines Glückes Schmied
+Kleinvieh macht | auch Mist
+Liebe geht | durch den Magen
+Man muss die Feste feiern, | wie sie fallen
+Neue Besen | kehren gut
+Pünktlichkeit ist | die Höflichkeit der Könige
+Sich regen | bringt Segen
+Unkraut | vergeht nicht
+Vorsicht ist | die Mutter der Porzellankiste
+Was lange währt, | wird endlich gut
+Wer schön sein will, | muss leiden
+Wer Wind sät, | wird Sturm ernten
+Wissen ist | Macht
+Der Ton macht | die Musik
+Die Zeit heilt | alle Wunden
+Ein Bild sagt | mehr als tausend Worte
+Es ist nicht alles Gold, | was glänzt
+Gleich und gleich | gesellt sich gern
+Gegensätze | ziehen sich an
+Handwerk hat | goldenen Boden
+Kindermund | tut Wahrheit kund
+Man lernt | nie aus
+Viele Hände | machen schnell ein Ende
+Wer nicht hören will, | muss fühlen
+Wer suchet, | der findet
+Spare in der Zeit, | dann hast du in der Not
+Eigener Herd | ist Goldes wert
+Abends werden | die Faulen fleißig
+Was ich nicht weiß, | macht mich nicht heiß
+Es wird nichts so heiß gegessen, | wie es gekocht wird
+
+[gymnastik] Sitzgymnastik
+Schultern hochziehen und wieder fallen lassen
+Schultern langsam nach hinten kreisen
+Kopf langsam nach rechts und links drehen
+Arme nach oben strecken und tief einatmen
+Hände zu Fäusten ballen und wieder öffnen
+Mit den Fingern Klavier spielen
+Mit den Füßen auf dem Boden trommeln
+Fersen heben und senken
+Zehenspitzen heben und senken
+Im Sitzen marschieren, Knie abwechselnd heben
+Sich selbst umarmen
+Mit den Armen große Kreise malen
+Handgelenke kreisen
+Fußgelenke kreisen
+Oberkörper sanft nach rechts und links drehen
+Rechte Hand auf die linke Schulter, dann andersherum
+Klatschen und auf die Oberschenkel patschen
+Ein Bein ausstrecken und die Fußspitze anziehen
+Rudern wie im Boot
+Hände reiben, bis sie warm sind
+Mit den Händen sanft das Gesicht ausstreichen
+Einatmen und Arme heben, ausatmen und sinken lassen
+Strecken und gähnen wie nach dem Aufwachen
+Mit der Nase die Zahlen von 1 bis 5 in die Luft schreiben
+Mit dem Fuß den eigenen Namen in die Luft schreiben
+Einen Luftballon aufpusten: tief ein, langsam aus
+Im Sitzen Rad fahren
+Wäsche aufhängen, Arme abwechselnd nach oben
+Fenster putzen mit großen Kreisen
+Teig kneten
+Äpfel pflücken, abwechselnd nach oben greifen
+Lächeln und die Augenbrauen hochziehen
+Die Arme ausschütteln
+Ein großes Paket heben und zur Seite stellen
+Mit beiden Händen eine Acht in die Luft malen
+
+[volkslieder] Volkslieder
+Alle Vögel sind schon da
+Am Brunnen vor dem Tore
+Das Wandern ist des Müllers Lust
+Die Gedanken sind frei
+Ein Jäger aus Kurpfalz
+Es tönen die Lieder
+Freut euch des Lebens
+Guter Mond, du gehst so stille
+Hoch auf dem gelben Wagen
+Horch, was kommt von draußen rein
+Im Frühtau zu Berge
+Im schönsten Wiesengrunde
+Kein schöner Land in dieser Zeit
+Komm, lieber Mai, und mache
+Der Mond ist aufgegangen
+Muss i denn zum Städtele hinaus
+Nun will der Lenz uns grüßen
+Sah ein Knab ein Röslein stehn
+Weißt du, wie viel Sternlein stehen
+Winter ade
+Wenn alle Brünnlein fließen
+Es klappert die Mühle am rauschenden Bach
+Auf, du junger Wandersmann
+Ännchen von Tharau
+Ich weiß nicht, was soll es bedeuten (Loreley)
+Wem Gott will rechte Gunst erweisen
+Bunt sind schon die Wälder
+In einem kühlen Grunde
+Abendstille überall
+Der Winter ist vorüber
+Wie schön blüht uns der Maien
+Hejo, spann den Wagen an
+Viel Glück und viel Segen
+Kommt ein Vogel geflogen
+Ein Vogel wollte Hochzeit machen
+Der Kuckuck und der Esel
+Ade zur guten Nacht
+Schön ist die Welt
+Wenn ich ein Vöglein wär
+Es waren zwei Königskinder
+Ein Männlein steht im Walde
+Leise rieselt der Schnee
+O Tannenbaum
+Stille Nacht, heilige Nacht
+Kling, Glöckchen, klingelingeling
+Am Weihnachtsbaum die Lichter brennen
+Ich bin ein Musikante
+Wir sind jung, die Welt ist offen
+
+[kinderlieder] Kinderlieder
+Alle meine Entchen
+Hänschen klein
+Kommt ein Vogel geflogen
+Fuchs, du hast die Gans gestohlen
+Häschen in der Grube
+Summ, summ, summ, Bienchen summ herum
+Backe, backe Kuchen
+Hoppe, hoppe Reiter
+Ich geh mit meiner Laterne
+Laterne, Laterne
+Morgen kommt der Weihnachtsmann
+Schlaf, Kindlein, schlaf
+Weißt du, wie viel Sternlein stehen
+Auf der Mauer, auf der Lauer
+Grün, grün, grün sind alle meine Kleider
+Ein Männlein steht im Walde
+Es tanzt ein Bi-Ba-Butzemann
+Taler, Taler, du musst wandern
+Bruder Jakob
+Zeigt her eure Füße
+Ringel, Ringel, Reihe
+Wer will fleißige Handwerker sehn
+Brüderchen, komm tanz mit mir
+Hopp, hopp, hopp, Pferdchen lauf Galopp
+Kuckuck, Kuckuck, ruft's aus dem Wald
+Alle Vögel sind schon da
+Winter ade
+Schneeflöckchen, Weißröckchen
+Jetzt fahrn wir übern See
+Mein Hut, der hat drei Ecken
+Ich bin ein dicker Tanzbär
+Es regnet, es regnet
+Sankt Martin ritt durch Schnee und Wind
+Kling, Glöckchen, klingelingeling
+Lasst uns froh und munter sein
+Ein Vogel wollte Hochzeit machen
+Der Kuckuck und der Esel
+Ein Hut, ein Stock, ein Regenschirm
+Hänsel und Gretel verliefen sich im Wald
+Ri-ra-rutsch, wir fahren mit der Kutsch
+Widewidewenne heißt meine Puthenne
+Wir sind die Musikanten
+Dornröschen war ein schönes Kind
+
+[wer] Wer?
+Ein kleiner Drache
+Eine mutige Prinzessin
+Ein vergesslicher Zauberer
+Ein sprechender Hund
+Eine neugierige Katze
+Ein alter Pirat
+Eine freundliche Hexe
+Ein kleiner Roboter
+Ein Ritter, der im Dunkeln Angst hat
+Ein kleiner Igel
+Eine Astronautin
+Ein Bäcker
+Ein sanfter Riese
+Ein flinker Zwerg
+Ein kleines Gespenst
+Eine langsame Schnecke
+Eine Feuerwehrfrau
+Eine Oma auf dem Motorrad
+Ein Eisbär
+Ein trauriger Clown
+Ein Detektiv mit Lupe
+Eine Meerjungfrau
+Ein Einhorn
+Ein Dinosaurier
+Ein schlauer Fuchs
+Ein kleines Mädchen
+Ein kleiner Junge
+Ein Postbote
+Eine fleißige Ameise
+Ein Schneemann
+
+[wo] Wo?
+im Wald
+auf dem Mond
+unter dem Meer
+in einer alten Burg
+im Supermarkt
+auf einem Bauernhof
+in der Schule
+auf einem Schiff
+in der Wüste
+im Zoo
+auf einer einsamen Insel
+in einer Höhle
+im Zirkus
+auf dem Dachboden
+in einer Bäckerei
+im Schwimmbad
+auf einem hohen Berg
+in einem Baumhaus
+im Weltall
+auf dem Jahrmarkt
+im tiefen Schnee
+in einem Zug
+in einem Märchenschloss
+im Garten
+mitten in der Stadt
+auf einer Wolke
+im Museum
+auf dem Spielplatz
+in einem Heißluftballon
+im Kinderzimmer
+
+[was] Was passiert?
+findet einen Schatz
+verliert den Schlüssel
+lernt zaubern
+trifft einen neuen Freund
+muss ein Rätsel lösen
+backt einen riesigen Kuchen
+verläuft sich
+kann plötzlich fliegen
+feiert ein großes Fest
+rettet ein kleines Tier
+schrumpft auf einmal
+bekommt einen geheimnisvollen Brief
+wird zum König gewählt
+verwandelt sich in einen Frosch
+hört ein seltsames Geräusch
+gewinnt einen Wettbewerb
+findet eine Tür, die vorher nicht da war
+weckt jemanden, der hundert Jahre geschlafen hat
+kann plötzlich mit Tieren sprechen
+baut eine verrückte Maschine
+fährt mit dem Fahrrad um die Welt
+entdeckt eine Höhle voller Kristalle
+will einen Drachen zähmen
+gibt ein Konzert
+sucht einen verlorenen Hut
+bekommt Besuch von einem Außerirdischen
+wird vom Regen überrascht
+sucht das größte Eis der Welt
+baut einen Schneemann, der lebendig wird
+findet eine Flaschenpost
+
+[bewegung] Bewegung
+Hüpfe fünfmal wie ein Frosch
+Stampfe wie ein Elefant
+Schleiche leise wie eine Katze
+Flattere wie ein Schmetterling
+Stehe auf einem Bein, bis alle bis 10 gezählt haben
+Drehe dich dreimal im Kreis
+Mach dich so groß wie ein Baum
+Mach dich ganz klein wie eine Maus
+Laufe schnell auf der Stelle
+Mach zehn Hampelmänner
+Berühre deine Zehen
+Watschle wie eine Ente
+Galoppiere wie ein Pferd
+Schwimme wie ein Fisch durch die Luft
+Klatsche zehnmal in die Hände
+Balanciere auf einer gedachten Linie
+Kreise mit den Armen
+Spring so hoch du kannst
+Gehe fünf Schritte rückwärts
+Tanze wie ein Roboter
+Strecke dich wie eine Giraffe
+Wackle wie ein Pudding
+Fliege wie ein Flugzeug
+Schüttle dich wie ein nasser Hund
+Mach fünf Kniebeugen
+Hüpfe auf einem Bein
+Brülle wie ein Löwe
+Gehe auf Zehenspitzen
+Gehe auf den Fersen
+Krabble seitwärts wie ein Krebs
+Erstarre wie eine Statue, bis alle bis 10 gezählt haben
+Male mit dem Po eine Acht in die Luft
+Tippe mit geschlossenen Augen auf deine Nase
+Mach einen Riesenschritt
+Trippel wie ein Zwerg
+Rudere wie in einem Boot
+Schlängle dich wie eine Schlange
+Hüpfe wie ein Känguru
+Winke mit beiden Armen wie ein Fan im Stadion
+Mach ein lustiges Gesicht
+
+[koerperteile] Körperteile
+Linke Hand
+Rechte Hand
+Linker Fuß
+Rechter Fuß
+
+[farben] Farben
+Rot #e03131
+Blau #1c7ed6
+Gelb #fcc419
+Grün #2f9e44
+
+[gefuehle] Gefühle
+😀 Fröhlich
+😢 Traurig
+😠 Wütend
+😨 Ängstlich
+😲 Überrascht
+😴 Müde
+🤔 Nachdenklich
+😳 Verlegen
+🥰 Verliebt
+😎 Lässig
+🤢 Angeekelt
+😌 Entspannt
+🤪 Albern
+😟 Besorgt
+🥳 In Feierlaune
+😋 Lecker!
+
+[reime] Reime
+Haus | Maus, Laus, raus, Strauß
+Baum | Traum, Schaum, Raum, kaum
+Hund | Mund, rund, bunt, Grund
+Ball | Stall, Knall, Fall, Schall
+Hose | Rose, Dose, lose
+Kuchen | suchen, buchen, fluchen
+Tisch | Fisch, frisch, wisch
+Sonne | Tonne, Wonne
+Hase | Nase, Vase, Blase
+Katze | Tatze, Glatze, Matratze
+Bein | Stein, klein, fein, Schwein
+Hand | Sand, Wand, Land, Band
+Bett | nett, Brett, fett
+Kopf | Topf, Zopf, Knopf
+Schuh | Kuh, zu, Ruh, du
+Stern | gern, fern, Kern
+Nacht | lacht, Macht, acht
+Igel | Spiegel, Riegel, Ziegel
+Bär | schwer, leer, Meer
+Ziege | Fliege, Wiege, Stiege
+Biene | Schiene, Miene, Kantine
+Brot | rot, Boot, Not
+Schnee | See, Tee, Fee, Zeh
+Regen | Segen, legen, wegen
+Wind | Kind, Rind, geschwind
+Glas | Gras, Spaß, Fass
+Ring | Ding, fing, ging
+Zahn | Hahn, Kahn, Bahn
+Fuß | Gruß, Mus, Ruß
+Tasse | Kasse, Klasse, Masse
+Rad | Bad, Pfad, Grad
+Hut | gut, Mut, Wut
+Sack | Lack, Pack, Frack
+Zug | Flug, klug, genug
+Licht | Gesicht, Gedicht, nicht
+Garten | warten, Karten, starten
+Kuss | Bus, Fluss, Nuss
+Uhr | Spur, nur, Schnur
+Eis | heiß, weiß, Kreis, Preis
+Schaf | brav, Graf, Schlaf
+Kamm | Damm, Lamm, Schlamm
+Torte | Worte, Sorte, Pforte
+Socke | Glocke, Locke, Flocke
+Schnecke | Ecke, Decke, Hecke
+Tanne | Kanne, Panne, Wanne
+Maus | Haus, Laus, raus
+Fisch | Tisch, frisch, wisch
+Wurst | Durst
+
+[begriffe] Begriffe
+Zahnbürste
+Regenschirm
+Fahrrad
+Schneemann
+Kaffeemaschine
+Bügeleisen
+Staubsauger
+Telefon
+Briefträger
+Feuerwehr
+Leuchtturm
+Hängematte
+Achterbahn
+Zahnarzt
+Bäcker
+Friseur
+Gießkanne
+Kinderwagen
+Schubkarre
+Rasenmäher
+Waschmaschine
+Fernseher
+Schreibmaschine
+Plattenspieler
+Strickjacke
+Gummistiefel
+Sonnenbrille
+Kochlöffel
+Nudelholz
+Pfannkuchen
+Spiegelei
+Sahnetorte
+Bratwurst
+Weihnachtsbaum
+Osterhase
+Geburtstagskuchen
+Hochzeit
+Picknick
+Zelten
+Angeln
+Kegeln
+Schach
+Kartenspiel
+Puzzle
+Schwimmen
+Walzer tanzen
+Gitarre
+Klavier
+Trompete
+Geige
+Dirigent
+Bahnhof
+Flughafen
+Ruderboot
+Heißluftballon
+Hubschrauber
+Straßenbahn
+Taxi
+Ampel
+Zebrastreifen
+Wochenmarkt
+Briefmarke
+Postkarte
+Zeitung lesen
+Brille
+Spazierstock
+Krawatte
+Handschuhe
+Schneeflocke
+Gewitter
+Regenbogen
+Sonnenuntergang
+Vollmond
+Sternschnuppe
+Kuckucksuhr
+Wecker
+Schlüssel
+Taschenlampe
+Kerze
+Kamin
+Gartenzwerg
+Blumenstrauß
+Sonnenblume
+Apfelbaum
+Erdbeeren pflücken
+Kartoffelsalat
+Kaffeeklatsch
+Frühstück im Bett
+Mittagsschlaf
+Koffer packen
+Sandburg
+Liegestuhl
+Eis essen
+Fotoalbum
+Kino
+Zirkus
+Zauberer
+Polizist
+Ärztin
+Lehrerin
+Bauer
+Kuh melken
+Traktor
+Hühner füttern
+Wäsche aufhängen
+Fenster putzen
+Brot backen
+Hund ausführen
+Vogelhaus
+Nähmaschine
+Strümpfe stricken
+Holz hacken
+Schlittschuh laufen
+Schlitten fahren
+Kuchen backen
+Bergsteigen
+Tennis
+Fußball
+Rollschuh fahren
+Fahrstuhl
+Rolltreppe
+Kühlschrank
+Toaster
+
+[begriffe-kinder] Begriffe für Kinder
+Hund
+Katze
+Elefant
+Giraffe
+Affe
+Schlange
+Frosch
+Pferd
+Kuh
+Schwein
+Hase
+Vogel
+Fisch
+Löwe
+Pinguin
+Krokodil
+Schmetterling
+Biene
+Spinne
+Schnecke
+Ball
+Puppe
+Teddybär
+Bauklötze
+Fahrrad
+Roller
+Rutsche
+Schaukel
+Sandkasten
+Trampolin
+Zähne putzen
+Banane
+Apfel
+Eis
+Pizza
+Nudeln
+Kuchen
+Bonbon
+Brezel
+Milch trinken
+Auto
+Bus
+Zug
+Flugzeug
+Rakete
+Schiff
+Traktor
+Feuerwehrauto
+Bagger
+Sonne
+Mond
+Regen
+Schnee
+Regenschirm
+Blume
+Baum
+Haus
+Schloss
+Prinzessin
+Ritter
+Pirat
+Drache
+Hexe
+Zauberer
+Gespenst
+Roboter
+Superheld
+Clown
+Arzt
+Koch
+Lehrerin
+Schuhe binden
+Schlafen
+Schwimmen
+Tanzen
+Singen
+Malen
+Lesen
+Fußball spielen
+Verstecken spielen
+Geburtstag
+Weihnachten
+Ostereier suchen
+Geschenk
+Brille
+Mütze
+Gummistiefel
+Rucksack
+Telefon
+Gitarre
+Trommel
+Schneemann
+Sandburg
+Seifenblasen
+Drachen steigen lassen
+Pfütze springen
+
+[darstellung] So geht's
+Erklären, ohne das Wort zu sagen
+Vormachen, ohne zu sprechen
+Malen, ohne Buchstaben und Zahlen
+
+[aemter] Ämter
+Tisch decken
+Tisch abräumen
+Blumen gießen
+Lüften
+Müll rausbringen
+Post holen
+Kalender umblättern
+Tiere füttern
+Geschirr spülen
+Abtrocknen
+Lieder aussuchen
+Gäste begrüßen
+
+[entscheidung] Ja oder Nein
+Ja
+Nein
+Ja
+Nein
+Ja
+Nein
+
+[muenze] Münze
+Kopf
+Zahl
+
+[fragen-kinder] Was wäre, wenn …?
+Was wäre, wenn du fliegen könntest?
+Was würdest du machen, wenn du einen Tag lang unsichtbar wärst?
+Welches Tier wärst du gern, und warum?
+Was würdest du dir von einer Fee wünschen?
+Wenn du zaubern könntest, was würdest du zaubern?
+Was wäre, wenn Tiere sprechen könnten?
+Wie sieht dein Traumhaus aus?
+Was würdest du auf eine einsame Insel mitnehmen?
+Was ist dein Lieblingsessen, und warum?
+Was war heute das Schönste?
+Worüber hast du zuletzt laut gelacht?
+Was möchtest du einmal werden?
+Was würdest du gern erfinden?
+Wenn du einen Tag lang Lehrerin oder Lehrer wärst, was würdest du machen?
+Was würdest du tun, wenn du so klein wärst wie eine Ameise?
+Welche Superkraft hättest du gern?
+Wohin würdest du mit einer Zeitmaschine reisen?
+Was ist das Lustigste, das dir passiert ist?
+Wer ist dein Held oder deine Heldin?
+Was machst du am liebsten mit deiner Familie?
+Was würdest du deinem Haustier sagen, wenn es dich verstehen könnte?
+Was wäre, wenn du einen Drachen als Haustier hättest?
+Was ist für dich mutig?
+Was macht einen guten Freund aus?
+Was würdest du kochen, wenn du alles kochen könntest?
+Was wäre, wenn die Schule im Wald wäre?
+Welches Spiel würdest du neu erfinden?
+Was würdest du machen, wenn du König oder Königin wärst?
+Was hilft dir, wenn du traurig bist?
+Worauf freust du dich gerade?
+Wie sieht ein perfekter Tag für dich aus?
+Was würdest du tun, wenn du einen Schatz findest?
+Was magst du am Sommer, und was am Winter?
+Was hast du Neues gelernt?
+Wenn du ein Buch schreiben würdest, worum ginge es?
+Was wäre, wenn es Bonbons regnen würde?
+Welches Geräusch magst du gern?
+Wie sähe ein Roboter aus, den du baust?
+Was wäre, wenn du im Meer wohnen würdest?
+Was würdest du Außerirdischen über die Erde erzählen?
+Welche drei Dinge machen dich glücklich?
+Was würdest du tun, wenn du einen Tag lang erwachsen wärst?
+Was wäre, wenn Bäume laufen könnten?
+Wem würdest du gern einmal Danke sagen?
+Was ist dein liebster Ort?
+Welches Tier würdest du gern einmal streicheln?
