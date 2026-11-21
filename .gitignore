@@ -1,0 +1,9 @@
+# Hier liegen Einstellungen und Update-Stand des Servers. Niemals ins Git legen.
+/data/
+
+# Gebaute Release-Dateien (php tools/build-release.php)
+/dist/
+
+# Test-Screenshots und Werkzeug-Abfall
+/*.png
+node_modules/
