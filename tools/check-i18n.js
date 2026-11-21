@@ -10,7 +10,7 @@ const read = f => fs.readFileSync(path.join(dir, f), 'utf8');
 const keys = new Set();
 const str = "'((?:[^'\\\\]|\\\\.)*)'";
 const unq = s => s.replace(/\\n/g, '\n').replace(/\\'/g, "'").replace(/\\\\/g, '\\');
-for (const f of ['app.js', 'stage.js']) {
+for (const f of ['app.js', 'stage.js', 'print.js']) {
     for (const m of read(f).matchAll(new RegExp('\\b[tN]\\(' + str, 'g'))) keys.add(unq(m[1]));
 }
 const eng = read('engine.js');

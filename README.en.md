@@ -37,7 +37,7 @@ Made for everyone who keeps groups busy: care homes, nurseries, schools, familie
   <tr>
     <td align="center"><img src="docs/en/phone.png" alt="On a phone: letter at the top, category below" width="200"><br><sub>On a phone</sub></td>
     <td align="center"><img src="docs/en/own.png" alt="New wheel: name, symbol and entries" width="200"><br><sub>Your own wheels in a minute</sub></td>
-    <td></td>
+    <td align="center"><img src="docs/en/print.png" alt="Print: preview of two bingo cards, settings next to it" width="250"><br><sub>Print bingo cards, each one different</sub></td>
   </tr>
 </table>
 
@@ -105,6 +105,16 @@ Fish
 ```
 
 One line per entry. `[Name]` starts a list, `== Name ==` a wheel with several reels. After `|` comes an answer that only appears after a tap. `#rrggbb` at the end of a line gives a field its own colour, e.g. `Red #e03131`. Two columns from Excel become question and answer.
+
+## Printing
+
+Menu → Print (or “Print …” when adjusting a game) creates an A4 PDF right in the browser, without any outside library and without a network. The preview shows exactly what comes out of the printer.
+
+- **Bingo cards, each one different:** classic with the numbers 1 to 75 (B I N G O, free space in the middle) or from any list, 3 × 3, 4 × 4 or 5 × 5 fields. No two cards have the same entries, not even in a different order, and each differs from the others as much as possible, so several people rarely win at once. If a list does not allow enough different cards, Drehsel tells you how many are possible. 1, 2 or 4 cards per page, card number and series, optionally a line for the name and a caller's list.
+- **Name, Place, Animal sheet:** landscape, with columns for letter, categories and points. Optionally every sheet gets different random categories.
+- **List:** any list in normal, large or very large text, in 1 to 3 columns, with numbers or boxes, answers underneath or at the end.
+- **Cards to cut out:** 4, 6, 8 or 12 per page with cutting lines, e.g. memory questions or words to guess, the answer small at the bottom.
+- **Maths sheets, each one different:** plus, minus, times, divided up to 10, 20, 100 or 1000. Every sheet has different sums, the answers are at the back.
 
 ## TV, projector, Apple TV
 
@@ -181,7 +191,8 @@ index.php      entry: serves files, service worker, manifest, the page
 app/lib/       settings, headers, updates (PHP)
 app/views/     the main page, also the template for the offline file
 app/assets/    the app in the browser:
-               engine.js  randomness, drawing, history, groups, jobs, sharing, built-in games
+               engine.js  randomness, drawing, history, groups, jobs, sharing, bingo cards, maths sheets, built-in games
+               pdf.js     PDF without outside libraries, with preview; print.js the print templates
                stage.js   wheel, reels, card, dice, bingo board, timer
                look.js    colour themes and automatic contrast
                app.js     controls, windows, settings, own wheels, backup
@@ -210,7 +221,7 @@ Practice | makes perfect
 To check:
 
 ```sh
-node tools/test-engine.js     # randomness, drawing, undo, groups, jobs, sharing
+node tools/test-engine.js     # randomness, drawing, undo, groups, jobs, sharing, bingo cards, maths sheets
 node tools/check-lists.js     # duplicate entries, missing lists
 node tools/check-i18n.js      # missing translations
 php tools/build-release.php   # dist/drehsel-install.php, ZIP and drehsel-offline.html

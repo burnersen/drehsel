@@ -294,6 +294,84 @@
         return out.map(o => ({ d: o.d, n: o.n }));
     }
 
+    /* ---------- Zum Drucken: Bingo-Karten und Rechenblätter, die nie gleich sind ---------- */
+    /** Anzahl der Möglichkeiten, k aus n zu wählen (als Kommazahl, bei sehr großen Werten Infinity) */
+    function choose(n, k) {
+        if (k < 0 || k > n) return 0;
+        k = Math.min(k, n - k);
+        let r = 1;
+        for (let i = 1; i <= k; i++) { r = r * (n - k + i) / i; if (r > 1e15) return Infinity; }
+        return Math.round(r);
+    }
+    /** Bingo-Karten. o = { classic: true } für 1 bis 75 mit Spalten B I N G O und Freifeld,
+        sonst { items: [Eintrag …], size: 3|4|5, free: true|false }. count = wie viele Karten.
+        Keine zwei Karten haben dieselben Einträge (auch nicht in anderer Anordnung), und von vielen Vorschlägen
+        nimmt jede Karte den, der sich am wenigsten mit den schon gezogenen deckt: so gewinnen selten mehrere auf einmal.
+        Ergebnis: { cards: [[Eintrag oder null für frei, …] Zeile für Zeile], size, max, short } */
+    function bingoCards(o) {
+        const size = o.classic ? 5 : Math.max(2, Math.min(6, o.size | 0 || 4));
+        const free = o.classic || (o.free && size % 2 === 1);
+        const k = size * size - (free ? 1 : 0);
+        let max, make;
+        if (o.classic) {
+            max = Infinity;
+            make = () => {
+                const cols = range(5).map(c => shuffle(range(15).map(i => c * 15 + i + 1)).slice(0, c === 2 ? 4 : 5).sort((a, b) => a - b));
+                cols[2].splice(2, 0, null);
+                return range(25).map(i => cols[i % 5][Math.floor(i / 5)]);
+            };
+        } else {
+            const items = o.items || [];
+            if (items.length < k) return { cards: [], size, max: 0, short: k - items.length };
+            max = choose(items.length, k);
+            make = () => {
+                const pick = shuffle(range(items.length)).slice(0, k);
+                if (free) pick.splice(Math.floor(k / 2), 0, null);
+                return pick;
+            };
+        }
+        const count = Math.max(1, Math.min(500, o.count | 0 || 1, max));
+        const keyOf = c => c.filter(x => x != null).slice().sort((a, b) => a - b).join(',');
+        const seen = new Set(), cards = [], sets = [];
+        let guard = 0;
+        while (cards.length < count && guard++ < count * 400) {
+            let best = null;
+            const tries = max > count * 20 ? 24 : 4;
+            for (let t = 0; t < tries; t++) {
+                const c = make(), key = keyOf(c);
+                if (seen.has(key)) continue;
+                const set = new Set(c.filter(x => x != null));
+                let worst = 0;
+                for (const s of sets) { let n = 0; for (const v of set) if (s.has(v)) n++; if (n > worst) worst = n; }
+                if (!best || worst < best.worst) best = { c, key, set, worst };
+            }
+            if (!best) continue;
+            seen.add(best.key); sets.push(best.set); cards.push(best.c);
+        }
+        const out = o.classic ? cards.map(c => c.map(v => v == null ? null : { t: String(v), p: 'BINGO'[(v - 1) / 15 | 0] }))
+            : cards.map(c => c.map(i => i == null ? null : o.items[i]));
+        return { cards: out, size, free, max, short: 0, wanted: o.count | 0 };
+    }
+    /** Rechenblätter: count Blätter mit je n Aufgaben, auf einem Blatt keine Aufgabe doppelt und kein Blatt wie ein anderes */
+    function mathSheets(o) {
+        const n = Math.max(4, Math.min(40, o.n | 0 || 20));
+        const sheets = [], seen = new Set();
+        let guard = 0;
+        while (sheets.length < Math.max(1, Math.min(100, o.count | 0 || 1)) && guard++ < 2000) {
+            const tasks = [], keys = new Set();
+            let g2 = 0;
+            while (tasks.length < n && g2++ < n * 60) {
+                const m = mathTask(o);
+                if (keys.has(m.t)) continue;
+                keys.add(m.t); tasks.push(m);
+            }
+            const key = Array.from(keys).sort().join('|');
+            if (seen.has(key)) continue;
+            seen.add(key); sheets.push(tasks);
+        }
+        return sheets;
+    }
+
     /* ---------- Räder prüfen (aus Sicherung, Datei oder Link) ---------- */
     const RULES = ['free', 'cycle', 'once'];
     const VIEWS = ['wheel', 'reels', 'card', 'dice', 'bingo', 'abc', 'teams', 'duties'];
@@ -417,6 +495,6 @@
 
     Object.assign(DR, { rnd, rndReal, shuffle, range, clip, parseLine, parseItems, itemLine, itemsToText, parseContent, parseImport, exportText,
         itemsOf, endless, sig, rollDice, mathTask, newState, normState, left, wheelItems, draw, undo, reset, teams, duties,
-        cleanGame, cleanSrc, encodeShare, decodeShare, GAMES, GROUPS, RULES, VIEWS });
+        cleanGame, cleanSrc, encodeShare, decodeShare, choose, bingoCards, mathSheets, GAMES, GROUPS, RULES, VIEWS });
     if (typeof module !== 'undefined' && module.exports) module.exports = DR;
 })(typeof window !== 'undefined' ? window : globalThis);

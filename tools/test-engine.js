@@ -117,6 +117,34 @@ t('cleanGame', () => {
     assert.strictEqual(g.slots[0].src.items[1].a, 'z');
     assert.strictEqual(DR.cleanGame({ slots: [] }), null);
 });
+t('Bingo klassisch: 100 verschiedene Karten, Spalten passen', () => {
+    const r = DR.bingoCards({ classic: true, count: 100 });
+    assert.strictEqual(r.cards.length, 100);
+    const keys = new Set();
+    for (const c of r.cards) {
+        assert.strictEqual(c.length, 25);
+        assert.strictEqual(c[12], null);
+        c.forEach((x, i) => { if (x) { const v = +x.t; assert(v >= (i % 5) * 15 + 1 && v <= (i % 5) * 15 + 15, 'Spalte ' + i + ': ' + v); assert.strictEqual(x.p, 'BINGO'[i % 5]); } });
+        const k = c.filter(Boolean).map(x => +x.t).sort((a, b) => a - b).join(',');
+        assert(!keys.has(k), 'doppelte Karte');
+        keys.add(k);
+    }
+});
+t('Wort-Bingo: nie zwei gleiche, Grenze wird eingehalten', () => {
+    const items = DR.range(12).map(i => ({ t: 'W' + i }));
+    const r = DR.bingoCards({ items, size: 3, free: false, count: 300 });
+    assert.strictEqual(r.max, 220);
+    assert.strictEqual(r.cards.length, 220);
+    const keys = new Set(r.cards.map(c => c.map(x => x.t).sort().join(',')));
+    assert.strictEqual(keys.size, 220);
+    assert.strictEqual(DR.bingoCards({ items: items.slice(0, 5), size: 3, count: 2 }).short, 4);
+});
+t('Rechenblätter: alle verschieden, keine Aufgabe doppelt', () => {
+    const sh = DR.mathSheets({ ops: ['+', '-'], max: 20, n: 20, count: 30 });
+    assert.strictEqual(sh.length, 30);
+    assert.strictEqual(new Set(sh.map(x => x.map(y => y.t).sort().join('|'))).size, 30);
+    for (const x of sh) assert.strictEqual(new Set(x.map(y => y.t)).size, 20);
+});
 (async () => {
     const g = DR.cleanGame({ name: 'Teilen', slots: [{ src: { type: 'items', items: ['Äpfel', 'Birnen'] } }] });
     const s = await DR.encodeShare(g);
