@@ -139,6 +139,39 @@ t('Wort-Bingo: nie zwei gleiche, Grenze wird eingehalten', () => {
     assert.strictEqual(keys.size, 220);
     assert.strictEqual(DR.bingoCards({ items: items.slice(0, 5), size: 3, count: 2 }).short, 4);
 });
+t('Einzeln ziehen: nur eine Walze neu, die andere bleibt samt Topf', () => {
+    const g = { slots: [{ src: { type: 'letters', ex: '' }, rule: 'cycle' }, { src: { type: 'list', list: 'a' }, rule: 'cycle' }] };
+    const st = DR.newState();
+    const d1 = DR.draw(g, st, ctx);
+    const pool0 = st.pools[0].slice(), pool1 = st.pools[1].slice();
+    const d2 = DR.draw(g, st, ctx, 1);
+    assert(d2.r[0].keep && !d2.r[1].keep);
+    assert.strictEqual(d2.r[0].sel[0].t, d1.r[0].sel[0].t);
+    assert.deepStrictEqual(st.pools[0], pool0);
+    assert.strictEqual(st.pools[1].length, pool1.length - 1);
+    assert.strictEqual(st.hist.length, 2);
+    assert(DR.undo(st));
+    assert.deepStrictEqual(st.pools[1], pool1);
+    // ohne Ergebnis davor wird alles gezogen
+    const st2 = DR.newState();
+    assert(!DR.draw(g, st2, ctx, 0).r.some(x => x.keep));
+});
+t('Eigene Buchstaben und Silben dazu', () => {
+    const it = DR.itemsOf({ src: { type: 'letters', ex: 'QXY', plus: 'SCH ST' } }, ctx).map(x => x.t);
+    assert(it.includes('SCH') && it.includes('ST') && !it.includes('Q'));
+    assert.strictEqual(DR.cleanSrc({ type: 'letters', plus: 'Sch, St;  Ei' }).plus, 'Sch St Ei');
+});
+t('Abgewählte Einträge bleiben stehen, werden aber nicht gezogen', () => {
+    const s = DR.cleanSrc({ type: 'items', items: ['Anna', 'Ben', 'Carla'], off: ['Ben', 'Gibtsnicht'] });
+    assert.deepStrictEqual(s.off, ['Ben']);
+    assert.deepStrictEqual(DR.itemsOf({ src: s }, ctx).map(x => x.t), ['Anna', 'Carla']);
+});
+t('Walzen als Leiste oder aus, einzeln ziehen bleibt erhalten', () => {
+    const g = DR.cleanGame({ name: 'X', mode: 'apart', slots: [{ src: { type: 'letters' } }, { src: { type: 'list', list: 'a' }, use: 'strip' }, { src: { type: 'list', list: 'a' }, use: 'kaputt' }] });
+    assert.strictEqual(g.mode, 'apart');
+    assert.strictEqual(g.slots[1].use, 'strip');
+    assert.strictEqual(g.slots[2].use, undefined);
+});
 t('Rechenblätter: alle verschieden, keine Aufgabe doppelt', () => {
     const sh = DR.mathSheets({ ops: ['+', '-'], max: 20, n: 20, count: 30 });
     assert.strictEqual(sh.length, 30);

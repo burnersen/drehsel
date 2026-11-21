@@ -119,6 +119,75 @@
         node.style.fontSize = lo + 'px';
         return lo;
     }
+    /* Randvoll: Ein Buchstabe, eine Zahl oder ein Wort wird nach den echten Umrissen der Zeichen eingepasst, nicht nach der
+       Textzeile mit ihrem Platz für Ober- und Unterlängen. So füllt ein M wirklich die Fläche, auf jedem Bildschirm.
+       box ist der Kasten, darin genau ein Element mit dem Text. Mehrere Wörter dürfen umbrechen, wenn sie so größer werden.
+       scale: Anteil der möglichen Größe (Regler „Ergebnis“). Liefert die Schriftgröße in px. */
+    const meas = doc.createElement('canvas').getContext('2d');
+    const inkOk = typeof TextMetrics !== 'undefined' && 'actualBoundingBoxAscent' in TextMetrics.prototype;
+    const canTranslate = !!(G.CSS && CSS.supports && CSS.supports('translate', '1px 1px'));
+    const num = v => parseFloat(v) || 0;
+    /** Wie die Zeichen eines Texts tatsächlich aussehen, gemessen bei 100 px: Breite, Höhe und Lage zur Grundlinie */
+    function ink(text, cs, lang) {
+        const t = String(text).trim();
+        if (!inkOk || !t) return null;
+        meas.font = cs.fontStyle + ' ' + cs.fontWeight + ' 100px ' + cs.fontFamily;
+        const m = meas.measureText(cs.textTransform === 'uppercase' ? t.toLocaleUpperCase(lang || undefined) : t);
+        const w = m.actualBoundingBoxLeft + m.actualBoundingBoxRight, h = m.actualBoundingBoxAscent + m.actualBoundingBoxDescent;
+        return w > 0 && h > 0 ? { w, h, l: m.actualBoundingBoxLeft, r: m.actualBoundingBoxRight, a: m.actualBoundingBoxAscent, d: m.actualBoundingBoxDescent } : null;
+    }
+    function bigFit(box, max, scale) {
+        if (!box || !box.isConnected) return 0;
+        scale = scale > 0 && scale < 1 ? scale : 1;
+        const kid = box.children.length === 1 ? box.firstElementChild : null;
+        box.classList.remove('ink');
+        if (kid) { kid.style.translate = ''; kid.style.transform = ''; }
+        const s = fit(box, max);
+        const plain = () => { if (s && scale < 1) box.style.fontSize = Math.max(10, Math.round(s * scale)) + 'px'; return s; };
+        if (!kid || kid.children.length || !s || kid.textContent.length > 80) return plain();
+        const bs = getComputedStyle(box), cs = getComputedStyle(kid);
+        const pl = num(bs.paddingLeft), pt = num(bs.paddingTop);
+        const W = box.clientWidth - pl - num(bs.paddingRight), H = box.clientHeight - pt - num(bs.paddingBottom);
+        const m = W > 24 && H > 24 ? ink(kid.textContent, cs, kid.lang || doc.documentElement.lang) : null;
+        if (!m) return plain();
+        // etwas Luft zum Rand, damit nichts klebt
+        const pad = Math.min(W, H) * .045;
+        const S = 100 * Math.min((W - 2 * pad) / m.w, (H - 2 * pad) / m.h) * scale;
+        if (!(S > s * scale * 1.01)) return plain();
+        box.classList.add('ink');
+        box.style.fontSize = S.toFixed(2) + 'px';
+        // Die Grundlinie kommt aus dem echten Layout: ein Punkt ohne Größe sitzt genau auf ihr
+        const probe = doc.createElement('i');
+        probe.className = 'bl';
+        kid.append(probe);
+        const br = box.getBoundingClientRect(), pr = probe.getBoundingClientRect(), kr = kid.getBoundingClientRect();
+        probe.remove();
+        const k = S / 100;
+        const cx = br.left + box.clientLeft + pl + W / 2, cy = br.top + box.clientTop + pt + H / 2;
+        const dx = cx - (kr.left + (m.r - m.l) * k / 2), dy = cy - (pr.bottom + (m.d - m.a) * k / 2);
+        if (canTranslate) kid.style.translate = dx.toFixed(1) + 'px ' + dy.toFixed(1) + 'px';
+        else kid.style.transform = 'translate(' + dx.toFixed(1) + 'px,' + dy.toFixed(1) + 'px)';
+        return S;
+    }
+    /** Mehrere Ergebnisse nebeneinander oder untereinander, je nachdem, was alle größer macht.
+        Gemessen wird ein typischer Eintrag jeder Liste, damit die Aufteilung beim nächsten Drehen nicht springt.
+        boxes: die Kästen, samples: je Kasten ein typischer Text. W, H: die freie Fläche. Liefert { dir, w: [Anteile] } */
+    function arrange(samples, W, H, cs, gap, head) {
+        const n = samples.length;
+        const asp = samples.map(t => { const m = ink(t || 'M', cs); return m ? Math.max(.5, Math.min(6, m.w / m.h)) : 1; });
+        // nebeneinander: alle gleich groß, wenn die Breite nach Seitenverhältnis verteilt wird
+        const Hr = Math.max(1, H - head), Wr = Math.max(1, W - gap * (n - 1));
+        const sRow = Math.min(Hr, Wr / asp.reduce((a, b) => a + b, 0));
+        // untereinander: jeder Kasten bekommt so viel Höhe, wie er mit seiner Breite nutzen kann (gerecht aufgefüllt)
+        const Hc = Math.max(1, H - gap * (n - 1) - head * n), use = asp.map(a => W / a);
+        let lo = 0, hi = Hc;
+        for (let i = 0; i < 40; i++) { const mid = (lo + hi) / 2; if (use.reduce((a, u) => a + Math.min(u, mid), 0) > Hc) hi = mid; else lo = mid; }
+        const capped = use.map(u => Math.min(u, lo));
+        const sCol = Math.min(...capped.map((h, i) => Math.min(h, use[i])));
+        const free = Hc - capped.reduce((a, b) => a + b, 0);
+        if (sRow >= sCol * 1.04) return { dir: 'row', w: asp };
+        return { dir: 'column', w: capped.map(h => h + free / n + head) };
+    }
     const css = (name, from) => getComputedStyle(from || doc.documentElement).getPropertyValue(name).trim();
     const sleep = ms => new Promise(r => setTimeout(r, ms));
     const raf = () => new Promise(r => requestAnimationFrame(r));
@@ -311,7 +380,7 @@
                     pxs.sort((x, y) => x - y);
                     const common = Math.max(pxs[Math.floor(pxs.length * .2)] || base, minPx);
                     // Zu klein zum Lesen? Dann lieber ein ruhiges Rad ohne Beschriftung, das Ergebnis steht ja groß daneben
-                    if (common < 15 * d) { this.labelCache = { L: [], short: false, none: true }; return; }
+                    if (common < (n <= 12 ? 10 : 15) * d) { this.labelCache = { L: [], short: false, none: true }; return; }
                     for (let i = 0; i < n; i++) {
                         const t = this.items[i].t;
                         c.font = fw + ' ' + common + 'px ' + ff;
@@ -478,6 +547,8 @@
             if (cover) { this.h.reveal(+cover.dataset.cover); return; }
             const nav = e.target.closest('[data-nav]');
             if (nav) { this.h.nav(+nav.dataset.nav); return; }
+            const one = e.target.closest('[data-slot]');
+            if (one) { this.h.tap(0, 0, +one.dataset.slot); return; }
             this.h.tap();
         }
         finishAll() { for (const w of this.wheels) w.finish(); this.skip = true; }
@@ -487,16 +558,36 @@
         show(m) {
             this.model = m;
             this.skip = false;
+            clearTimeout(this.bigT);
             const r = this.root;
             r.className = 'v-' + m.view + (m.show ? ' show' : '');
             r.replaceChildren();
             this.wheels = [];
             this.fitList = [];
+            this.groups = [];
+            this.board = null; this.diceBox = null; this.ball = null;
             const view = { wheel: this.vWheel, reels: this.vReels, card: this.vReels, dice: this.vDice, bingo: this.vBingo, abc: this.vAbc, teams: this.vTeams, duties: this.vDuties }[m.view] || this.vWheel;
             if (m.empty) r.append(this.vEmpty(m));
             else view.call(this, m);
             if (m.timer) r.append(this.timerEl(m.timer));
             if (m.extra) r.append(m.extra);
+            // Rad bildschirmfüllend: Es dreht über die ganze Fläche, bleibt kurz stehen, damit man den Zeiger sieht,
+            // dann übernimmt das Ergebnis die ganze Fläche. Erst das nächste Antippen dreht wieder.
+            if (m.view === 'wheel' && m.big && !m.empty) {
+                if (!m.res) r.classList.add('wfull');
+                else if (this.spunAt && performance.now() - this.spunAt < 600) { r.classList.add('wfull', 'landed'); this.bigT = setTimeout(() => this.setBig(true), 1100); }
+                else r.classList.add('big');
+            }
+            this.spunAt = 0;
+            this.layout();
+        }
+        setBig(on) {
+            clearTimeout(this.bigT);
+            const r = this.root, full = !on && !!(this.model && this.model.big && this.model.view === 'wheel');
+            if (r.classList.contains('big') === !!on && r.classList.contains('wfull') === full) return;
+            r.classList.toggle('big', !!on);
+            r.classList.toggle('wfull', full);
+            r.classList.remove('landed');
             this.layout();
         }
         orient() {
@@ -511,35 +602,81 @@
             this.root.classList.toggle('port', o === 'port');
             const W = this.root.clientWidth, H = this.root.clientHeight;
             if (m.view === 'wheel' && !m.empty) {
-                const n = Math.max(1, m.slots.length);
-                const sz = o === 'land' ? Math.min(H, W * .58 / n) : Math.min(W / n, H * .6);
-                this.root.style.setProperty('--wsz', Math.floor(sz) + 'px');
+                // Räder so groß wie möglich: quer höchstens gut die Hälfte der Breite, hochkant gut die Hälfte der Höhe.
+                // Mehrere Räder stehen dabei neben- oder untereinander, je nachdem, wo sie größer werden.
+                const n = Math.max(1, m.slots.length), gap = 8;
+                const full = this.root.classList.contains('wfull');
+                const aw = o === 'land' && !full ? W * .56 : W, ah = o === 'land' || full ? H : H * .56;
+                const opts = [];
+                for (let c = 1; c <= n; c++) {
+                    const r = Math.ceil(n / c), s = Math.min((aw - gap * (c - 1)) / c, (ah - gap * (r - 1)) / r);
+                    opts.push({ s, c, r, ext: o === 'land' ? c * s : r * s });
+                }
+                // Fast so groß, aber deutlich weniger Platz weg vom Ergebnis: dann lieber diese Anordnung
+                const top = Math.max(...opts.map(x => x.s));
+                const best = full ? opts.find(x => x.s === top) : opts.filter(x => x.s >= top * .8).sort((x, y) => x.ext - y.ext)[0];
+                const sz = Math.floor(best.s);
+                this.root.style.setProperty('--wsz', sz + 'px');
+                this.root.style.setProperty('--wcols', String(best.c));
+                this.root.style.setProperty('--wbasis', (o === 'land' ? best.c * sz + gap * (best.c - 1) : best.r * sz + gap * (best.r - 1)) + 'px');
             }
             if (m.view === 'dice' && this.diceBox) {
                 const n = this.diceBox.children.length, bw = this.diceBox.clientWidth, bh = this.diceBox.clientHeight;
                 let best = 0;
                 for (let cols = 1; cols <= n; cols++) { const rows = Math.ceil(n / cols); best = Math.max(best, Math.min(bw / cols, bh / rows)); }
-                this.diceBox.style.setProperty('--die', Math.floor(best * .78) + 'px');
+                this.diceBox.style.setProperty('--die', Math.floor(best * .86) + 'px');
             }
             if (this.board) this.layoutBoard();
+            for (const g of this.groups) this.arrangeGroup(g);
             for (const w of this.wheels) w.resize();
             this.refit();
         }
+        /** Mehrere Ergebnisse: nebeneinander oder untereinander, Anteile nach typischer Länge der Einträge */
+        arrangeGroup(g) {
+            const box = g.box, kids = Array.from(box.children);
+            if (kids.length < 2 || !box.isConnected) return;
+            kids.forEach(k => { k.style.flex = ''; });
+            box.style.flexDirection = '';
+            const W = box.clientWidth, H = box.clientHeight;
+            const val = box.querySelector('.val');
+            if (!W || !H || !val) return;
+            const lab = box.querySelector('.lab');
+            const cs = getComputedStyle(val), bs = getComputedStyle(kids[0]);
+            const head = (lab ? lab.offsetHeight : 0) + num(bs.paddingTop) + num(bs.paddingBottom);
+            const r = arrange(g.samples, W, H, cs, num(getComputedStyle(box).columnGap) || num(getComputedStyle(box).rowGap) || 10, head);
+            box.style.flexDirection = r.dir;
+            kids.forEach((k, i) => { k.style.flex = (r.w[i] || 1).toFixed(3) + ' 1 0'; });
+        }
+        /** Ein typischer Eintrag je Walze: die Länge, die drei von vier Einträgen nicht überschreiten */
+        sampleOf(m, k) {
+            const s = m.slots[k] || {};
+            if (s.hide) return this.t('Verdeckt');
+            const all = (m.all[k] || []).map(x => (x.p ? x.p + ' ' : '') + x.t);
+            if (!all.length) return this.h.sample ? this.h.sample(k) : 'MMM';
+            const byLen = all.slice().sort((a, b) => a.length - b.length);
+            return byLen[Math.min(byLen.length - 1, Math.floor(byLen.length * .75))];
+        }
+        group(box, m, keys) {
+            if (keys.length > 1) this.groups.push({ box, samples: keys.map(k => this.sampleOf(m, k)) });
+            return box;
+        }
         refit() {
             const f = this.h.resScale ? this.h.resScale() : 1;
-            for (const [node, max, res] of this.fitList) {
-                const s = fit(node, typeof max === 'function' ? max() : max);
-                if (res && f < 1 && s) node.style.fontSize = Math.max(10, Math.round(s * f)) + 'px';
+            for (const [node, max, mode] of this.fitList) {
+                const mx = typeof max === 'function' ? max() : max;
+                if (mode === 'big') { bigFit(node, mx, f); continue; }
+                const s = fit(node, mx);
+                if (mode && f < 1 && s) node.style.fontSize = Math.max(10, Math.round(s * f)) + 'px';
             }
         }
-        addFit(node, max, res) { this.fitList.push([node, max, res]); return node; }
+        addFit(node, max, mode) { this.fitList.push([node, max, mode]); return node; }
 
         /* --- Bausteine --- */
         /** Ein Ergebnis als Kasten: Beschriftung, Wert (so groß wie möglich), Auflösung */
         resBox(m, k, cls) {
             const slot = m.slots[k] || {};
             const sel = m.res ? m.res[k] || [] : null;
-            const box = el('div.res' + (cls ? '.' + cls : ''));
+            const box = el('div.res' + (cls ? '.' + cls : ''), { 'data-slot': m.apart ? String(k) : null, title: m.apart ? this.t('Antippen zieht nur hier neu') : null });
             if (slot.label) box.append(el('div.lab', { text: slot.label }));
             const val = el('div.val');
             box.append(val);
@@ -548,7 +685,7 @@
             if (ans) {
                 const open = m.rev;
                 const a = el('div.ans' + (open ? '.open' : ''), { 'data-cover': open ? null : String(k) });
-                if (open) { a.append(el('span', { text: (sel[0].q ? '= ' : '') + ans })); this.addFit(a, () => Math.min(box.clientHeight * .3, 160)); }
+                if (open) { a.append(el('span', { text: (sel[0].q ? '= ' : '') + ans })); this.addFit(a, () => Math.min(box.clientHeight * .3, 600)); }
                 else a.append(icon('eye'), el('span', { text: this.t('Antippen für die Auflösung') }));
                 box.append(a);
             }
@@ -557,18 +694,18 @@
         fillVal(val, sel, slot, m, k) {
             val.replaceChildren();
             val.classList.remove('balls', 'covered', 'wait');
-            if (!sel) { val.classList.add('wait'); val.append(el('span', { text: k ? '?' : m.hint || '?' })); this.addFit(val, k ? 120 : 52); return; }
+            if (!sel) { val.classList.add('wait'); val.append(el('span', { text: k ? '?' : m.hint || '?' })); this.addFit(val, k ? 160 : 60); return; }
             if (slot.hide) val.dataset.open = String(k); else delete val.dataset.open;
             if (slot.hide && !(m.open && m.open[k])) {
                 val.classList.add('covered');
                 val.append(el('span', null, icon('eye'), el('b', { text: this.t('Verdeckt') }), el('small', { text: this.t('Antippen zum Aufdecken') })));
-                this.addFit(val, 90);
+                this.addFit(val, 140);
                 return;
             }
             if (sel.length > 1) {
                 val.classList.add('balls');
                 for (const s of sel) val.append(el('span.ball', { text: s.t }));
-                this.addFit(val, 300, true);
+                this.addFit(val, 1200, 'res');
                 return;
             }
             const s = sel[0] || { t: '' };
@@ -577,14 +714,14 @@
             if (s.c) { val.style.setProperty('--sw', s.c); val.style.setProperty('--sw-ink', DR.look.inkOn(s.c)); }
             else { val.style.removeProperty('--sw'); val.style.removeProperty('--sw-ink'); }
             val.classList.toggle('colored', !!s.c);
-            this.addFit(val, 900, true);
+            this.addFit(val, 4000, 'big');
         }
         foot(m) {
-            const f = el('div.foot.noclick');
             const left = el('div.info');
             if (m.info) left.append(el('span', { text: m.info }));
             if (m.hist && m.hist.length) left.append(el('span.hist', null, m.hist.map(x => el('b', { text: x }))));
-            f.append(left);
+            if (m.show && !left.children.length) { this.root.classList.add('nofoot'); return null; }
+            const f = el('div.foot.noclick', null, left);
             if (!m.show) {
                 const acts = el('div.acts');
                 if (m.canUndo) acts.append(el('button.iconbtn.small', { type: 'button', title: this.t('Rückgängig'), 'aria-label': this.t('Rückgängig'), onclick: () => this.h.undo() }, icon('undo')));
@@ -593,9 +730,11 @@
             }
             return f;
         }
+        /** Leisten unter dem Ergebnis: alle Einträge einer Walze, die nicht gezogen wird (etwa die Kategorien beim Stadt-Land-Fluss) */
         cats(m) {
-            if (!m.cats || !m.cats.length) return null;
-            return el('div.cats.noclick', null, m.cats.map(c => el('span', { text: c })));
+            if (!m.strips || !m.strips.length) return null;
+            return el('div.strips.noclick', null, m.strips.map(st => el('div.cats', null,
+                st.label ? el('b', { text: st.label }) : null, st.items.map(c => el('span', { text: c })))));
         }
         vEmpty(m) {
             const e = el('div.empty');
@@ -611,18 +750,20 @@
             m.slots.forEach((s, k) => {
                 const box = el('div.wbox');
                 wrap.append(box);
-                const w = new Wheel(box, { tap: () => { if (!this.busy) this.h.tap(); }, swipe: (dir, p) => { if (!this.busy) this.h.tap(dir, p); }, tick: () => this.h.tick() });
+                const only = m.apart ? k : undefined;
+                const w = new Wheel(box, { tap: () => { if (!this.busy) this.h.tap(0, 0, only); }, swipe: (dir, p) => { if (!this.busy) this.h.tap(dir, p, only); }, tick: () => this.h.tick() });
                 this.wheels.push(w);
                 w.set(s.seg, m.hitSeg ? m.hitSeg[k] : -1, this.colors());
                 if (this.rots && this.rots[k] != null) w.rot = this.rots[k];
             });
             const results = el('div.results');
             m.slots.forEach((s, k) => results.append(this.resBox(m, k)));
-            panel.append(results);
+            panel.append(this.group(results, m, m.slots.map((_, k) => k)));
             const cats = this.cats(m);
             if (cats) panel.append(cats);
             if (m.note) panel.append(el('p.note', { text: m.note }));
-            panel.append(this.foot(m));
+            const f = this.foot(m);
+            if (f) panel.append(f);
             this.root.append(wrap, panel);
         }
         /* --- Walzen und Karte --- */
@@ -630,11 +771,12 @@
             const box = el('div.reels' + (m.view === 'card' ? '.card' : ''));
             m.slots.forEach((s, k) => box.append(this.resBox(m, k, 'reel')));
             this.reelBox = box;
-            this.root.append(box);
+            this.root.append(this.group(box, m, m.slots.map((_, k) => k)));
             const cats = this.cats(m);
             if (cats) this.root.append(cats);
             if (m.note) this.root.append(el('p.note', { text: m.note }));
-            this.root.append(this.foot(m));
+            const f = this.foot(m);
+            if (f) this.root.append(f);
         }
         /* --- Würfel --- */
         vDice(m) {
@@ -644,13 +786,15 @@
             this.diceBox = el('div.dicebox' + (sel ? '' : '.idle'), null, vals.map(die));
             const total = vals.reduce((a, b) => a + b, 0);
             const sum = el('div.sum', { text: sel && vals.length > 1 ? this.t('Zusammen: {n}', { n: total }) : sel ? '' : (m.hint || '') });
-            this.root.append(this.diceBox, sum, this.foot(m));
+            this.root.append(this.diceBox, sum);
+            const f = this.foot(m);
+            if (f) this.root.append(f);
         }
         /* --- Bingo: große Kugel und Tafel --- */
         vBingo(m) {
             const sel = m.res && m.res[0] && m.res[0][0];
             const ball = el('div.ballbox', null, el('div.bigball' + (sel ? '' : '.idle'), null,
-                sel && sel.p ? el('small', { text: sel.p }) : null, el('span', { text: sel ? sel.t : '?' })));
+                sel && sel.p ? el('small', { text: sel.p }) : null, el('div.num', null, el('span', { text: sel ? sel.t : '?', lang: m.lang }))));
             this.ball = ball.firstChild;
             const b = m.board;
             const board = el('div.board.noclick');
@@ -662,27 +806,47 @@
                 }
             } else for (const it of b.items) board.append(el('span', { class: (drawn.has(it.t) ? 'on' : '') + (it.t === b.last ? ' last' : ''), text: it.t }));
             this.board = board;
-            this.root.append(ball, board, this.foot(m));
+            this.root.append(ball, board);
+            const f = this.foot(m);
+            if (f) this.root.append(f);
         }
         layoutBoard() {
             const b = this.model.board, board = this.board;
             if (!b || !board.isConnected) return;
             const W = board.clientWidth, H = board.clientHeight;
-            let cols, rows;
-            if (b.rows) { cols = Math.max(...b.rows.map(r => r.items.length)) + 1; rows = b.rows.length; }
-            else {
+            let cols, rows, cw, ch, fs, flow = 'row';
+            if (b.rows) {
+                const long = Math.max(...b.rows.map(r => r.items.length)) + 1;
+                // Hochkant steht B I N G O nebeneinander, quer untereinander: so werden die Felder größer
+                const across = Math.min(W / long, H / b.rows.length), down = Math.min(W / b.rows.length, H / long);
+                if (down > across) { cols = b.rows.length; rows = long; flow = 'column'; } else { cols = long; rows = b.rows.length; }
+                cw = ch = Math.floor(Math.min(W / cols, H / rows));
+                fs = cw * .42;
+            } else {
+                // Tafel aus einer Liste: die Felder richten sich nach der Länge der Einträge
                 const n = b.items.length;
+                const lens = b.items.map(x => x.t.length).sort((x, y) => x - y);
+                const L = Math.max(2, lens[Math.floor((lens.length - 1) * .8)] || 2);
                 let best = null;
-                for (let c = 1; c <= n; c++) { const r = Math.ceil(n / c), s = Math.min(W / c, H / r); if (!best || s > best.s) best = { c, r, s }; }
+                for (let c = 1; c <= n; c++) {
+                    const r = Math.ceil(n / c), f = Math.min(H / r * .42, W / c * .86 / (L * .56));
+                    if (!best || f > best.f) best = { c, r, f };
+                }
                 cols = best.c; rows = best.r;
+                cw = Math.floor(W / cols); ch = Math.floor(Math.min(H / rows, cw * 1.2));
+                fs = best.f;
             }
             board.style.setProperty('--cols', cols);
             board.style.setProperty('--rows', rows);
-            const cell = Math.min(W / cols, H / rows);
-            board.style.setProperty('--cell', Math.floor(cell) + 'px');
+            board.style.setProperty('--cw', cw + 'px');
+            board.style.setProperty('--ch', ch + 'px');
+            board.style.setProperty('--bfs', Math.max(8, Math.floor(fs)) + 'px');
+            board.style.gridAutoFlow = flow;
+            board.classList.toggle('words', !b.rows && b.items.some(x => x.t.length > 3));
             const bb = this.ball.parentNode, bs = Math.floor(Math.min(bb.clientWidth, bb.clientHeight));
             this.ball.style.width = bs + 'px'; this.ball.style.height = bs + 'px';
-            this.addFit(this.ball.lastChild, () => this.ball.clientHeight * .62);
+            this.fitList = this.fitList.filter(x => x[0] !== this.ball.lastChild);
+            this.addFit(this.ball.lastChild, 4000, 'big');
         }
         /* --- ABC-Runde --- */
         vAbc(m) {
@@ -691,11 +855,13 @@
             const letter = el('div.letter');
             const cur = a.letters[a.i] || '';
             letter.append(el('button.nav.prev', { type: 'button', 'data-nav': '-1', 'aria-label': this.t('Zurück'), disabled: a.i <= 0 || null }, icon('left')),
-                el('div.big', { text: m.res ? cur : '' }),
+                el('div.big', null, el('span', { text: m.res ? cur : '' })),
                 el('button.nav.next', { type: 'button', 'data-nav': '1', 'aria-label': this.t('Weiter') }, icon('right')));
-            if (m.res) this.addFit(letter.children[1], 1200);
+            if (m.res) this.addFit(letter.children[1], 4000, 'big');
             const strip = el('div.strip.noclick', null, a.letters.map((l, i) => el('span', { class: i < a.i ? 'done' : i === a.i && m.res ? 'cur' : '', text: l })));
-            this.root.append(theme, letter, strip, this.foot(m));
+            this.root.append(theme, letter, strip);
+            const f = this.foot(m);
+            if (f) this.root.append(f);
         }
         /* --- Gruppen --- */
         vTeams(m) {
@@ -711,8 +877,10 @@
             });
             if (!m.teams || !m.teams.length) box.append(el('div.res.reel', null, el('div.val.wait', null, el('span', { text: m.hint || '' }))));
             this.teamBox = box;
-            this.root.append(box, this.foot(m));
-            this.addFit(box, () => Math.min(120, box.clientHeight / 4));
+            this.root.append(box);
+            const f = this.foot(m);
+            if (f) this.root.append(f);
+            this.addFit(box, () => Math.min(m.show ? 360 : 120, box.clientHeight / 4));
         }
         /* --- Ämter --- */
         vDuties(m) {
@@ -721,8 +889,10 @@
             box.style.setProperty('--dcols', String(Math.max(1, Math.min(4, Math.round(Math.sqrt(n * (W / H) / 5))))));
             for (const x of m.duties || []) box.append(el('div.duty', null, el('span.d', { text: x.d.t }), el('span.arrow', { text: '→' }), el('b.n', { text: x.n ? x.n.t : '–' })));
             if (!m.duties || !m.duties.length) box.append(el('div.res.reel', null, el('div.val.wait', null, el('span', { text: m.hint || '' }))));
-            this.root.append(box, this.foot(m));
-            this.addFit(box, () => Math.min(140, box.clientHeight / 3));
+            this.root.append(box);
+            const f = this.foot(m);
+            if (f) this.root.append(f);
+            this.addFit(box, () => Math.min(m.show ? 400 : 140, box.clientHeight / 3));
         }
 
         /* ---------- Drehen ----------
@@ -731,17 +901,19 @@
             const m = this.model;
             this.busy = true;
             this.skip = false;
+            this.setBig(false);
             this.root.classList.add('spinning');
             try {
                 if (m.view === 'wheel') {
                     const jobs = d.r.map((x, k) => {
                         const w = this.wheels[k];
-                        if (!w || !x.seg) return Promise.resolve();
+                        if (!w || !x.seg || x.keep) return Promise.resolve();
                         w.set(x.seg.map(i => m.all[k][i]), -1, this.colors());
                         return w.spinTo(x.hit, o.dur ? o.dur + k * 600 : 0, o.dir || 1, o.power);
                     });
                     // Ergebnisse im Feld daneben verdecken, solange es dreht
-                    this.root.querySelectorAll('.results .val').forEach(v => { v.classList.add('rolling'); });
+                    const vals = this.root.querySelectorAll('.results .val');
+                    d.r.forEach((x, k) => { if (!x.keep && vals[k]) vals[k].classList.add('rolling'); });
                     await Promise.all(jobs);
                     this.rots = this.wheels.map(w => w.rot);
                 } else if (m.view === 'dice') {
@@ -756,6 +928,7 @@
                 } else {
                     const vals = Array.from(this.root.querySelectorAll('.reels .val'));
                     const samplers = d.r.map((x, k) => {
+                        if (x.keep) return null;
                         if (m.slots[k].hide) return () => '• • •';
                         const n = x.sel.length;
                         const one = () => (x.seg && m.all[k].length ? m.all[k][DR.rnd(m.all[k].length)].t : this.h.sample(k));
@@ -765,21 +938,28 @@
                 }
             } finally {
                 this.busy = false;
+                this.spunAt = performance.now();
                 this.root.classList.remove('spinning');
             }
         }
-        /** Walze: Einträge laufen durch, immer langsamer, bis das Ergebnis steht. Bei jedem Wechsel ein leises Klicken. */
+        /** Walze: Einträge laufen durch, immer langsamer, bis das Ergebnis steht. Bei jedem Wechsel ein leises Klicken.
+            Ein Sampler null heißt: diese Walze bleibt stehen. */
         async flicker(nodes, samplers, dur) {
             if (!dur) return;
             const t0 = performance.now();
-            const ends = nodes.map((_, k) => dur * (.55 + .45 * (k + 1) / nodes.length));
+            const live = nodes.map((n, k) => !!(n && samplers[k]));
+            const cnt = Math.max(1, live.filter(Boolean).length);
+            let j = 0;
+            const ends = nodes.map((_, k) => live[k] ? dur * (.55 + .45 * (++j) / cnt) : 0);
             const next = nodes.map(() => 0);
-            const done = nodes.map(() => false);
+            const done = live.map(x => !x);
+            const f = this.h.resScale ? this.h.resScale() : 1;
             const show = (node, text) => {
-                node.replaceChildren(el('span', { text }));
-                node.classList.remove('covered', 'wait', 'balls');
+                const tag = node.firstElementChild && node.firstElementChild.tagName === 'B' ? 'b' : 'span';
+                node.replaceChildren(el(tag, { text }));
+                node.classList.remove('covered', 'wait', 'balls', 'colored');
                 node.classList.remove('roll'); void node.offsetWidth; node.classList.add('roll');
-                fit(node, Math.min(node.clientHeight * .7, 600));
+                bigFit(node, 4000, f);
             };
             while (done.some(x => !x)) {
                 await raf();
@@ -842,5 +1022,5 @@
         }
     }
 
-    Object.assign(DR, { el, icon, ICONS, fit, Sound, Wheel, Stage, die, sleep });
+    Object.assign(DR, { el, icon, ICONS, fit, bigFit, Sound, Wheel, Stage, die, sleep });
 })(window);

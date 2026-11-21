@@ -80,6 +80,6 @@ require DR_APP . '/lib/core.php';
 ob_start();
 require DR_APP . '/views/app.php';
 $html = (string)ob_get_clean();
-$html = str_replace('<html lang="de"', "<!-- Drehsel $version · offline · https://github.com/burnersen/mixer · GNU AGPL v3 -->\n<html lang=\"de\"", $html);
+$html = str_replace('<html lang="de"', "<!-- Drehsel $version · offline · https://github.com/burnersen/drehsel · GNU AGPL v3 -->\n<html lang=\"de\"", $html);
 file_put_contents($dist . '/drehsel-offline.html', $html);
 printf("%s  (%d KB)\n", 'dist/drehsel-offline.html', (int)round(strlen($html) / 1024));

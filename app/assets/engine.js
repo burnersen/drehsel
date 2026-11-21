@@ -117,13 +117,21 @@
     function itemsOf(slot, ctx) {
         const s = slot.src || {};
         switch (s.type) {
-            case 'items': return Array.isArray(s.items) ? s.items : [];
+            case 'items': {
+                const items = Array.isArray(s.items) ? s.items : [];
+                // abgewählte Einträge bleiben in der Liste stehen, werden aber nicht gezogen
+                if (!Array.isArray(s.off) || !s.off.length) return items;
+                const off = new Set(s.off);
+                return items.filter(x => !off.has(x.t));
+            }
             case 'list': { const l = ctx.list(s.list); return l ? l.items : []; }
             case 'names': return ctx.names();
             case 'letters': {
                 const ex = String(s.ex || '').toUpperCase();
-                const all = ctx.alphabet().concat(s.um ? ctx.extra() : []);
-                return all.filter(x => ex.indexOf(x.toUpperCase()) < 0).map(t => ({ t }));
+                const all = ctx.alphabet().concat(s.um ? ctx.extra() : []).filter(x => ex.indexOf(x.toUpperCase()) < 0);
+                // Eigene Buchstaben oder Silben dazu, etwa SCH, ST oder EI
+                for (const x of String(s.plus || '').split(/[\s,;]+/)) if (x && all.indexOf(x) < 0) all.push(x);
+                return all.map(t => ({ t }));
             }
             case 'numbers': {
                 const from = Math.round(+s.from || 0), to = Math.round(+s.to || 0), step = Math.max(1, Math.round(Math.abs(+s.step || 1)));
@@ -196,12 +204,19 @@
     }
 
     /** Eine Drehung. Liefert { r: [{ k, sel: [Eintrag + i], seg: [Indizes auf dem Rad], hit }], done } oder { empty: k } (Walze leer)
-        bzw. { over: k } (bei „nur einmal“ ist alles gezogen). */
-    function draw(game, st, ctx) {
+        bzw. { over: k } (bei „nur einmal“ ist alles gezogen).
+        only: nur diese Walze neu ziehen, die anderen behalten ihr letztes Ergebnis (keep: true), ihr Topf bleibt unberührt. */
+    function draw(game, st, ctx, only) {
         const before = snap(st);
         const out = [];
+        const prev = st.hist[st.hist.length - 1];
+        const keepOk = only != null && only >= 0 && only < game.slots.length && prev && Array.isArray(prev.r) && prev.r.length === game.slots.length;
         for (let k = 0; k < game.slots.length; k++) {
             const slot = game.slots[k];
+            if (keepOk && k !== only && prev.r[k] && prev.r[k].length) {
+                out.push({ k, sel: prev.r[k].map(x => Object.assign({}, x)), seg: null, hit: -1, keep: true });
+                continue;
+            }
             const pick = Math.max(1, Math.min(20, slot.pick | 0 || 1));
             if (endless(slot)) {
                 const sel = [];
@@ -378,7 +393,12 @@
     function cleanSrc(s) {
         s = s && typeof s === 'object' ? s : {};
         switch (s.type) {
-            case 'letters': return { type: 'letters', ex: clip(s.ex, 40).toUpperCase().replace(/[^A-ZÄÖÜẞ]/g, ''), um: !!s.um };
+            case 'letters': {
+                const out = { type: 'letters', ex: clip(s.ex, 40).toUpperCase().replace(/[^A-ZÄÖÜẞ]/g, ''), um: !!s.um };
+                const plus = clip(s.plus, 120).split(/[\s,;]+/).filter(x => x && x.length <= 8).join(' ');
+                if (plus) out.plus = plus;
+                return out;
+            }
             case 'numbers': {
                 const f = Math.max(-99999, Math.min(99999, Math.round(+s.from || 1))), t = Math.max(-99999, Math.min(99999, Math.round(+s.to || 10)));
                 return { type: 'numbers', from: f, to: t, step: Math.max(1, Math.min(10000, Math.round(+s.step || 1))), bingo: !!s.bingo };
@@ -387,7 +407,12 @@
             case 'math': return { type: 'math', ops: (Array.isArray(s.ops) ? s.ops : ['+']).filter(o => '+-×:'.indexOf(o) >= 0).slice(0, 4), max: [10, 20, 100, 1000].indexOf(+s.max) >= 0 ? +s.max : 20 };
             case 'names': return { type: 'names' };
             case 'list': return { type: 'list', list: clip(s.list, 40) };
-            default: return { type: 'items', items: (Array.isArray(s.items) ? s.items : []).slice(0, 5000).map(x => typeof x === 'string' ? parseLine(x) : x && parseLine(itemLine({ t: clip(x.t, 200), a: x.a && clip(x.a, 300), c: /^#[0-9a-f]{6}$/i.test(x.c || '') ? x.c : '' }))).filter(Boolean) };
+            default: {
+                const out = { type: 'items', items: (Array.isArray(s.items) ? s.items : []).slice(0, 5000).map(x => typeof x === 'string' ? parseLine(x) : x && parseLine(itemLine({ t: clip(x.t, 200), a: x.a && clip(x.a, 300), c: /^#[0-9a-f]{6}$/i.test(x.c || '') ? x.c : '' }))).filter(Boolean) };
+                const off = (Array.isArray(s.off) ? s.off : []).filter(x => typeof x === 'string' && out.items.some(i => i.t === x)).slice(0, 5000);
+                if (off.length) out.off = off;
+                return out;
+            }
         }
     }
     function cleanGame(g) {
@@ -396,6 +421,8 @@
             label: clip(s && s.label, 60), src: cleanSrc(s && s.src), rule: RULES.indexOf(s && s.rule) >= 0 ? s.rule : 'free',
             pick: Math.max(1, Math.min(20, Math.round(+(s && s.pick) || 1))), hide: !!(s && s.hide),
         }));
+        // Walze nicht ziehen: als Leiste unter dem Ergebnis zeigen (strip) oder ganz weglassen (off)
+        (Array.isArray(g.slots) ? g.slots : []).slice(0, 6).forEach((s, i) => { if (s && (s.use === 'strip' || s.use === 'off')) slots[i].use = s.use; });
         if (!slots.length) return null;
         const out = {
             id: /^[a-z0-9_-]{1,40}$/i.test(g.id || '') ? g.id : 'u' + Date.now().toString(36) + rnd(1296).toString(36),
@@ -404,6 +431,7 @@
         };
         if (g.timer && +g.timer.s > 0) out.timer = { s: Math.max(5, Math.min(3600, Math.round(+g.timer.s))), auto: !!g.timer.auto };
         if (g.groups) out.groups = Math.max(2, Math.min(12, Math.round(+g.groups)));
+        if (g.mode === 'apart') out.mode = 'apart';
         return out;
     }
 
@@ -433,14 +461,14 @@
        tags: alle, senioren, kinder, gruppe, werkzeug. */
     const L = (list, label, rule, more) => Object.assign({ label, src: { type: 'list', list }, rule: rule || 'cycle' }, more || {});
     const GAMES = [
-        { id: 'slf', ic: 'pen', tags: ['alle', 'senioren', 'kinder'], name: 'Stadt-Land-Fluss', desc: 'Buchstabe drehen, alle schreiben los. Schwierige Buchstaben bleiben draußen.',
-            slots: [{ label: 'Buchstabe', src: { type: 'letters', ex: 'QXY' }, rule: 'cycle' }], view: 'wheel', cats: 'slf-klassisch', timer: { s: 0, auto: true } },
+        { id: 'slf', ic: 'pen', tags: ['alle', 'senioren', 'kinder'], name: 'Stadt-Land-Fluss', desc: 'Buchstabe und Kategorie drehen, alle schreiben los. Schwierige Buchstaben bleiben draußen.',
+            slots: [{ label: 'Buchstabe', src: { type: 'letters', ex: 'QXY' }, rule: 'cycle' }, L('slf-klassisch', 'Kategorie')], view: 'wheel', timer: { s: 0, auto: true } },
         { id: 'slf-mund', ic: 'chat', tags: ['alle', 'senioren', 'gruppe'], name: 'Nennt etwas mit …', desc: 'Buchstabe und Kategorie, wer zuerst etwas Passendes sagt. Stadt-Land-Fluss ohne Stift.',
             slots: [{ label: 'Buchstabe', src: { type: 'letters', ex: 'QXYCJV' }, rule: 'cycle' }, L('slf-senioren', 'Kategorie')], view: 'reels' },
         { id: 'slf-kinder', ic: 'pen', tags: ['kinder'], name: 'Stadt-Land-Fluss für Kinder', desc: 'Leichte Buchstaben und Kategorien wie Tier, Farbe und Essen.',
             slots: [{ label: 'Buchstabe', src: { type: 'letters', ex: 'CJQVXY' }, rule: 'cycle' }, L('slf-kinder', 'Kategorie')], view: 'reels' },
         { id: 'bingo', ic: 'grid', tags: ['alle', 'senioren', 'gruppe'], name: 'Bingo', desc: 'Zahlen von 1 bis 75 ohne Zurücklegen, mit Tafel und Ansage.',
-            slots: [{ label: 'Zahl', src: { type: 'numbers', from: 1, to: 75, step: 1, bingo: true }, rule: 'once' }], view: 'bingo', say: true },
+            slots: [{ label: 'Zahl', src: { type: 'numbers', from: 1, to: 75, step: 1, bingo: true }, rule: 'once' }], view: 'bingo' },
         { id: 'begriffe', ic: 'mask', tags: ['alle', 'gruppe'], name: 'Begriffe raten', desc: 'Erklären, vormachen oder malen. Der Begriff bleibt verdeckt, bis man ihn antippt.',
             slots: [L('begriffe', 'Begriff', 'cycle', { hide: true }), L('darstellung', 'So geht\'s', 'free')], view: 'reels', timer: { s: 60, auto: true } },
         { id: 'abc', ic: 'abc', tags: ['alle', 'senioren', 'gruppe'], name: 'ABC-Runde', desc: 'Ein Thema, dann reihum von A bis Z. Klassiker im Gedächtnistraining.',

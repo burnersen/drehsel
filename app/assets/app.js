@@ -11,7 +11,7 @@
     const LIST_URLS = JSON.parse(root.dataset.lists || '{}');
     const UI_LANGS = JSON.parse(root.dataset.langs || '["de"]');
     const LINKS = {
-        play: 'https://drehsel.burnersen.de/', github: 'https://github.com/burnersen/mixer', web: 'https://tech.burnersen.de/',
+        play: 'https://drehsel.burnersen.de/', github: 'https://github.com/burnersen/drehsel', web: 'https://tech.burnersen.de/',
         kofi: 'https://ko-fi.com/burnersen', suchsel: 'https://suchsel.burnersen.de/',
         kaufen: { de: 'https://tech.burnersen.de/tools/kaufen/', en: 'https://tech.burnersen.de/en/tools/kaufen-en/' },
     };
@@ -28,7 +28,8 @@
     const DEF = {
         lang: navLang(), look: { mode: 'auto', l: 'klassisch', d: 'nacht', cl: null, cd: null }, font: 'atkinson',
         fs: { ui: 1, res: 1, wheel: 1, small: 1 }, fw: 800, caps: false,
-        speed: 'normal', sound: true, vib: true, say: false, sayRate: 1, black: true, wake: true, cur: 'slf', filter: 'all', seen: false, tvTip: false,
+        speed: 'normal', sound: true, vib: true, say: false, sayRate: .9, voice: '', black: true, wake: true, cur: 'slf', filter: 'all', seen: false, tvTip: false,
+        hist: false, count: true, countShow: false, bigRes: 'always',
     };
     const set = Object.assign({}, DEF, load('set', {}));
     set.look = Object.assign({}, DEF.look, set.look || {});
@@ -38,8 +39,22 @@
     let own = (load('games', []) || []).map(DR.cleanGame).filter(Boolean);    // eigene Räder
     let ov = load('ov', {}) || {};                                            // Anpassungen an eingebauten Spielen
     let lo = load('lo', {}) || {};                                            // ausgeblendete und ergänzte Einträge eingebauter Listen
-    let names = DR.parseItems((load('names', []) || []).map(DR.itemLine).join('\n'));    // Teilnehmer
-    const saveOwn = () => save('games', own), saveOv = () => save('ov', ov), saveLo = () => save('lo', lo), saveNames = () => save('names', names);
+    // Teilnehmer: mehrere Namenslisten (etwa je Kita-Gruppe), eine davon gilt gerade
+    const cleanNl = d => {
+        const lists = (d && Array.isArray(d.lists) ? d.lists : []).slice(0, 50).map((l, i) => ({
+            id: /^[a-z0-9]{1,16}$/.test(l && l.id || '') ? l.id : 'n' + i + Date.now().toString(36),
+            name: String(l && l.name || '').replace(/\s+/g, ' ').trim().slice(0, 60),
+            items: DR.parseItems((Array.isArray(l && l.items) ? l.items : []).map(x => typeof x === 'string' ? x : DR.itemLine(x)).join('\n')),
+            off: (l && Array.isArray(l.off) ? l.off : []).filter(x => typeof x === 'string').slice(0, 5000),
+        }));
+        return lists.length ? { lists, cur: lists.some(l => l.id === d.cur) ? d.cur : lists[0].id } : null;
+    };
+    let nl = cleanNl(load('nl', null)) || { lists: [{ id: 'n0', name: '', items: DR.parseItems((load('names', []) || []).map(DR.itemLine).join('\n')) }], cur: 'n0' };
+    const curNl = () => nl.lists.find(l => l.id === nl.cur) || nl.lists[0];
+    /** Wer heute mitspielt: alle aus der Liste, die gerade gilt, außer den abgewählten (etwa wer heute fehlt) */
+    const activeNames = () => { const l = curNl(); const off = new Set(l.off || []); return l.items.filter(x => !off.has(x.t)); };
+    const saveOwn = () => save('games', own), saveOv = () => save('ov', ov), saveLo = () => save('lo', lo);
+    const saveNames = () => { save('nl', nl); drop('names'); };
 
     /* ---------- Übersetzung: Schlüssel ist der deutsche Text ---------- */
     function t(s, vars) {
@@ -60,6 +75,8 @@
         clearTimeout(toastT);
         toastT = setTimeout(() => { e.hidden = true; }, ms || (action ? 7000 : Math.min(5000, 2000 + msg.length * 30)));
     }
+    /** Inhalt ersetzen, leere Teile (null, false) fallen weg statt als Text „null“ zu erscheinen */
+    const fill = (node, ...kids) => node.replaceChildren(...kids.flat().filter(k => k != null && k !== false));
     const N = s => s;    // markiert Texte, die erst später übersetzt werden (für tools/check-i18n.js)
     const announce = s => { const l = $('#live'); l.textContent = ''; setTimeout(() => { l.textContent = s; }, 30); };
 
@@ -78,7 +95,8 @@
         const mode = curMode();
         cols = colorsFor(mode);
         const vars = L.derive(cols);
-        if (showMode && set.black) { vars['--bg'] = '#000000'; }
+        // Vorführmodus auf Schwarz: alles, was direkt auf dem Hintergrund steht, wird für Schwarz nachgeregelt
+        if (showMode && set.black) { const blk = L.derive(Object.assign({}, cols, { bg: '#000000' })); for (const k of ['--bg', '--text-bg', '--ink-bg', '--mut-bg']) vars[k] = blk[k]; }
         for (const k in vars) root.style.setProperty(k, vars[k]);
         root.dataset.theme = mode;
         root.dataset.font = set.font;
@@ -116,36 +134,76 @@
         return null;
     }
     const loKey = id => contentLang() + ':' + id;
-    /** Eine eingebaute Liste mit den eigenen Änderungen: ausgeblendete fallen weg, ergänzte kommen dazu */
-    function listFor(id) {
-        const b = baseList(id);
-        const o = lo[loKey(id)];
-        if (!b) return o && o.add && o.add.length ? { id, name: id, items: o.add } : null;
-        if (!o) return b;
+    const coll = () => new Intl.Collator(set.lang, { sensitivity: 'base', numeric: true });
+    /** Neue Einträge einsortieren, als wären sie schon immer da gewesen: vor den ersten, der im Alphabet danach kommt */
+    function insertSorted(rows, it, cmp) {
+        cmp = cmp || coll();
+        const i = rows.findIndex(r => cmp.compare(r.t, it.t) > 0);
+        if (i < 0) rows.push(it); else rows.splice(i, 0, it);
+        return rows;
+    }
+    const cleanIt = x => { const o = { t: x.t }; if (x.a) o.a = x.a; if (x.c) o.c = x.c; return o; };
+    /** Die eingebaute Liste mit allen Änderungen als Zeilen: { t, a, c, off (abgewählt), own (selbst ergänzt) }.
+        Gelöschte eingebaute Einträge fehlen, eigene stehen an ihrem Platz im Alphabet. */
+    function stdRows(id) {
+        const b = baseList(id), o = lo[loKey(id)] || {};
+        const del = new Set(o.only && b ? b.items.map(x => x.t) : o.del || []);
         const off = new Set(o.off || []);
-        return { id, name: b.name, items: b.items.filter(x => !off.has(x.t)).concat(o.add || []) };
+        const rows = (b ? b.items : []).filter(x => !del.has(x.t)).map(x => Object.assign({}, x));
+        const cmp = coll();
+        for (const x of o.add || []) if (!rows.some(r => r.t === x.t)) insertSorted(rows, Object.assign({}, x, { own: true }), cmp);
+        rows.forEach(r => { if (off.has(r.t)) r.off = true; });
+        return rows;
+    }
+    /** Welche Liste einer eingebauten Liste gerade gilt: die eingebaute (Standard) oder eine eigene Fassung (Reiter) */
+    function curVar(id) { const o = lo[loKey(id)]; return o && o.cur ? (o.vars || []).find(v => v.id === o.cur) || null : null; }
+    /** Eine eingebaute Liste mit den eigenen Änderungen, so wie sie gezogen wird */
+    function listFor(id) {
+        const b = baseList(id), o = lo[loKey(id)];
+        if (!b && !o) return null;
+        const v = curVar(id);
+        if (v) { const off = new Set(v.off || []); return { id, name: v.name || (b && b.name) || id, items: v.items.filter(x => !off.has(x.t)) }; }
+        if (!o) return b;
+        return { id, name: b ? b.name : id, items: stdRows(id).filter(r => !r.off).map(cleanIt) };
     }
     // Buchstaben nur aus der Sprache, die gerade gilt: Englisch hat keine Umlaute
     const ownList = id => content[contentLang()] && content[contentLang()][id];
     const alphabet = () => { const l = ownList('alphabet') || baseList('alphabet'); return l && l.items.length ? l.items.map(x => x.t).join(' ').match(/\S+/g) : 'A B C D E F G H I J K L M N O P Q R S T U V W X Y Z'.split(' '); };
     const extraLetters = () => { const l = ownList('alphabet-extra'); return l ? l.items.map(x => x.t).join(' ').match(/\S+/g) || [] : []; };
-    const ctx = { list: listFor, names: () => names, alphabet, extra: extraLetters };
+    const ctx = { list: listFor, names: activeNames, alphabet, extra: extraLetters };
 
     /* ---------- Spiele: eingebaute mit Anpassungen, eigene ---------- */
     const clone = o => JSON.parse(JSON.stringify(o));
     function merged(b) {
         const o = ov[b.id] || {};
         const g = clone(b);
-        for (const k of ['view', 'timer', 'say', 'cats', 'groups']) if (o[k] !== undefined) g[k] = o[k];
+        for (const k of ['view', 'timer', 'say', 'groups', 'abcEx', 'mode']) if (o[k] !== undefined) g[k] = o[k];
         g.slots = g.slots.map((s, i) => {
             const x = (o.slots || [])[i] || {};
             const out = Object.assign({}, s, x);
             out.src = Object.assign({}, s.src, x.src || {});
+            // Eigene Einträge statt der eingebauten Liste: dann zählt nur, was dort steht
+            if (out.src.type === 'items') out.src = { type: 'items', items: Array.isArray(out.src.items) ? out.src.items : [] };
             return out;
         });
+        // Aus Version 1.1: Stadt-Land-Fluss hatte die Kategorien nur als Leiste darunter
+        if (b.id === 'slf' && o.cats !== undefined && g.slots[1]) {
+            const x = (o.slots || [])[1] || {};
+            if (o.cats && !(x.src && x.src.list)) g.slots[1].src.list = o.cats;
+            if (o.cats === null && !x.use) g.slots[1].use = 'off';
+        }
         g.name = t(b.name); g.desc = t(b.desc);
         if (b.note && o.note === undefined) g.note = t(b.note);
         g.slots.forEach(s => { s.label = t(s.label); });
+        return effective(g);
+    }
+    /** Was gezogen wird: Walzen auf „Leiste“ oder „Aus“ fallen heraus. allSlots behält alle (für die Einstellungen). */
+    function effective(g) {
+        g.allSlots = g.slots;
+        const act = g.slots.filter(s => !s.use);
+        g.slots = act.length ? act : g.slots.slice(0, 1);
+        g.strips = g.allSlots.filter(s => s.use === 'strip' && g.slots.indexOf(s) < 0);
+        if (g.slots.length < 2) delete g.mode;
         return g;
     }
     const builtin = id => DR.GAMES.find(g => g.id === id);
@@ -153,7 +211,7 @@
         const b = builtin(id);
         if (b) return merged(b);
         const o = own.find(g => g.id === id);
-        return o ? Object.assign(clone(o), { own: true }) : null;
+        return o ? effective(Object.assign(clone(o), { own: true })) : null;
     }
     /** Eine Einstellung am Spiel ändern: bei eingebauten als Anpassung, bei eigenen direkt */
     function patchGame(id, fn) {
@@ -294,21 +352,74 @@
     const slug = s => String(s || 'drehsel').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/ß/g, 'ss').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40) || 'drehsel';
     const today = () => { const d = new Date(); return d.getFullYear() + String(d.getMonth() + 1).padStart(2, '0') + String(d.getDate()).padStart(2, '0'); };
 
-    /* ---------- Vorlesen und Vibration ---------- */
+    /* ---------- Vorlesen und Vibration ----------
+       Von Haus aus aus. Gelesen wird mit der besten Stimme, die das Gerät hergibt: Premium und Erweitert (Apple),
+       Natural (Microsoft), Google, dann die normalen. Die Spaßstimmen und die blechernen Eloquence-Stimmen von Apple
+       (Eddy, Flo, Grandma …) kommen nur dran, wenn es nichts anderes gibt. Siri-Stimmen gibt Apple für Webseiten nicht frei. */
     let voices = [];
     const loadVoices = () => { try { voices = speechSynthesis.getVoices() || []; } catch (e) {} };
     if ('speechSynthesis' in window) { loadVoices(); speechSynthesis.addEventListener && speechSynthesis.addEventListener('voiceschanged', loadVoices); }
+    const SPEAK_LANG = { de: 'de-DE', en: 'en-GB' };
+    const NOVELTY = /\b(albert|bad news|bahh|bells|boing|bubbles|cellos|good news|jester|organ|superstar|trinoids|whisper|wobble|zarvox|junior|kathy|ralph|fred|deranged|hysterical|pipe organ)\b/i;
+    const ELOQUENCE = /eloquence|^(eddy|flo|grandma|grandpa|reed|rocko|sandy|shelley)\b/i;
+    const vLang = v => String(v.lang || '').toLowerCase().replace('_', '-');
+    function voiceScore(v) {
+        const n = (v.name + ' ' + v.voiceURI).toLowerCase();
+        let sc = 0;
+        if (/premium/.test(n)) sc += 70;
+        else if (/enhanced|erweitert|verbessert|améliorée|mejorada/.test(n)) sc += 60;
+        if (/siri/.test(n)) sc += 65;
+        if (/natural|neural/.test(n)) sc += 62;
+        if (/google/.test(n)) sc += 40;
+        if (/network|online/.test(n) && !/natural/.test(n)) sc += 8;
+        if (ELOQUENCE.test(v.name) || /eloquence/.test(n)) sc -= 50;
+        if (NOVELTY.test(v.name) || /speech\.synthesis\.voice\./.test(n) && NOVELTY.test(n)) sc -= 90;
+        if (/compact/.test(n)) sc -= 4;
+        const want = (SPEAK_LANG[set.lang] || set.lang).toLowerCase();
+        if (vLang(v) === want) sc += 6;
+        if (v.localService) sc += 2;
+        if (v.default) sc += 1;
+        return sc;
+    }
+    /** Alle Stimmen für die Sprache, die beste zuerst */
+    const voicesFor = () => voices.filter(v => vLang(v).startsWith(set.lang)).sort((a, b) => voiceScore(b) - voiceScore(a));
+    function bestVoice() {
+        const v = voicesFor();
+        return (set.voice && v.find(x => x.voiceURI === set.voice)) || v[0] || null;
+    }
+    // Buchstaben so, wie man sie sagt: sonst liest manche Stimme „M“ als „Meter“ oder verschluckt ihn ganz
+    const LETTERS_DE = { A: 'Ah', B: 'Beh', C: 'Zeh', D: 'Deh', E: 'Eh', F: 'Eff', G: 'Geh', H: 'Hah', I: 'Ih', J: 'Jott', K: 'Kah', L: 'Ell', M: 'Emm', N: 'Enn', O: 'Oh', P: 'Peh', Q: 'Kuh', R: 'Err', S: 'Ess', T: 'Teh', U: 'Uh', V: 'Fau', W: 'Weh', X: 'Ix', Y: 'Üpsilon', Z: 'Zett', Ä: 'Äh', Ö: 'Öh', Ü: 'Üh' };
+    const letterNames = () => set.lang === 'de' ? LETTERS_DE : (window.DR_I18N && DR_I18N[set.lang] && DR_I18N[set.lang]._letters) || {};
+    const sayWord = w => { const L2 = letterNames(); const u = String(w).trim(); return /^\p{Lu}$/u.test(u) && L2[u] ? L2[u] : u; };
+    /** Was vorgelesen wird: bei mehreren Walzen mit Überschrift, etwa „Buchstabe: Enn. Kategorie: Tier.“ */
+    function speechOf(r, g, only) {
+        if (!r) return '';
+        const parts = [];
+        r.forEach((sel, k) => {
+            const sl = g.slots[k];
+            if (!sl || sl.hide || (only != null && k !== only) || !sel || !sel.length) return;
+            const val = sel.map(x => (x.p ? sayWord(x.p) + ' ' : '') + sayWord(x.t)).join(', ');
+            parts.push(g.slots.length > 1 && sl.label ? sl.label + ': ' + val : val);
+        });
+        return parts.join('. ');
+    }
+    let primed = false;
+    /** iPhone und iPad sprechen nur, wenn das erste Wort aus einem Fingertipp heraus kommt */
+    function primeSpeech() {
+        if (primed || !sayOn() || !('speechSynthesis' in window)) return;
+        primed = true;
+        try { const u = new SpeechSynthesisUtterance(' '); u.volume = 0; speechSynthesis.speak(u); } catch (e) {}
+    }
     function speak(text, force) {
         if (!text || !('speechSynthesis' in window)) return;
         if (!force && !sayOn()) return;
         try {
+            if (!voices.length) loadVoices();
             speechSynthesis.cancel();
             const u = new SpeechSynthesisUtterance(String(text).replace(/[|•]/g, ' '));
-            const lang = set.lang === 'de' ? 'de-DE' : set.lang === 'en' ? 'en-GB' : set.lang;
-            u.lang = lang;
-            const v = voices.filter(x => x.lang && x.lang.toLowerCase().replace('_', '-').startsWith(set.lang));
-            const best = v.find(x => x.localService && x.default) || v.find(x => x.localService) || v[0];
-            if (best) u.voice = best;
+            u.lang = SPEAK_LANG[set.lang] || set.lang;
+            const best = bestVoice();
+            if (best) { u.voice = best; u.lang = best.lang; }
             u.rate = set.sayRate || 1;
             speechSynthesis.speak(u);
         } catch (e) {}
@@ -368,18 +479,23 @@
         const st = stateOf(g.id);
         const all = g.slots.map(s => DR.endless(s) ? [] : DR.itemsOf(s, ctx));
         const last = st.hist[st.hist.length - 1];
+        // Passt das letzte Ergebnis nicht mehr zu den Walzen (eine wurde zu- oder abgeschaltet), steht noch nichts da
+        const lastOk = last && Array.isArray(last.r) && last.r.length === g.slots.length;
         const m = {
             view: g.view, lang: set.lang, show: showMode, all, rev, open,
             slots: g.slots.map((s, k) => ({ label: s.label, hide: s.hide, seg: [] })),
-            res: last ? last.r : null, canUndo: !!(last && last.b), hint: t('Antippen zum Drehen'),
+            res: lastOk ? last.r : null, canUndo: !!(last && last.b), hint: t('Antippen zum Drehen'),
+            apart: g.mode === 'apart' && g.slots.length > 1,
+            big: g.view === 'wheel' && (set.bigRes === 'always' || (set.bigRes === 'show' && showMode)),
         };
         // Was das Rad zeigt: direkt nach dem Drehen die Felder von vorher mit dem Gewinner, sonst was noch im Topf ist
         if (g.view === 'wheel') {
+            const ls = lastSpin && lastSpin.r.length === g.slots.length ? lastSpin : null;
             m.slots.forEach((s, k) => {
-                if (lastSpin && lastSpin.r[k] && lastSpin.r[k].seg) { s.seg = lastSpin.r[k].seg.map(i => all[k][i]).filter(Boolean); }
+                if (ls && ls.r[k] && ls.r[k].seg) { s.seg = ls.r[k].seg.map(i => all[k][i]).filter(Boolean); }
                 else s.seg = DR.wheelItems(g, st, k, ctx).map(i => all[k][i]);
             });
-            m.hitSeg = lastSpin ? lastSpin.r.map(x => x.hit) : null;
+            m.hitSeg = ls ? ls.r.map(x => x.hit) : null;
         }
         // Leere Listen und fehlende Namen
         const k0 = g.slots.findIndex((s, k) => !DR.endless(s) && !all[k].length);
@@ -402,7 +518,7 @@
             const rows = all[0].some(x => x.p) ? 'BINGO'.split('').map(p => ({ p, items: all[0].filter(x => x.p === p) })).filter(r => r.items.length) : null;
             m.board = { items: all[0], rows, drawn, last: last ? last.r[0][0].t : null };
         }
-        if (g.view !== 'teams' && g.view !== 'duties' && g.view !== 'abc') {
+        if (set.hist && g.view !== 'teams' && g.view !== 'duties' && g.view !== 'abc') {
             m.hist = st.hist.slice(-7, -1).reverse().map(h => resText(h.r, g)).filter(Boolean).map(s => s.length > 18 ? s.slice(0, 16) + '…' : s);
         }
         if (g.view === 'dice') m.dice = g.slots[0].src.n || 1;
@@ -413,8 +529,8 @@
         }
         if (g.view === 'teams') { m.teams = st.extra.teams || null; m.hint = t('Antippen zum Einteilen'); m.canUndo = false; m.res = null; }
         if (g.view === 'duties') { m.duties = st.extra.duties || null; m.hint = t('Antippen zum Verteilen'); m.canUndo = false; m.res = null; }
-        if (g.cats) { const l = listFor(g.cats); m.cats = l ? l.items.map(x => x.t) : null; }
-        if (info.length) m.info = info.join(' · ');
+        if (g.strips && g.strips.length) m.strips = g.strips.map(s => ({ label: g.strips.length > 1 ? s.label : '', items: DR.itemsOf(s, ctx).map(x => x.t) })).filter(x => x.items.length);
+        if (info.length && (showMode ? set.countShow : set.count)) m.info = info.join(' · ');
         if (st.extra.over) m.info = (m.info ? m.info + ' · ' : '') + t('Alle gezogen');
         if (g.timer && g.timer.s > 0) { if (timer.s !== g.timer.s) timer.setup(g.timer.s); m.timer = timer; } else { timer.setup(0); }
         if (showMode) m.extra = el('button.exitshow', { type: 'button', 'aria-label': t('Vorführmodus beenden'), title: t('Vorführmodus beenden'), onclick: e => { e.stopPropagation(); toggleShow(false); } }, icon('compress'));
@@ -452,18 +568,20 @@
         if (!s) return;
         if (s.src.type === 'list') editBuiltinList(s.src.list);
         else if (s.src.type === 'names') showNames();
+        else if (s.src.type === 'items') editSlotItems(game.id, (game.allSlots || game.slots).indexOf(s));
         else if (game.own) editOwn(game.id);
         else showGameSettings();
     }
 
     /* ---------- Drehen ---------- */
-    async function spin(dir, power) {
+    async function spin(dir, power, only) {
         if (!game) return;
         if (busy) { stage.finishAll(); return; }
         if (sheets.length) return;
         const g = game, st = stateOf(g.id);
         DR.Sound.on = set.sound;
         DR.Sound.unlock();
+        primeSpeech();
         if (stage.model && stage.model.empty) { stage.model.empty.action && stage.model.empty.action.fn(); return; }
         const dur = speedMs(g.view);
         if (g.view === 'teams' || g.view === 'duties') {
@@ -480,7 +598,9 @@
             announce(txt); speak(txt);
             return;
         }
-        const d = DR.draw(g, st, ctx);
+        if (only != null && !(g.slots.length > 1 && only >= 0 && only < g.slots.length)) only = undefined;
+        const prevSpin = lastSpin;
+        const d = DR.draw(g, st, ctx, only);
         if (d.empty != null) { render(); return; }
         if (d.over != null) {
             st.extra.over = true; saveState(g.id); render();
@@ -490,16 +610,19 @@
         st.extra.over = false;
         if (g.view === 'abc') st.extra.abc = 0;
         saveState(g.id);
-        lastSpin = d; rev = false; open = {};
+        rev = false;
+        if (only == null) open = {}; else delete open[only];
         busy = true;
         $('#spinBtn').classList.add('busy');
         try { await stage.spin(d, { dur, dir: dir || 1, power }); } finally { busy = false; $('#spinBtn').classList.remove('busy'); }
+        // Walzen, die stehen geblieben sind, behalten auf dem Rad ihr Feld von vorher
+        lastSpin = { r: d.r.map((x, k) => x.keep ? (prevSpin && prevSpin.r[k] && prevSpin.r[k].seg ? prevSpin.r[k] : { k, sel: x.sel, seg: null, hit: -1 }) : x) };
         if (set.sound && dur) DR.Sound.land();
         vibrate(40);
         render();
-        const txt = resText(d.r.map(x => x.sel), g);
-        announce(txt);
-        speak(txt);
+        const res = d.r.map(x => x.sel);
+        announce(resText(only != null ? res.map((x, k) => k === only ? x : []) : res, g));
+        speak(speechOf(res, g, only));
         if (g.timer && g.timer.s > 0 && g.timer.auto) timer.restart();
     }
     function reveal(k) {
@@ -509,7 +632,7 @@
         if (set.sound) DR.Sound.reveal();
         render();
         const a = last.r[k] && last.r[k][0] && last.r[k][0].a;
-        if (a) { announce(a); speak(a); }
+        if (a) { announce(a); speak(sayWord(a)); }
     }
     function openHidden(k) {
         open[k] = !open[k];
@@ -527,14 +650,16 @@
         saveState(game.id);
         render();
         if (set.sound) DR.Sound.tick();
-        speak(m.abc.letters[i]);
+        speak(sayWord(m.abc.letters[i]));
     }
-    function tap(dir, power) {
+    function tap(dir, power, only) {
+        primeSpeech();
         if (game.view === 'abc' && stateOf(game.id).hist.length && !dir) { nav(1); return; }
         const st = stateOf(game.id), last = st.hist[st.hist.length - 1];
         // Zuerst die Auflösung zeigen, beim nächsten Antippen weiter
         if (!dir && last && !rev && last.r.length === 1 && last.r[0].length === 1 && last.r[0][0].a && !game.slots[0].hide) { reveal(0); return; }
-        spin(dir, power);
+        // „Einzeln ziehen“: Antippen einer Walze zieht nur sie neu
+        spin(dir, power, game.mode === 'apart' ? only : undefined);
     }
     function undo() {
         const st = stateOf(game.id);
@@ -622,7 +747,7 @@
         s = sheet(t('Menü'), el('div.menu', null,
             menuItem('home', t('Spiel wählen'), go(showHome), t('Alle Spiele, Werkzeuge und eigene Räder')),
             menuItem('plus', t('Neues Rad'), go(() => editOwn(null)), t('Eigene Liste anlegen oder einfügen')),
-            menuItem('people', t('Teilnehmer'), go(showNames), t('Namen für Wer ist dran, Gruppen und Ämter')),
+            menuItem('people', t('Teilnehmer'), go(showNames), (curNl().name ? curNl().name + ' · ' : '') + t('Namen für Wer ist dran, Gruppen und Ämter')),
             menuItem('sliders', t('Dieses Spiel anpassen'), go(showGameSettings), game ? game.name : ''),
             menuItem('expand', t('Vorführmodus'), go(() => toggleShow(true)), t('Vollbild für Fernseher, Beamer und Tablet')),
             menuItem('print', t('Drucken'), go(() => showPrint()), t('Bingo-Karten, Spielblätter, Listen und Rechenblätter als PDF')),
@@ -643,28 +768,37 @@
         const s = sheet(t('Anpassen: {n}', { n: g.name }), body, { onClose: () => render() });
         const paint = () => {
             const g = getGame(game.id);
+            const all = g.allSlots || g.slots;
             body.replaceChildren();
             if (g.desc) body.append(el('p.lead', { text: g.desc }));
-            // Darstellung
-            if (['wheel', 'reels', 'card'].indexOf(g.view) >= 0) {
-                body.append(section(t('Darstellung'), seg([['wheel', t('Rad')], ['reels', t('Walzen')], ['card', t('Karte')]], g.view,
-                    v => { patchGame(g.id, o => { o.view = v; }); lastSpin = null; paint(); }, 'c3'),
-                note(t('Rad zum Zuschauen, Walzen für mehrere Dinge auf einmal, Karte für lange Texte wie Fragen.'))));
+            // Darstellung: Rad, Walzen, Karte und bei einer Walze auch die Tafel wie beim Bingo
+            if (['wheel', 'reels', 'card', 'bingo'].indexOf(g.view) >= 0) {
+                const one = g.slots.length === 1 && !DR.endless(g.slots[0]);
+                const views = [['wheel', t('Rad')], ['reels', t('Walzen')], ['card', t('Karte')]].concat(one ? [['bingo', t('Tafel')]] : []);
+                body.append(section(t('Darstellung'), seg(views, g.view, v => {
+                    patchGame(g.id, (o, isB) => {
+                        o.view = v;
+                        // Auf der Tafel kommt jeder Eintrag nur einmal, bis zur neuen Runde
+                        if (v === 'bingo' && (g.slots[0].rule || 'free') !== 'once') slotPatch(o, isB, all.indexOf(g.slots[0])).rule = 'once';
+                    });
+                    lastSpin = null; paint();
+                }, one ? 'c4' : 'c3'),
+                note(one ? t('Rad zum Zuschauen, Walzen für mehrere Dinge auf einmal, Karte für lange Texte wie Fragen, Tafel zum Abhaken wie beim Bingo.')
+                    : t('Rad zum Zuschauen, Walzen für mehrere Dinge auf einmal, Karte für lange Texte wie Fragen.'))));
+            }
+            // Mehrere Walzen: alle auf einmal oder jede für sich
+            if (g.slots.length > 1 && ['wheel', 'reels', 'card'].indexOf(g.view) >= 0) {
+                body.append(section(t('Mehrere Walzen'), seg([['', t('Alle zusammen'), t('Ein Antippen zieht alles neu')], ['apart', t('Einzeln'), t('Antippen einer Walze zieht nur sie neu')]],
+                    g.mode || '', v => patchGame(g.id, o => { o.mode = v || undefined; if (!v) delete o.mode; }))));
             }
             // Je Walze: Inhalt und Regeln
-            g.slots.forEach((sl, k) => body.append(slotSection(g, sl, k, paint)));
+            all.forEach((sl, k) => body.append(slotSection(g, sl, k, paint)));
             // Gruppen
             if (g.view === 'teams') body.append(section(t('Gruppen'), el('div.row', null, el('span', { text: t('Anzahl der Gruppen') }), stepper(g.groups || 2, 2, 12, v => patchGame(g.id, o => { o.groups = v; })))));
             // ABC-Runde
             if (g.view === 'abc') {
                 const ex = g.abcEx != null ? g.abcEx : 'QXY';
                 body.append(section(t('Buchstaben der ABC-Runde'), letterChips(alphabet(), ex, v => patchGame(g.id, o => { o.abcEx = v; })), note(t('Ausgegraute Buchstaben werden übersprungen.'))));
-            }
-            // Kategorien bei Stadt-Land-Fluss
-            if (g.cats !== undefined || (b && b.cats)) {
-                const opts = [['', t('Keine anzeigen')], ['slf-klassisch', t('Klassisch: Stadt, Land, Fluss …')], ['slf-senioren', t('Für Senioren')], ['slf-kinder', t('Für Kinder')]];
-                const sel = el('select', { onchange: () => patchGame(g.id, o => { o.cats = sel.value || null; }) }, opts.map(([v, l]) => el('option', { value: v, selected: (g.cats || '') === v }, l)));
-                body.append(section(t('Kategorien unter dem Ergebnis'), sel, el('div.btns', null, g.cats ? btn(t('Kategorien bearbeiten'), () => editBuiltinList(g.cats), 'edit') : null)));
             }
             // Sanduhr
             const tm = g.timer || { s: 0, auto: true };
@@ -674,7 +808,8 @@
             tm.s ? note(t('Antippen startet und hält an, lange drücken setzt zurück.')) : null));
             // Vorlesen
             body.append(section(t('Ergebnis vorlesen'), seg([['', t('Wie eingestellt')], ['1', t('Immer')], ['0', t('Nie')]], g.say == null ? '' : g.say ? '1' : '0',
-                v => patchGame(g.id, o => { o.say = v === '' ? null : v === '1'; }), 'c3')));
+                v => patchGame(g.id, o => { o.say = v === '' ? null : v === '1'; }), 'c3'),
+            note(t('„Wie eingestellt“ folgt dem Schalter unter Menü → Farben und Schrift → Vorlesen. Von Haus aus ist Vorlesen aus.'))));
             // Runde, Kopie, Teilen
             const acts = el('div.btns');
             acts.append(btn(t('Drucken …'), () => { s.close(); setTimeout(() => showPrint(), 80); }, 'print'));
@@ -704,44 +839,100 @@
         }
         return box;
     }
+    /** Auswahl, woher eine Walze ihre Einträge nimmt: jede eingebaute Liste oder eine eigene nur für dieses Spiel */
+    function listChooser(g, sl, k, repaint) {
+        const c = content[contentLang()] || {};
+        const cur = sl.src.type === 'list' ? sl.src.list : '';
+        const sel = el('select', { 'aria-label': t('Liste') }, el('option', { value: '', selected: !cur }, t('Eigene Liste nur für dieses Spiel')),
+            Object.keys(c).filter(id => !/^alphabet/.test(id)).map(id => el('option', { value: id, selected: id === cur }, c[id].name)));
+        sel.addEventListener('change', () => {
+            const v = sel.value;
+            if (v) patchGame(g.id, (o, isB) => { slotPatch(o, isB, k).src = { type: 'list', list: v }; });
+            else {
+                // Eigene Liste: startet mit den Einträgen von gerade eben, alles darf weg oder dazu
+                const items = DR.itemsOf(sl, ctx).map(x => Object.assign({}, x));
+                patchGame(g.id, (o, isB) => { slotPatch(o, isB, k).src = { type: 'items', items }; });
+                editSlotItems(g.id, k, repaint);
+            }
+            lastSpin = null;
+            repaint();
+        });
+        return field(t('Einträge aus'), sel);
+    }
+    /** Eigene Einträge einer Walze bearbeiten (eigene Räder und eigene Listen in eingebauten Spielen) */
+    function editSlotItems(id, k, repaint) {
+        const g = getGame(id);
+        const sl = g && (g.allSlots || g.slots)[k];
+        if (!sl || sl.src.type !== 'items') return;
+        const off = new Set(sl.src.off || []);
+        const rows = sl.src.items.map(x => Object.assign({}, x, off.has(x.t) ? { off: true } : {}));
+        const save = rows => {
+            const src = { type: 'items', items: rows.map(cleanIt) };
+            const o2 = rows.filter(r => r.off).map(r => r.t);
+            if (o2.length) src.off = o2;
+            patchGame(id, (o, isB) => { slotPatch(o, isB, k).src = src; });
+            lastSpin = null;
+        };
+        sheet(sl.label || g.name, el('div', null,
+            note(builtin(id) ? t('Diese Liste gilt nur für „{n}“.', { n: g.name }) : t('Die Einträge von „{n}“.', { n: g.name })),
+            listEditor(rows, save)), { cls: 'wide', onClose: () => { if (repaint) repaint(); } });
+    }
     function slotSection(g, sl, k, repaint) {
         const sec = el('section.sec.slot');
-        const head = g.slots.length > 1 ? (sl.label || t('Walze {n}', { n: k + 1 })) : t('Inhalt');
+        const all = g.allSlots || g.slots;
+        const head = all.length > 1 ? (sl.label || t('Walze {n}', { n: k + 1 })) : t('Inhalt');
         sec.append(el('h3', { text: head }));
         const src = sl.src;
         const items = DR.endless(sl) ? [] : DR.itemsOf(sl, ctx);
+        const isB = !!builtin(g.id);
+        // Bei mehreren Walzen: ziehen, nur als Leiste zeigen (etwa die Kategorien zum Aufschreiben) oder weglassen
+        if (all.length > 1) {
+            sec.append(field(t('Diese Walze'), seg([['', t('Ziehen')], ['strip', t('Nur anzeigen'), t('alle als Leiste')], ['off', t('Aus')]], sl.use || '',
+                v => { patchGame(g.id, (o, isB2) => { const x = slotPatch(o, isB2, k); if (v) x.use = v; else delete x.use; }); lastSpin = null; repaint(); }, 'c3')));
+            if (sl.use === 'off') return sec;
+        }
         if (src.type === 'list') {
             const l = baseList(src.list);
-            sec.append(el('div.row', null, el('span', { text: t('{n} Einträge', { n: items.length }) + (l ? ' · ' + l.name : '') }), btn(t('Bearbeiten'), () => editBuiltinList(src.list), 'edit')));
+            const o = lo[loKey(src.list)];
+            const v = curVar(src.list);
+            sec.append(el('div.row', null, el('span', { text: t('{n} Einträge', { n: items.length }) + ' · ' + (v ? v.name : l ? l.name : src.list) }), btn(t('Bearbeiten'), () => editBuiltinList(src.list), 'edit')));
+            // Mehrere Fassungen der Liste: mit einem Tipp umschalten
+            if (o && (o.vars || []).length) {
+                sec.append(el('div.chips.tabs', { role: 'tablist' }, [{ id: '', name: t('Standard') }].concat(o.vars).map(x => el('button.chip' + ((o.cur || '') === x.id ? '.on' : ''), { type: 'button', role: 'tab', onclick: () => {
+                    if (x.id) o.cur = x.id; else delete o.cur;
+                    saveLo(); lastSpin = null; render(); repaint();
+                } }, x.name || t('Ohne Namen')))));
+            }
+            sec.append(listChooser(g, sl, k, repaint));
         } else if (src.type === 'items') {
-            sec.append(el('div.row', null, el('span', { text: t('{n} Einträge', { n: items.length }) }), btn(t('Bearbeiten'), () => editOwn(g.id), 'edit')));
+            sec.append(el('div.row', null, el('span', { text: t('{n} Einträge', { n: items.length }) }), btn(t('Bearbeiten'), () => editSlotItems(g.id, k, repaint), 'edit')));
+            if (isB) sec.append(listChooser(g, sl, k, repaint));
         } else if (src.type === 'names') {
-            sec.append(el('div.row', null, el('span', { text: t('{n} Namen', { n: names.length }) }), btn(t('Namen bearbeiten'), showNames, 'people')));
+            sec.append(el('div.row', null, el('span', { text: t('{n} Namen', { n: activeNames().length }) + (curNl().name ? ' · ' + curNl().name : '') }), btn(t('Namen bearbeiten'), showNames, 'people')));
         } else if (src.type === 'letters') {
             const ex = src.ex || '';
-            const all = alphabet().concat(src.um ? extraLetters() : []);
-            sec.append(letterChips(all, ex, v => patchGame(g.id, (o, isB) => { srcPatch(o, isB, k).ex = v; })));
+            const abc = alphabet().concat(src.um ? extraLetters() : []);
+            sec.append(letterChips(abc, ex, v => patchGame(g.id, (o, isB2) => { srcPatch(o, isB2, k).ex = v; })));
             const quick = el('div.btns.small', null,
-                btn(t('Alle'), () => { patchGame(g.id, (o, isB) => { srcPatch(o, isB, k).ex = ''; }); repaint(); }),
-                btn(t('Ohne Q, X, Y'), () => { patchGame(g.id, (o, isB) => { srcPatch(o, isB, k).ex = 'QXY'; }); repaint(); }),
-                btn(t('Nur leichte'), () => { patchGame(g.id, (o, isB) => { srcPatch(o, isB, k).ex = 'CJQVXY'; }); repaint(); }));
+                btn(t('Alle'), () => { patchGame(g.id, (o, isB2) => { srcPatch(o, isB2, k).ex = ''; }); repaint(); }),
+                btn(t('Ohne Q, X, Y'), () => { patchGame(g.id, (o, isB2) => { srcPatch(o, isB2, k).ex = 'QXY'; }); repaint(); }),
+                btn(t('Nur leichte'), () => { patchGame(g.id, (o, isB2) => { srcPatch(o, isB2, k).ex = 'CJQVXY'; }); repaint(); }));
             sec.append(quick, note(t('Ausgegraute Buchstaben bleiben draußen. Antippen schaltet um.')));
-            if (extraLetters().length) sec.append(toggle(t('Mit Umlauten (Ä, Ö, Ü)'), !!src.um, v => { patchGame(g.id, (o, isB) => { srcPatch(o, isB, k).um = v; }); repaint(); }));
+            if (extraLetters().length) sec.append(toggle(t('Mit Umlauten (Ä, Ö, Ü)'), !!src.um, v => { patchGame(g.id, (o, isB2) => { srcPatch(o, isB2, k).um = v; }); repaint(); }));
+            const plus = el('input', { type: 'text', value: src.plus || '', maxlength: 120, placeholder: t('z. B. SCH ST EI'), autocapitalize: 'characters' });
+            plus.addEventListener('change', () => { const v = plus.value.trim().split(/[\s,;]+/).filter(x => x && x.length <= 8).join(' '); plus.value = v; patchGame(g.id, (o, isB2) => { srcPatch(o, isB2, k).plus = v; }); });
+            sec.append(field(t('Eigene Buchstaben oder Silben dazu'), plus));
         } else if (src.type === 'numbers') {
-            const setN = (key, v) => patchGame(g.id, (o, isB) => { srcPatch(o, isB, k)[key] = v; });
+            const setN = (key, v) => patchGame(g.id, (o, isB2) => { srcPatch(o, isB2, k)[key] = v; });
             sec.append(el('div.nums', null,
                 field(t('Von'), stepper(src.from, -9999, 99999, v => setN('from', v))),
                 field(t('Bis'), stepper(src.to, -9999, 99999, v => setN('to', v))),
                 field(t('Schrittweite'), stepper(src.step || 1, 1, 1000, v => setN('step', v)))));
-            sec.append(el('div.btns.small', null,
-                btn('1–6', () => { patchGame(g.id, (o, isB) => Object.assign(srcPatch(o, isB, k), { from: 1, to: 6, step: 1, bingo: false })); repaint(); }),
-                btn('1–10', () => { patchGame(g.id, (o, isB) => Object.assign(srcPatch(o, isB, k), { from: 1, to: 10, step: 1, bingo: false })); repaint(); }),
-                btn('1–49', () => { patchGame(g.id, (o, isB) => Object.assign(srcPatch(o, isB, k), { from: 1, to: 49, step: 1, bingo: false })); repaint(); }),
-                btn(t('Bingo 1–75'), () => { patchGame(g.id, (o, isB) => Object.assign(srcPatch(o, isB, k), { from: 1, to: 75, step: 1, bingo: true })); repaint(); }),
-                btn('1–90', () => { patchGame(g.id, (o, isB) => Object.assign(srcPatch(o, isB, k), { from: 1, to: 90, step: 1, bingo: false })); repaint(); })));
+            const preset = (from, to, bingo) => () => { patchGame(g.id, (o, isB2) => Object.assign(srcPatch(o, isB2, k), { from, to, step: 1, bingo })); repaint(); };
+            sec.append(el('div.btns.small', null, btn('1–6', preset(1, 6, false)), btn('1–10', preset(1, 10, false)), btn('1–49', preset(1, 49, false)), btn(t('Bingo 1–75'), preset(1, 75, true)), btn('1–90', preset(1, 90, false))));
             sec.append(note(t('{n} Zahlen', { n: items.length })));
         } else if (src.type === 'dice') {
-            sec.append(el('div.row', null, el('span', { text: t('Anzahl der Würfel') }), stepper(src.n || 1, 1, 9, v => patchGame(g.id, (o, isB) => { srcPatch(o, isB, k).n = v; }))));
+            sec.append(el('div.row', null, el('span', { text: t('Anzahl der Würfel') }), stepper(src.n || 1, 1, 9, v => patchGame(g.id, (o, isB2) => { srcPatch(o, isB2, k).n = v; }))));
         } else if (src.type === 'math') {
             const ops = src.ops || ['+'];
             const chips = el('div.chips');
@@ -749,71 +940,222 @@
                 chips.append(el('button.chip' + (ops.indexOf(op) >= 0 ? '.on' : ''), { type: 'button', onclick: () => {
                     const next = ops.indexOf(op) >= 0 ? ops.filter(x => x !== op) : ops.concat(op);
                     if (!next.length) return;
-                    patchGame(g.id, (o, isB) => { srcPatch(o, isB, k).ops = next; }); repaint();
+                    patchGame(g.id, (o, isB2) => { srcPatch(o, isB2, k).ops = next; }); repaint();
                 } }, label));
             }
             sec.append(field(t('Rechenarten'), chips), field(t('Zahlenraum'), seg([[10, t('bis 10')], [20, t('bis 20')], [100, t('bis 100')], [1000, t('bis 1000')]], src.max || 20,
-                v => patchGame(g.id, (o, isB) => { srcPatch(o, isB, k).max = +v; }), 'c4')));
+                v => patchGame(g.id, (o, isB2) => { srcPatch(o, isB2, k).max = +v; }), 'c4')));
         }
         // Regeln
-        if (!DR.endless(sl) && g.view !== 'teams' && g.view !== 'duties') {
-            sec.append(field(t('Ziehen'), seg(RULE_OPTS(), sl.rule || 'free', v => { patchGame(g.id, (o, isB) => { slotPatch(o, isB, k).rule = v; }); }, 'c3')));
+        if (!DR.endless(sl) && g.view !== 'teams' && g.view !== 'duties' && sl.use !== 'strip') {
+            sec.append(field(t('Ziehen'), seg(RULE_OPTS(), sl.rule || 'free', v => { patchGame(g.id, (o, isB2) => { slotPatch(o, isB2, k).rule = v; }); }, 'c3')));
             if (['wheel', 'reels', 'card'].indexOf(g.view) >= 0 && items.length > 2) {
-                sec.append(el('div.row', null, el('span', { text: t('Wie viele auf einmal') }), stepper(sl.pick || 1, 1, Math.min(20, items.length), v => patchGame(g.id, (o, isB) => { slotPatch(o, isB, k).pick = v; }))));
+                sec.append(el('div.row', null, el('span', { text: t('Wie viele auf einmal') }), stepper(sl.pick || 1, 1, Math.min(20, items.length), v => patchGame(g.id, (o, isB2) => { slotPatch(o, isB2, k).pick = v; }))));
             }
-            if (src.type !== 'names') sec.append(toggle(t('Verdeckt'), !!sl.hide, v => patchGame(g.id, (o, isB) => { slotPatch(o, isB, k).hide = v; }), t('Erst Antippen zeigt das Ergebnis, etwa für Begriffe raten')));
+            if (src.type !== 'names') sec.append(toggle(t('Verdeckt'), !!sl.hide, v => patchGame(g.id, (o, isB2) => { slotPatch(o, isB2, k).hide = v; }), t('Erst Antippen zeigt das Ergebnis, etwa für Begriffe raten')));
         }
         return sec;
     }
 
-    /* ---------- Eingebaute Liste bearbeiten: Einträge ausblenden und eigene ergänzen ---------- */
+    /* ---------- Listen-Editor: jede Zeile an- und abwählbar, bearbeitbar und löschbar ----------
+       rows: [{ t, a, c, off, own }]. save(rows) läuft nach jeder Änderung. Neue Einträge werden einsortiert, nicht unten angehängt. */
+    function listEditor(rows, save, sorted) {
+        // Eingebaute Listen zeigt der Editor nach dem Alphabet: Eigenes steht dann an seinem Platz, als wäre es immer da gewesen
+        if (sorted) { const cmp = coll(); rows.sort((x, y) => cmp.compare(x.t, y.t)); }
+        const box = el('div.leditor');
+        const listEl = el('div.lrows');
+        const count = el('p.note.lcount');
+        const changed = () => { save(rows); paintCount(); };
+        const paintCount = () => { count.textContent = t('{n} von {m} ausgewählt', { n: rows.filter(r => !r.off).length, m: rows.length }); };
+        let q = '';
+        function row(r) {
+            const cb = el('input', { type: 'checkbox', checked: !r.off, 'aria-label': r.t });
+            const txt = el('span.lt', null, el('span', { text: r.t }), r.a ? el('small', { text: r.a }) : null);
+            const edit = el('button.iconbtn.small', { type: 'button', title: t('Ändern'), 'aria-label': t('Ändern') }, icon('edit'));
+            const del = el('button.iconbtn.small', { type: 'button', title: t('Löschen'), 'aria-label': t('Löschen') }, icon('trash'));
+            const line = el('div.lrow' + (r.off ? '.off' : '') + (r.own && rows.some(x => !x.own) ? '.own' : ''), null, el('label', null, cb, txt), edit, del);
+            cb.addEventListener('change', () => { if (cb.checked) delete r.off; else r.off = true; line.classList.toggle('off', !!r.off); changed(); });
+            del.addEventListener('click', () => {
+                const i = rows.indexOf(r);
+                if (i < 0) return;
+                rows.splice(i, 1); line.remove(); changed();
+                toast(t('Gelöscht: {x}', { x: r.t }), { label: t('Rückgängig'), fn: () => { rows.splice(Math.min(i, rows.length), 0, r); paint(); changed(); } });
+            });
+            edit.addEventListener('click', () => {
+                const inp = el('input', { type: 'text', value: DR.itemLine(cleanIt(r)), maxlength: 500, 'aria-label': t('Ändern') });
+                let done = false;
+                const ok = () => {
+                    if (done) return;
+                    done = true;
+                    const it = DR.parseLine(inp.value);
+                    if (it && DR.itemLine(it) !== DR.itemLine(cleanIt(r))) {
+                        rows.splice(rows.indexOf(r), 1);
+                        const nr = Object.assign(it, { own: true });
+                        if (r.off) nr.off = true;
+                        insertSorted(rows, nr);
+                        changed();
+                    }
+                    paint();
+                };
+                inp.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); ok(); } else if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); done = true; paint(); } });
+                inp.addEventListener('blur', ok);
+                line.replaceChildren(inp);
+                inp.focus();
+            });
+            return line;
+        }
+        function paint(mark) {
+            const ql = q.toLowerCase();
+            listEl.replaceChildren(...rows.filter(r => !ql || (r.t + ' ' + (r.a || '')).toLowerCase().indexOf(ql) >= 0).map(r => {
+                const line = row(r);
+                if (r === mark) { line.classList.add('new'); setTimeout(() => line.scrollIntoView({ block: 'nearest' }), 30); }
+                return line;
+            }));
+            if (!rows.length) listEl.append(el('p.note', { text: t('Noch leer. Oben neue Einträge eintippen.') }));
+            paintCount();
+        }
+        // Einen Eintrag dazu: Enter oder Knopf. Gibt es ihn schon, wird er nur wieder angewählt.
+        const addIn = el('input', { type: 'text', maxlength: 500, placeholder: t('Neuer Eintrag, auch Frage | Antwort'), enterkeyhint: 'done', 'aria-label': t('Neuer Eintrag') });
+        const addOne = (it, many) => {
+            const have = rows.find(r => r.t.toLowerCase() === it.t.toLowerCase());
+            if (have) { delete have.off; return have; }
+            const nr = Object.assign(it, { own: true });
+            insertSorted(rows, nr);
+            return nr;
+        };
+        const addNow = () => {
+            const it = DR.parseLine(addIn.value);
+            if (!it) return;
+            const got = addOne(it);
+            addIn.value = '';
+            q = ''; search.value = '';
+            paint(got); changed();
+            addIn.focus();
+        };
+        addIn.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); addNow(); } });
+        const search = el('input', { type: 'search', placeholder: t('In der Liste suchen'), 'aria-label': t('In der Liste suchen') });
+        search.addEventListener('input', () => { q = search.value.trim(); paint(); });
+        // Viele auf einmal: einfügen oder aus einer Datei
+        const bulk = el('textarea', { rows: 5, placeholder: t('Mehrere Einträge, einer pro Zeile. Auch aus WhatsApp, E-Mail oder einer Excel-Spalte.') });
+        const addMany = items => { let n = 0; for (const it of items) { addOne(it); n++; } paint(); changed(); toast(t('{n} Einträge eingefügt und einsortiert.', { n })); };
+        box.append(
+            el('div.ladd', null, addIn, btn(t('Hinzufügen'), addNow, 'plus', 'primary')),
+            el('details.lbulk', null, el('summary', { text: t('Mehrere auf einmal einfügen') }), bulk,
+                el('div.btns.small', null,
+                    btn(t('Einfügen'), () => { const its = DR.parseItems(bulk.value); if (its.length) { bulk.value = ''; addMany(its); } }, 'check'),
+                    btn(t('Aus Datei'), () => pickFile('.txt,.csv,text/plain', txt => { const got = DR.parseImport(txt, ''); addMany(got.length ? got[0].slots.flatMap(x => x.items) : []); }), 'upload'))),
+            ...(rows.length > 12 ? [search] : []),
+            listEl,
+            el('div.row', null, count, el('div.btns.small', null,
+                btn(t('Alle an'), () => { rows.forEach(r => { delete r.off; }); paint(); changed(); }),
+                btn(t('Alle aus'), () => { rows.forEach(r => { r.off = true; }); paint(); changed(); }))));
+        paint();
+        return box;
+    }
+
+    /* ---------- Eingebaute Liste bearbeiten: an- und abwählen, löschen, ergänzen, mehrere Fassungen als Reiter ---------- */
     function editBuiltinList(id) {
         const base = baseList(id);
-        if (!base) return;
         const key = loKey(id);
-        const o = lo[key] ? clone(lo[key]) : { off: [], add: [] };
-        const off = new Set(o.off || []);
-        const listBox = el('div.checklist');
-        for (const it of base.items) {
-            const cb = el('input', { type: 'checkbox', checked: !off.has(it.t), onchange: () => { if (cb.checked) off.delete(it.t); else off.add(it.t); } });
-            listBox.append(el('label', null, cb, el('span', null, it.t, it.a ? el('small', { text: ' | ' + it.a }) : null)));
-        }
-        const add = el('textarea', { rows: 5, placeholder: t('Eigene Einträge, einer pro Zeile. „Frage | Antwort“ zeigt die Antwort erst beim Antippen.'), value: DR.itemsToText(o.add || []) });
-        const commit = () => {
-            const next = { off: Array.from(off), add: DR.parseItems(add.value) };
-            if (!next.off.length && !next.add.length) delete lo[key]; else lo[key] = next;
+        if (!base && !lo[key]) return;
+        const body = el('div.listedit');
+        let s;
+        const O = () => lo[key] || (lo[key] = {});
+        const tidy = () => {
+            const o = lo[key];
+            if (o && !(o.del || []).length && !(o.off || []).length && !(o.add || []).length && !(o.vars || []).length && !o.cur && !o.only) delete lo[key];
             saveLo();
+            lastSpin = null;
         };
-        const body = el('div', null,
-            note(t('Häkchen weg blendet einen Eintrag aus. Die eingebaute Liste selbst bleibt, Zurücksetzen holt alles wieder.')),
-            el('div.btns.small', null,
-                btn(t('Alle an'), () => { off.clear(); listBox.querySelectorAll('input').forEach(c => { c.checked = true; }); }),
-                btn(t('Alle aus'), () => { base.items.forEach(x => off.add(x.t)); listBox.querySelectorAll('input').forEach(c => { c.checked = false; }); })),
-            listBox,
-            section(t('Eigene Einträge ergänzen'), add),
-            el('div.btns', null,
-                btn(t('Zurücksetzen'), () => { delete lo[key]; saveLo(); s.close(); }, 'undo'),
-                btn(t('Fertig'), () => s.close(), 'check', 'primary')));
-        const s = sheet(base.name, body, { onClose: () => { if (lo[key] !== undefined || off.size || add.value.trim()) commit(); lastSpin = null; render(); } });
+        const varRows = v => v.items.map(x => Object.assign({}, x, (v.off || []).indexOf(x.t) >= 0 ? { off: true } : {}));
+        const paint = () => {
+            const o = lo[key] || {};
+            const v = curVar(id);
+            const tabs = el('div.chips.tabs', { role: 'tablist' },
+                el('button.chip' + (!v ? '.on' : ''), { type: 'button', role: 'tab', 'aria-selected': String(!v), onclick: () => { delete O().cur; tidy(); paint(); } }, t('Standard')),
+                (o.vars || []).map(x => el('button.chip' + (v && v.id === x.id ? '.on' : ''), { type: 'button', role: 'tab', 'aria-selected': String(!!(v && v.id === x.id)), onclick: () => { O().cur = x.id; tidy(); paint(); } }, x.name || t('Ohne Namen'))),
+                el('button.chip.add', { type: 'button', onclick: () => newVar(v) }, icon('plus'), el('span', { text: t('Neue Liste') })));
+            const rows = v ? varRows(v) : stdRows(id);
+            const save = rows => {
+                if (v) { v.items = rows.map(cleanIt); v.off = rows.filter(r => r.off).map(r => r.t); tidy(); return; }
+                const x = O();
+                const keep = new Set(rows.filter(r => !r.own).map(r => r.t));
+                x.del = base ? base.items.filter(b => !keep.has(b.t)).map(b => b.t) : [];
+                x.off = rows.filter(r => r.off).map(r => r.t);
+                x.add = rows.filter(r => r.own).map(cleanIt);
+                delete x.only;
+                tidy();
+            };
+            let nameIn = null;
+            if (v) {
+                nameIn = el('input', { type: 'text', value: v.name || '', maxlength: 60 });
+                nameIn.addEventListener('change', () => { v.name = nameIn.value.trim().slice(0, 60); tidy(); paint(); });
+            }
+            fill(body,
+                tabs,
+                note(v ? t('Eine eigene Fassung dieser Liste. Gilt überall, wo die Liste vorkommt, solange ihr Reiter gewählt ist.')
+                    : t('Die eingebaute Liste. Häkchen weg: bleibt stehen, wird aber nicht gezogen. Papierkorb: ganz weg. Eigenes wird einsortiert.')),
+                v ? field(t('Name der Liste'), nameIn) : null,
+                listEditor(rows, save, true),
+                el('div.btns', null,
+                    v ? btn(t('Diese Liste löschen'), () => confirmDlg(t('Liste löschen?'), t('„{n}“ wird von diesem Gerät gelöscht.', { n: v.name || t('Liste') }), t('Löschen'), () => {
+                        const x = O(); x.vars = (x.vars || []).filter(y => y.id !== v.id); delete x.cur; tidy(); paint();
+                    }), 'trash', 'danger') : null,
+                    !v && ((o.del || []).length || (o.off || []).length || o.only) ? btn(t('Gelöschte zurückholen'), () => { const x = O(); x.del = []; x.off = []; delete x.only; tidy(); paint(); }, 'undo') : null,
+                    !v && (o.add || []).length ? btn(t('Eigene Einträge entfernen'), () => confirmDlg(t('Eigene Einträge entfernen?'), t('Alles, was du in der Standard-Liste ergänzt hast, wird gelöscht.'), t('Entfernen'), () => { O().add = []; tidy(); paint(); }), 'trash') : null,
+                    btn(t('Fertig'), () => s.close(), 'check', 'primary')));
+        };
+        function newVar(from) {
+            const name = el('input', { type: 'text', maxlength: 60, placeholder: t('z. B. Kinder, Erwachsene, Bärengruppe') });
+            let d;
+            const make = copy => {
+                const x = O();
+                x.vars = x.vars || [];
+                const rows = copy ? (from ? varRows(from) : stdRows(id)) : [];
+                const nv = { id: 'v' + Date.now().toString(36), name: name.value.trim().slice(0, 60) || t('Liste {n}', { n: x.vars.length + 2 }), items: rows.map(cleanIt), off: rows.filter(r => r.off).map(r => r.t) };
+                x.vars.push(nv);
+                x.cur = nv.id;
+                tidy();
+                d.close();
+                paint();
+            };
+            d = sheet(t('Neue Liste'), el('div', null, field(t('Name'), name),
+                note(t('Eine weitere Fassung dieser Liste, etwa mit eigenen Fragen für eine Gruppe. Umschalten geht dann mit einem Tipp auf ihren Reiter.')),
+                el('div.btns', null, btn(t('Leer anfangen'), () => make(false), 'plus'), btn(t('Diese Liste kopieren'), () => make(true), 'copy', 'primary'))), { cls: 'narrow' });
+            if (!isTouch()) name.focus();
+        }
+        s = sheet(base ? base.name : id, body, { cls: 'wide', onClose: () => { lastSpin = null; render(); } });
+        paint();
     }
 
     /* ---------- Teilnehmer ---------- */
     function showNames() {
-        const ta = el('textarea.names', { rows: 10, placeholder: t('Ein Name pro Zeile'), value: DR.itemsToText(names) });
-        const count = el('p.note');
-        const upd = () => { names = DR.parseItems(ta.value); count.textContent = t('{n} Namen', { n: names.length }); };
-        ta.addEventListener('input', () => { upd(); saveNames(); });
-        upd();
-        const body = el('div', null,
-            note(t('Die Namen gelten für „Wer ist dran?“, „Gruppen einteilen“ und „Ämter verteilen“ und bleiben nur auf diesem Gerät.')),
-            ta, count,
-            el('div.btns', null,
-                btn(t('Sortieren'), () => { ta.value = DR.itemsToText(DR.parseItems(ta.value).sort((a, b) => a.t.localeCompare(b.t, set.lang))); upd(); saveNames(); }),
-                btn(t('Aus Datei'), () => pickFile('.txt,.csv,text/plain', txt => { ta.value = (ta.value.trim() ? ta.value.trim() + '\n' : '') + DR.itemsToText(DR.parseItems(txt)); upd(); saveNames(); }), 'upload'),
-                btn(t('Leeren'), () => confirmDlg(t('Alle Namen löschen?'), t('Die Liste der Teilnehmer wird geleert.'), t('Leeren'), () => { ta.value = ''; upd(); saveNames(); })),
-                btn(t('Fertig'), () => s.close(), 'check', 'primary')));
-        const s = sheet(t('Teilnehmer'), body, { cls: 'narrow', onClose: () => { saveNames(); lastSpin = null; render(); } });
-        if (!isTouch()) ta.focus();
+        const body = el('div');
+        let s;
+        const paint = () => {
+            const cur = curNl();
+            // Mehrere Listen als Reiter, etwa eine je Gruppe: ein Tipp, und diese gilt
+            const tabs = el('div.chips.tabs', { role: 'tablist' },
+                nl.lists.map((l, i) => el('button.chip' + (l.id === cur.id ? '.on' : ''), { type: 'button', role: 'tab', 'aria-selected': String(l.id === cur.id), onclick: () => { nl.cur = l.id; saveNames(); lastSpin = null; paint(); } }, l.name || t('Liste {n}', { n: i + 1 }))),
+                el('button.chip.add', { type: 'button', onclick: () => { const id = 'n' + Date.now().toString(36); nl.lists.push({ id, name: '', items: [], off: [] }); nl.cur = id; saveNames(); lastSpin = null; paint(); setTimeout(() => nameIn.focus(), 50); } }, icon('plus'), el('span', { text: t('Neue Liste') })));
+            const nameIn = el('input', { type: 'text', value: cur.name, maxlength: 60, placeholder: t('Name der Liste, z. B. Bärengruppe') });
+            nameIn.addEventListener('change', () => { cur.name = nameIn.value.trim().slice(0, 60); saveNames(); paint(); });
+            const off = new Set(cur.off || []);
+            const rows = cur.items.map(x => Object.assign({}, x, off.has(x.t) ? { off: true } : {}));
+            const save = rows => { cur.items = rows.map(cleanIt); cur.off = rows.filter(r => r.off).map(r => r.t); saveNames(); lastSpin = null; };
+            fill(body,
+                note(t('Für „Wer ist dran?“, „Gruppen einteilen“, „Ämter verteilen“ und eigene Räder mit Teilnehmern. Häkchen weg, wer heute fehlt. Alles bleibt nur auf diesem Gerät.')),
+                tabs,
+                field(t('Name der Liste'), nameIn),
+                listEditor(rows, save, true),
+                el('div.btns', null,
+                    nl.lists.length > 1 ? btn(t('Diese Liste löschen'), () => confirmDlg(t('Liste löschen?'), t('„{n}“ mit allen Namen wird von diesem Gerät gelöscht.', { n: cur.name || t('Liste') }), t('Löschen'), () => {
+                        nl.lists = nl.lists.filter(l => l.id !== cur.id); nl.cur = nl.lists[0].id; saveNames(); lastSpin = null; paint();
+                    }), 'trash', 'danger') : null,
+                    btn(t('Fertig'), () => s.close(), 'check', 'primary')));
+        };
+        s = sheet(t('Teilnehmer'), body, { cls: 'wide', onClose: () => { saveNames(); lastSpin = null; render(); } });
+        paint();
     }
 
     /* ---------- Eigenes Rad anlegen oder bearbeiten ---------- */
@@ -834,8 +1176,9 @@
             g.slots.forEach((sl, k) => {
                 const card = el('div.slotcard');
                 const label = el('input', { type: 'text', value: sl.label || '', placeholder: g.slots.length > 1 ? t('Überschrift, z. B. Wer?') : t('Überschrift über dem Ergebnis (freiwillig)'), maxlength: 60, oninput: () => { sl.label = label.value; } });
-                const type = el('select', { onchange: () => { sl.src = DR.cleanSrc({ type: type.value, from: 1, to: 10, n: 2, ops: ['+', '-'], max: 20 }); paintSlots(); } },
-                    ['items', 'names', 'letters', 'numbers', 'dice', 'math'].map(v => el('option', { value: v, selected: sl.src.type === v }, t(SRC_NAMES[v]))));
+                const firstList = Object.keys(content[contentLang()] || {}).find(id => !/^alphabet/.test(id)) || '';
+                const type = el('select', { onchange: () => { sl.src = DR.cleanSrc({ type: type.value, from: 1, to: 10, n: 2, ops: ['+', '-'], max: 20, list: firstList }); paintSlots(); } },
+                    ['items', 'list', 'names', 'letters', 'numbers', 'dice', 'math'].map(v => el('option', { value: v, selected: sl.src.type === v }, t(SRC_NAMES[v]))));
                 card.append(el('div.slothead', null, el('b', { text: g.slots.length > 1 ? t('Walze {n}', { n: k + 1 }) : t('Inhalt') }), type,
                     g.slots.length > 1 ? el('button.iconbtn', { type: 'button', 'aria-label': t('Walze entfernen'), title: t('Walze entfernen'), onclick: () => { g.slots.splice(k, 1); paintSlots(); } }, icon('trash')) : null), label);
                 if (sl.src.type === 'items') {
@@ -855,6 +1198,11 @@
                         const its = got.length ? got[0].slots.flatMap(s => s.items) : [];
                         ta.value = (ta.value.trim() ? ta.value.trim() + '\n' : '') + DR.itemsToText(its); upd();
                     }), 'upload')), from);
+                } else if (sl.src.type === 'list') {
+                    const c = content[contentLang()] || {};
+                    const ls = el('select', { 'aria-label': t('Liste'), onchange: () => { sl.src = { type: 'list', list: ls.value }; } },
+                        Object.keys(c).filter(id => !/^alphabet/.test(id)).map(id => el('option', { value: id, selected: id === sl.src.list }, c[id].name)));
+                    card.append(ls, note(t('Nimmt eine eingebaute Liste samt deinen Änderungen daran. Bearbeiten lässt sie sich danach unter „Anpassen“.')));
                 } else if (sl.src.type === 'names') card.append(note(t('Nimmt die Teilnehmer, die unter Menü → Teilnehmer stehen.')));
                 else card.append(note(t('Feineinstellungen wie Bereich, Buchstaben oder Rechenarten gibt es nach dem Speichern unter „Anpassen“.')));
                 slotsBox.append(card);
@@ -887,13 +1235,12 @@
     /** Eingebautes Spiel als eigenes Rad: alle Einträge (mit Änderungen) wandern mit, danach frei veränderbar */
     function materialize(g) {
         const out = clone(g);
-        out.slots = g.slots.map(s => {
+        out.slots = (g.allSlots || g.slots).map(s => {
             const x = clone(s);
             if (s.src.type === 'list') x.src = { type: 'items', items: DR.itemsOf(s, ctx).map(it => Object.assign({}, it)) };
             return x;
         });
-        delete out.builtin; delete out.own; delete out.desc; delete out.tags;
-        if (out.cats) { out.note = (listFor(out.cats) || { items: [] }).items.map(x => x.t).join(' · '); delete out.cats; }
+        delete out.builtin; delete out.own; delete out.desc; delete out.tags; delete out.allSlots; delete out.strips;
         return out;
     }
     function copyToOwn(id) {
@@ -979,7 +1326,7 @@
         const body = el('div.settings');
         const s = sheet(t('Farben und Schrift'), body, { onClose: () => render() });
         const paint = () => {
-            body.replaceChildren(
+            fill(body,
                 UI_LANGS.length > 1 ? section(t('Sprache'), seg(UI_LANGS.map(l => [l, langName(l)]), set.lang, async v => {
                     set.lang = v; saveSet(); await loadContent(contentLang()); applyTexts(); openGame(game.id, true); s.close();
                 }, 'c3'), note(t('Sprache der Bedienung und der eingebauten Listen.'))) : null,
@@ -992,15 +1339,43 @@
                     field(t('Tempo'), seg([['slow', t('Gemütlich')], ['normal', t('Normal')], ['fast', t('Flott')], ['off', t('Sofort')]], set.speed, v => { set.speed = v; saveSet(); }, 'c4')),
                     toggle(t('Klicken und Klang'), set.sound, v => { set.sound = v; DR.Sound.on = v; saveSet(); }),
                     'vibrate' in navigator ? toggle(t('Vibration'), set.vib, v => { set.vib = v; saveSet(); }) : null),
+                section(t('Anzeige'),
+                    toggle(t('Zuletzt gezogene unten zeigen'), set.hist, v => { set.hist = v; saveSet(); }, t('Die letzten Ergebnisse klein unter dem aktuellen. Von Haus aus aus, dann bleibt mehr Platz.')),
+                    toggle(t('Zähler „noch … von …“'), set.count, v => { set.count = v; saveSet(); }, t('Wie viele Einträge noch im Topf sind')),
+                    field(t('Rad und Ergebnis bildschirmfüllend'), seg([['always', t('Immer')], ['show', t('Im Vorführmodus')], ['never', t('Nie')]], set.bigRes, v => { set.bigRes = v; saveSet(); }, 'c3')),
+                    note(t('Das Rad dreht über die ganze Fläche, bleibt kurz stehen, dann zeigt sich das Ergebnis über die ganze Fläche. Erst das nächste Antippen dreht wieder. „Nie“ zeigt Rad und Ergebnis nebeneinander.'))),
                 'speechSynthesis' in window ? section(t('Vorlesen'),
-                    toggle(t('Ergebnis vorlesen'), set.say, v => { set.say = v; saveSet(); }, t('Über die Sprachausgabe des Geräts. Einzelne Spiele wie Bingo lesen immer vor, das lässt sich dort umstellen.')),
+                    toggle(t('Ergebnis vorlesen'), set.say, v => { set.say = v; saveSet(); paint(); }, t('Über die Sprachausgabe des Geräts. Von Haus aus aus. Einzelne Spiele lassen sich unter „Anpassen“ anders einstellen.')),
+                    voicePicker(),
                     field(t('Sprechtempo'), seg([[.75, t('Langsam')], [.9, t('Ruhig')], [1, t('Normal')]], set.sayRate, v => { set.sayRate = +v; saveSet(); }, 'c3')),
-                    el('div.btns', null, btn(t('Probe hören'), () => speak(t('So klingt die Ansage. Der Buchstabe ist M.'), true), 'sound'))) : null,
+                    el('div.btns', null, btn(t('Probe hören'), () => speak(t('So klingt die Ansage. Buchstabe: {x}. Kategorie: Tier.', { x: sayWord('M') }), true), 'sound')),
+                    note(voiceHint())) : null,
                 section(t('Vorführmodus'),
                     toggle(t('Schwarzer Hintergrund'), set.black, v => { set.black = v; saveSet(); }, t('Am Fernseher verschmelzen dann die schwarzen Ränder mit dem Bild.')),
+                    toggle(t('Zähler auch im Vorführmodus'), set.countShow, v => { set.countShow = v; saveSet(); }, t('Sonst zeigt der Vorführmodus nur das Ergebnis')),
                     'wakeLock' in navigator ? toggle(t('Bildschirm bleibt an'), set.wake, v => { set.wake = v; saveSet(); wake(v); }) : null));
         };
         paint();
+    }
+    /** Stimme wählen: die beste ist vorausgewählt, einfache Stimmen stehen unten */
+    function voicePicker() {
+        const sel = el('select', { 'aria-label': t('Stimme') });
+        const fill = () => {
+            const v = voicesFor(), best = v[0];
+            sel.replaceChildren(el('option', { value: '' }, best ? t('Automatisch: {n}', { n: best.name }) : t('Automatisch')),
+                ...v.map(x => el('option', { value: x.voiceURI, selected: x.voiceURI === set.voice }, x.name + (voiceScore(x) < -20 ? ' · ' + t('einfache Stimme') : '') + (x.localService === false ? ' · ' + t('braucht Internet') : ''))));
+            if (!set.voice || !v.some(x => x.voiceURI === set.voice)) sel.value = '';
+        };
+        fill();
+        sel.addEventListener('change', () => { set.voice = sel.value; saveSet(); speak(t('So klingt die Ansage. Buchstabe: {x}. Kategorie: Tier.', { x: sayWord('M') }), true); });
+        if (!voices.length && 'speechSynthesis' in window) { const once = () => { loadVoices(); fill(); speechSynthesis.removeEventListener && speechSynthesis.removeEventListener('voiceschanged', once); }; speechSynthesis.addEventListener && speechSynthesis.addEventListener('voiceschanged', once); }
+        return field(t('Stimme'), sel);
+    }
+    function voiceHint() {
+        const pf = platform();
+        if (pf === 'ios' || pf === 'mac-safari') return t('Bessere Stimmen: am iPhone und iPad unter Einstellungen → Bedienungshilfen → Gesprochene Inhalte → Stimmen laden, am Mac unter Systemeinstellungen → Bedienungshilfen → Gesprochene Inhalte. Ob Safari sie nutzen darf, entscheidet Apple. Die Siri-Stimmen gibt Apple für Webseiten nicht frei.');
+        if (pf === 'android' || pf === 'android-firefox') return t('Bessere Stimmen: Android-Einstellungen → Bedienungshilfen → Sprachausgabe. Dort die Google-Sprachausgabe wählen und die Sprachdaten in hoher Qualität laden.');
+        return t('Am Rechner klingen in Edge die Stimmen mit „Natural“ im Namen am besten, in Chrome die Google-Stimmen.');
     }
     const FONTS = [['atkinson', 'Atkinson', N('Besonders deutlich, für schlechte Augen')], ['fibel', N('Fibel'), N('Wie in der Schule, für Leseanfänger')],
         ['lexend', 'Lexend', N('Breit und flüssig zu lesen')], ['nunito', 'Nunito', N('Rund und freundlich')], ['system', N('System'), N('Die Schrift des Geräts')]];
@@ -1116,7 +1491,8 @@
     function backupData() {
         const st = {};
         for (const g of DR.GAMES.concat(own)) { const x = load('st_' + g.id, null); if (x) st[g.id] = x; }
-        return { app: 'drehsel', v: 1, at: new Date().toISOString(), set, own, ov, lo, names, st };
+        saveNames();
+        return { app: 'drehsel', v: 2, at: new Date().toISOString(), set, own, ov, lo, names: activeNames(), nl, st };
     }
     function restore(d) {
         if (!d || d.app !== 'drehsel') throw new Error('bad');
@@ -1125,7 +1501,9 @@
         saveOwn();
         if (d.ov && typeof d.ov === 'object') { ov = Object.assign(ov, d.ov); saveOv(); }
         if (d.lo && typeof d.lo === 'object') { lo = Object.assign(lo, d.lo); saveLo(); }
-        if (Array.isArray(d.names) && d.names.length) { names = DR.parseItems(d.names.map(x => DR.itemLine(x)).join('\n')); saveNames(); }
+        const got = cleanNl(d.nl);
+        if (got) { nl = got; saveNames(); }
+        else if (Array.isArray(d.names) && d.names.length) { curNl().items = DR.parseItems(d.names.map(x => DR.itemLine(x)).join('\n')); curNl().off = []; saveNames(); }
         if (d.set && typeof d.set === 'object') {
             for (const k in DEF) if (d.set[k] !== undefined && typeof d.set[k] === typeof DEF[k]) set[k] = d.set[k];
             set.look = Object.assign({}, DEF.look, set.look); set.fs = Object.assign({}, DEF.fs, set.fs);
@@ -1135,7 +1513,7 @@
         return games.length;
     }
     function exportGames(ids) {
-        const games = ids.map(getGame).filter(Boolean);
+        const games = ids.map(getGame).filter(Boolean).map(g => Object.assign({}, g, { slots: g.allSlots || g.slots }));
         const text = '# Drehsel ' + root.dataset.v + ' · ' + new Date().toLocaleDateString(set.lang) + '\n' + DR.exportText(games, (g, i) => DR.endless(g.slots[i]) || g.slots[i].src.type === 'numbers' || g.slots[i].src.type === 'letters' ? null : DR.itemsOf(g.slots[i], ctx));
         shareOrDownload(new Blob([text], { type: 'text/plain;charset=utf-8' }), (games.length === 1 ? slug(games[0].name) : 'drehsel-listen') + '.txt');
     }
@@ -1192,7 +1570,7 @@
         ops: ['+', '-'], max: 20 }, load('print', {}));
     function printKind(g) {
         if (g.view === 'bingo') return 'bingo';
-        if (/^slf/.test(g.id) || g.cats) return 'slf';
+        if (/^slf/.test(g.id)) return 'slf';
         if (g.slots.some(s => s.src.type === 'math')) return 'math';
         if (g.view === 'card' || g.slots.some(s => s.hide)) return 'cards';
         return 'list';
@@ -1218,7 +1596,8 @@
         if (mathSlot) { o.ops = mathSlot.src.ops || o.ops; o.max = mathSlot.src.max || o.max; }
         const sources = printSources();
         o.src = sources[0] ? sources[0][0] : '';
-        if (g.cats) o.cats = g.cats;
+        const catSlot = (g.allSlots || g.slots).find(s => s.src.type === 'list' && /^slf-/.test(s.src.list));
+        if (catSlot) o.cats = catSlot.src.list;
         const cv = el('canvas.preview', { title: t('Antippen macht die Vorschau größer') });
         const pager = el('div.pager');
         const warn = el('p.warn', { hidden: true });
@@ -1373,15 +1752,20 @@
                 [t('Schneller fertig'), t('Während es dreht, noch einmal antippen: dann steht das Ergebnis sofort da.')],
                 [t('Auflösung'), t('Steht unter dem Ergebnis „Antippen für die Auflösung“, zeigt das erste Antippen die Antwort, das nächste dreht weiter.')],
                 [t('Verdeckt'), t('Bei „Begriffe raten“ ist der Begriff verdeckt. Antippen deckt ihn auf und wieder zu, so sieht ihn nur, wer erklärt.')],
+                [t('Bildschirmfüllend'), t('Das Rad dreht über die ganze Fläche, danach steht das Ergebnis über die ganze Fläche. Erst das nächste Antippen dreht wieder. Umstellen unter Menü → Farben und Schrift → Anzeige.')],
+                [t('Einzeln ziehen'), t('Bei mehreren Walzen, etwa Buchstabe und Kategorie, lässt sich unter „Anpassen“ einstellen, dass Antippen einer Walze nur sie neu zieht. Am Rechner gehen dafür auch die Tasten 1 bis 6.')],
                 [t('Sanduhr'), t('Antippen startet und hält an, lange drücken setzt zurück.')],
                 [t('Rückgängig'), t('Unten rechts: die letzte Drehung zurücknehmen oder den Verlauf ansehen und eine neue Runde beginnen.')]]),
             el('h3', { text: t('Anpassen') }),
-            p(t('Der Regler-Knopf oben öffnet die Einstellungen des Spiels: Darstellung (Rad, Walzen, Karte), welche Einträge drin sind, ob etwas wiederkommen darf, Sanduhr und Vorlesen. Eingebaute Listen lassen sich ergänzen und einzelne Einträge ausblenden.')),
+            p(t('Der Regler-Knopf oben öffnet die Einstellungen des Spiels: Darstellung (Rad, Walzen, Karte, Tafel), welche Liste drin ist, ob etwas wiederkommen darf, Sanduhr und Vorlesen. Jede Walze kann auch eine andere eingebaute Liste nehmen oder eine ganz eigene.')),
             el('h3', { text: t('Eigene Listen') }),
-            p(t('Menü → Neues Rad: Namen geben, Einträge eintippen oder einfügen, fertig. Unter Menü → Sicherung und Listen lassen sich Textdateien importieren und exportieren. Alles bleibt nur auf diesem Gerät.')),
+            p(t('Jede Liste lässt sich bearbeiten: Häkchen weg heißt, der Eintrag bleibt stehen, wird aber nicht gezogen. Der Papierkorb nimmt ihn ganz raus. Neues wird an seinem Platz im Alphabet einsortiert. „Neue Liste“ legt weitere Fassungen an, etwa für Kinder und für Erwachsene, umgeschaltet wird mit einem Tipp auf den Reiter.')),
+            p(t('Menü → Neues Rad: Namen geben, Einträge eintippen oder einfügen, fertig. Unter Menü → Teilnehmer gibt es mehrere Namenslisten, etwa je Gruppe. Unter Menü → Sicherung und Listen lassen sich Textdateien importieren und exportieren. Alles bleibt nur auf diesem Gerät.')),
             el('h3', { text: t('Fernseher, Beamer, Apple TV') }),
-            p(t('Der Vorführmodus (Knopf mit den vier Ecken) zeigt nur noch Rad und Ergebnis, randvoll. Antippen dreht, oben links geht es zurück. Beim Spiegeln vom iPad auf den Fernseher das iPad quer halten und im Kontrollzentrum die Drehsperre einschalten. Das iPad hat ein anderes Format als der Fernseher, deshalb bleiben links und rechts Ränder. Mit schwarzem Hintergrund fallen sie kaum auf. Als App installiert verschwinden auch die Leisten des Browsers.')),
+            p(t('Der Vorführmodus (Knopf mit den vier Ecken) zeigt nur noch Rad und Ergebnis, randvoll. Auf dem iPhone geht echtes Vollbild nur, wenn Drehsel als App auf dem Home-Bildschirm liegt. Antippen dreht, oben links geht es zurück. Beim Spiegeln vom iPad auf den Fernseher das iPad quer halten und im Kontrollzentrum die Drehsperre einschalten. Das iPad hat ein anderes Format als der Fernseher, deshalb bleiben links und rechts Ränder. Mit schwarzem Hintergrund fallen sie kaum auf. Als App installiert verschwinden auch die Leisten des Browsers.')),
             p(t('Am Rechner mit Beamer drehen Leertaste, Enter und Pfeiltasten, also auch ein Präsentations-Klicker. F schaltet den Vorführmodus um, Esc beendet ihn.')),
+            el('h3', { text: t('Vorlesen') }),
+            p(t('Von Haus aus aus. Eingeschaltet wird unter Menü → Farben und Schrift → Vorlesen, dort lässt sich auch die Stimme wählen. Drehsel nimmt von selbst die beste Stimme des Geräts. Die Siri-Stimmen gibt Apple für Webseiten nicht frei.')),
             el('h3', { text: t('Gut lesbar') }),
             p(t('Unter Menü → Farben und Schrift gibt es fertige Farbwelten, einen Farbmischer für eigene Farben, fünf Schriften und Regler für die Größen. Die Schrift wird überall automatisch so eingestellt, dass sie auf ihrem Untergrund gut lesbar bleibt.'))), { cls: 'narrow' });
     }
@@ -1500,6 +1884,7 @@
             if (document.activeElement && document.activeElement.closest && document.activeElement.closest('#top') && k !== 'PageDown') return;
             e.preventDefault(); tap();
         } else if (k === 'f' || k === 'F') toggleShow();
+        else if (/^[1-6]$/.test(k) && game && game.mode === 'apart' && game.slots.length >= +k) { e.preventDefault(); tap(0, 0, +k - 1); }
         else if (k === 'Backspace') { if (stateOf(game.id).hist.length) undo(); }
     });
 
@@ -1508,8 +1893,9 @@
         applyLook();
         applyTexts();
         stage = new DR.Stage($('#stage'), {
-            t, colors: segColors, tap: (dir, p) => tap(dir, p), reveal, open: openHidden, nav, undo, history: showHistory,
+            t, colors: segColors, tap: (dir, p, k) => tap(dir, p, k), reveal, open: openHidden, nav, undo, history: showHistory,
             tick: () => { if (set.sound && set.speed !== 'off') DR.Sound.tick(); },
+            only: k => spin(0, 0, k),
             resScale: () => set.fs.res,
             sample: k => { const s = game.slots[k]; return s.src.type === 'math' ? DR.mathTask(s.src).t : s.src.type === 'dice' ? DR.rollDice(s.src.n).t : '?'; },
         });
