@@ -1,0 +1,930 @@
+# Drehsel – built-in lists (English)
+#
+# [id] Name starts a list, followed by one entry per line.
+# Text | Answer   shows the answer only after a tap.
+# #rrggbb at the end of a line gives the field its own colour on the wheel.
+# Lines starting with # and a space are comments.
+# The ids are the same in every language, see de.txt.
+
+[alphabet] Alphabet
+A B C D E F G H I J K L M N O P Q R S T U V W X Y Z
+
+[slf-klassisch] Classic categories
+City
+Country
+River
+First name
+Animal
+Job
+Plant
+
+[slf-senioren] Categories for seniors
+City
+Country
+River
+First name
+Animal
+Job
+Flower
+Tree
+Fruit or vegetable
+Dish
+Drink
+Item of clothing
+Musical instrument
+Tool
+Household item
+Kitchen gadget
+Herb or spice
+Bird
+Fish
+Sport
+Game
+Hobby
+Fairy tale character
+Song
+Singer
+Actor or actress
+Car make
+Mountain
+Island
+Capital city
+Part of the body
+Colour
+Sweet or dessert
+Piece of furniture
+Something in the garden
+Something round
+Something soft
+Something made of wood
+Something you can give as a present
+Something you need on holiday
+
+[slf-kinder] Categories for children
+Animal
+First name
+Food
+Fruit or vegetable
+Colour
+Toy
+Drink
+Clothes
+Part of the body
+Vehicle
+Job
+Plant
+Sweets
+Something in your bedroom
+Something round
+Fairy tale character
+Sport
+Something at school
+Musical instrument
+Furniture
+Something that can fly
+Something that can swim
+Something soft
+Something loud
+Something green
+Something in the kitchen
+Insect
+City
+Country
+
+[abc-themen] Topics for the ABC round
+Fruit and vegetables
+Animals
+First names
+Cities
+Countries
+Jobs
+Flowers and plants
+Food and drink
+Things in the house
+Clothes
+Sports
+Hobbies
+Musical instruments
+Things in the garden
+Vehicles
+Things in the kitchen
+Sweets and cakes
+Herbs and spices
+Fairy tale characters
+Things at the seaside
+Tools
+Parts of the body
+Things in the bathroom
+Drinks
+Things from the supermarket
+Things you can give as a present
+Games
+Birds
+Trees
+Things made of wood
+Things that are round
+Things at school
+Things in winter
+Things in summer
+Holidays and celebrations
+Furniture
+Dishes and meals
+Beautiful words
+Things in the forest
+Things you can wear
+
+[erinnerung] Memory questions
+What was your school called, and how did you get there?
+Who was your favourite teacher?
+What did your family eat on Sundays?
+What was your favourite food as a child?
+Which game did you like to play most as a child?
+What did your bedroom look like when you were young?
+Did you have a pet? What was its name?
+Where did you go on your first holiday?
+What did your first bicycle look like?
+What was your first car?
+What did you want to be when you grew up?
+Where was your first job?
+What did you spend your first wages on?
+Which song reminds you of your youth?
+Where did you go dancing?
+Which film made a big impression on you?
+How did you celebrate Christmas when you were young?
+How were birthdays celebrated in your family?
+What did you do in the summer holidays?
+Which sweet from the old days can you no longer buy?
+What did the shop look like where your family did its shopping?
+How much did a loaf of bread cost back then?
+Which radio or TV programme did you love?
+When did you first see a television?
+How did you meet your partner?
+What was your wedding day like?
+Which item of clothing did you love to wear?
+Which hairstyle was fashionable in your youth?
+What hobby did you have as a young person?
+Which sport did you enjoy?
+What did you get up to with your brothers, sisters or friends?
+Who was your best friend?
+Did you ever play a prank on someone?
+What did you do when it snowed?
+What did your mother often say to you?
+What did you learn from your father?
+What did your grandmother cook best?
+Which dish can you cook especially well?
+How was the washing done when you were young?
+How was your home heated?
+Which chores did you have to do as a child?
+What did your garden look like?
+Which flowers do you like best?
+In which town did you live the longest?
+Which journey was the most beautiful?
+What is the bravest thing you have ever done?
+What are you proud of in your life?
+Which book did you love to read?
+Which fairy tale do you still know?
+Which poem did you learn at school?
+Which toy did you wish for as a child?
+What did you buy with your first pocket money?
+What was a very special day out back then?
+How did you get to work?
+Which music do you still like to listen to?
+Which singer or actor did you admire?
+What made you laugh as a child?
+Which smell reminds you of the old days?
+What did the kitchen of your childhood smell like?
+Which celebration of the year did you like best?
+What did you do on New Year's Eve?
+What was your first day at school like?
+Which subject did you like best at school?
+Which animals lived on your street or nearby?
+What did you like to do in your free time?
+Which piece of advice has helped you in life?
+What advice would you give a young person today?
+Which day in your life was especially wonderful?
+How did you arrange to meet friends without a telephone?
+Which board or card game did your family play?
+Which place did you love to visit on a day out?
+
+[sprichwoerter] Proverbs
+An apple a day | keeps the doctor away
+Actions speak | louder than words
+Don't count your chickens | before they hatch
+The early bird | catches the worm
+Every cloud | has a silver lining
+Too many cooks | spoil the broth
+A stitch in time | saves nine
+Birds of a feather | flock together
+Don't put all your eggs | in one basket
+Where there's a will, | there's a way
+When in Rome, | do as the Romans do
+All that glitters | is not gold
+Better late | than never
+Practice | makes perfect
+Rome wasn't built | in a day
+The grass is always greener | on the other side
+Absence makes | the heart grow fonder
+A picture is worth | a thousand words
+Beauty is | in the eye of the beholder
+Look before | you leap
+Two heads | are better than one
+Out of sight, | out of mind
+Honesty is | the best policy
+Laughter is | the best medicine
+Necessity is | the mother of invention
+Don't judge a book | by its cover
+You can't teach an old dog | new tricks
+Many hands | make light work
+A bird in the hand | is worth two in the bush
+Easy come, | easy go
+Every dog | has its day
+Fortune favours | the brave
+Haste | makes waste
+If it ain't broke, | don't fix it
+Strike while | the iron is hot
+The pen is mightier | than the sword
+Variety is | the spice of life
+What goes around | comes around
+You can lead a horse to water, | but you can't make it drink
+Still waters | run deep
+Slow and steady | wins the race
+The proof of the pudding | is in the eating
+There's no place | like home
+Home is | where the heart is
+Good things come | to those who wait
+It's no use crying | over spilt milk
+Let sleeping dogs | lie
+Make hay | while the sun shines
+Never put off till tomorrow | what you can do today
+No pain, | no gain
+One good turn | deserves another
+People who live in glass houses | shouldn't throw stones
+The apple doesn't fall | far from the tree
+There's no such thing | as a free lunch
+Waste not, | want not
+When the cat's away, | the mice will play
+A friend in need | is a friend indeed
+All good things | must come to an end
+Barking dogs | seldom bite
+Don't bite the hand | that feeds you
+Don't cross the bridge | until you come to it
+First come, | first served
+Great minds | think alike
+Hope for the best, | prepare for the worst
+Knowledge | is power
+Money doesn't | grow on trees
+Old habits | die hard
+Patience | is a virtue
+There's no time | like the present
+Two wrongs | don't make a right
+A watched pot | never boils
+Every little | helps
+Many a true word | is spoken in jest
+Time and tide | wait for no man
+Early to bed and early to rise | makes a man healthy, wealthy and wise
+
+[gymnastik] Chair exercises
+Lift your shoulders up and let them drop
+Roll your shoulders slowly backwards
+Turn your head slowly to the right and to the left
+Stretch your arms up and breathe in deeply
+Make fists and open your hands again
+Play the piano with your fingers
+Drum on the floor with your feet
+Lift and lower your heels
+Lift and lower your toes
+March while sitting, lifting your knees in turn
+Give yourself a hug
+Draw big circles with your arms
+Circle your wrists
+Circle your ankles
+Gently turn your upper body to the right and left
+Right hand on left shoulder, then the other way round
+Clap your hands, then pat your thighs
+Stretch out one leg and pull your toes towards you
+Row a boat
+Rub your hands until they are warm
+Gently stroke your face with your hands
+Breathe in and raise your arms, breathe out and lower them
+Stretch and yawn as if you have just woken up
+Write the numbers 1 to 5 in the air with your nose
+Write your name in the air with your foot
+Blow up a balloon: breathe in deeply, out slowly
+Ride a bicycle while sitting
+Hang up the washing, arms up in turn
+Clean the windows with big circles
+Knead the dough
+Pick apples, reaching up with each arm in turn
+Smile and raise your eyebrows
+Shake out your arms
+Lift a big parcel and put it down to the side
+Draw a figure of eight in the air with both hands
+
+[volkslieder] Old songs
+Daisy Bell (A Bicycle Built for Two)
+My Bonnie Lies over the Ocean
+Oh! Susanna
+She'll Be Coming 'Round the Mountain
+Home on the Range
+Oh My Darling, Clementine
+Danny Boy
+Auld Lang Syne
+Amazing Grace
+Swing Low, Sweet Chariot
+When the Saints Go Marching In
+Molly Malone
+Scarborough Fair
+Greensleeves
+The Yellow Rose of Texas
+Camptown Races
+Take Me Out to the Ball Game
+Shenandoah
+Red River Valley
+Down by the Riverside
+Michael, Row the Boat Ashore
+I've Been Working on the Railroad
+Yankee Doodle
+It's a Long Way to Tipperary
+Let Me Call You Sweetheart
+By the Light of the Silvery Moon
+In the Good Old Summertime
+Shine On, Harvest Moon
+Down by the Old Mill Stream
+When Irish Eyes Are Smiling
+The Skye Boat Song
+Loch Lomond
+Jingle Bells
+Deck the Halls
+Silent Night
+We Wish You a Merry Christmas
+O Christmas Tree
+Good King Wenceslas
+The Holly and the Ivy
+Hark! The Herald Angels Sing
+Waltzing Matilda
+The Ash Grove
+Early One Morning
+Cockles and Mussels
+
+[kinderlieder] Children's songs
+Twinkle, Twinkle, Little Star
+Old MacDonald Had a Farm
+The Wheels on the Bus
+Row, Row, Row Your Boat
+Baa, Baa, Black Sheep
+Mary Had a Little Lamb
+Incy Wincy Spider
+Head, Shoulders, Knees and Toes
+If You're Happy and You Know It
+London Bridge Is Falling Down
+Humpty Dumpty
+Hickory Dickory Dock
+Jack and Jill
+Pop Goes the Weasel
+The Farmer in the Dell
+Ring a Ring o' Roses
+This Old Man
+Five Little Ducks
+Five Little Monkeys
+Hokey Cokey
+The Grand Old Duke of York
+Hot Cross Buns
+Polly Put the Kettle On
+Oranges and Lemons
+Sing a Song of Sixpence
+Little Bo-Peep
+Hey Diddle Diddle
+Old King Cole
+Ten Green Bottles
+Frère Jacques
+Lavender's Blue
+Rock-a-Bye Baby
+Bingo Was His Name-O
+I'm a Little Teapot
+Miss Polly Had a Dolly
+One, Two, Buckle My Shoe
+Pat-a-Cake
+The Muffin Man
+Here We Go Round the Mulberry Bush
+Skip to My Lou
+Hush, Little Baby
+Rain, Rain, Go Away
+Jingle Bells
+Ten in the Bed
+
+[wer] Who?
+A little dragon
+A brave princess
+A forgetful wizard
+A talking dog
+A curious cat
+An old pirate
+A friendly witch
+A small robot
+A knight who is afraid of the dark
+A little hedgehog
+An astronaut
+A baker
+A gentle giant
+A quick little dwarf
+A little ghost
+A slow snail
+A firefighter
+A grandma on a motorbike
+A polar bear
+A sad clown
+A detective with a magnifying glass
+A mermaid
+A unicorn
+A dinosaur
+A clever fox
+A little girl
+A little boy
+A postman
+A busy ant
+A snowman
+
+[wo] Where?
+in the forest
+on the moon
+under the sea
+in an old castle
+at the supermarket
+on a farm
+at school
+on a ship
+in the desert
+at the zoo
+on a desert island
+in a cave
+at the circus
+in the attic
+in a bakery
+at the swimming pool
+on a high mountain
+in a tree house
+in outer space
+at the funfair
+in deep snow
+on a train
+in a fairy tale palace
+in the garden
+in the middle of town
+on a cloud
+in a museum
+at the playground
+in a hot-air balloon
+in the bedroom
+
+[was] What happens?
+finds a treasure
+loses the key
+learns to do magic
+meets a new friend
+has to solve a riddle
+bakes a giant cake
+gets lost
+can suddenly fly
+throws a big party
+rescues a small animal
+suddenly shrinks
+gets a mysterious letter
+is crowned king
+turns into a frog
+hears a strange noise
+wins a competition
+finds a door that wasn't there before
+wakes someone who has slept for a hundred years
+can suddenly talk to animals
+builds a crazy machine
+rides a bicycle around the world
+discovers a cave full of crystals
+wants to tame a dragon
+gives a concert
+looks for a lost hat
+gets a visit from an alien
+is caught in the rain
+looks for the biggest ice cream in the world
+builds a snowman that comes to life
+finds a message in a bottle
+
+[bewegung] Moving
+Hop five times like a frog
+Stomp like an elephant
+Creep quietly like a cat
+Flutter like a butterfly
+Stand on one leg while everyone counts to 10
+Turn around three times
+Make yourself as tall as a tree
+Make yourself as small as a mouse
+Run fast on the spot
+Do ten star jumps
+Touch your toes
+Waddle like a duck
+Gallop like a horse
+Swim through the air like a fish
+Clap your hands ten times
+Balance along an imaginary line
+Circle your arms
+Jump as high as you can
+Take five steps backwards
+Dance like a robot
+Stretch like a giraffe
+Wobble like a jelly
+Fly like an aeroplane
+Shake like a wet dog
+Do five squats
+Hop on one leg
+Roar like a lion
+Walk on tiptoe
+Walk on your heels
+Scuttle sideways like a crab
+Freeze like a statue while everyone counts to 10
+Draw a figure of eight in the air with your bottom
+Close your eyes and touch your nose
+Take a giant step
+Take tiny steps like a dwarf
+Row a boat
+Wiggle like a snake
+Hop like a kangaroo
+Wave both arms like a football fan
+Pull a funny face
+
+[koerperteile] Body parts
+Left hand
+Right hand
+Left foot
+Right foot
+
+[farben] Colours
+Red #e03131
+Blue #1c7ed6
+Yellow #fcc419
+Green #2f9e44
+
+[gefuehle] Feelings
+😀 Happy
+😢 Sad
+😠 Angry
+😨 Scared
+😲 Surprised
+😴 Tired
+🤔 Thoughtful
+😳 Embarrassed
+🥰 In love
+😎 Cool
+🤢 Disgusted
+😌 Relaxed
+🤪 Silly
+😟 Worried
+🥳 Ready to party
+😋 Yummy!
+
+[reime] Rhymes
+cat | hat, bat, mat, rat
+dog | log, frog, fog
+sun | fun, run, bun
+house | mouse
+tree | bee, sea, key, knee
+bed | red, head, bread
+star | car, far, jar
+cake | lake, snake, bake
+ball | wall, tall, small
+fish | dish, wish
+boat | coat, goat, float
+bear | chair, hair, pear
+moon | spoon, soon, balloon
+night | light, kite, bright
+rain | train, plane, chain
+hand | sand, band, land
+book | cook, hook, look
+pig | big, dig, wig
+box | fox, socks, rocks
+shoe | blue, two, zoo
+king | ring, sing, swing
+snow | bow, toe, grow
+bee | tea, see, three
+clock | sock, rock, lock
+duck | truck, luck
+hen | pen, ten, men
+mouse | house
+rug | bug, mug, hug
+bell | shell, well, smell
+day | play, hay, tray
+nose | rose, toes, hose
+cow | now, how, bow
+fly | sky, pie, eye
+goat | boat, coat, note
+mice | rice, nice, ice
+bread | bed, red, head
+jam | ham, lamb, pram
+ship | lip, hip, drip
+cheese | sneeze, please, trees
+whale | snail, tail, nail
+peach | beach, reach, teach
+light | night, bright, white
+song | long, strong, wrong
+cup | pup, up
+hill | mill, fill, spill
+
+[begriffe] Words to guess
+Toothbrush
+Umbrella
+Bicycle
+Snowman
+Coffee machine
+Iron
+Vacuum cleaner
+Telephone
+Postman
+Fire brigade
+Lighthouse
+Hammock
+Roller coaster
+Dentist
+Baker
+Hairdresser
+Watering can
+Pram
+Wheelbarrow
+Lawn mower
+Washing machine
+Television
+Typewriter
+Record player
+Cardigan
+Wellington boots
+Sunglasses
+Wooden spoon
+Rolling pin
+Pancake
+Fried egg
+Cream cake
+Sausage
+Christmas tree
+Easter bunny
+Birthday cake
+Wedding
+Picnic
+Camping
+Fishing
+Bowling
+Chess
+Card game
+Jigsaw puzzle
+Swimming
+Dancing a waltz
+Guitar
+Piano
+Trumpet
+Violin
+Conductor
+Railway station
+Airport
+Rowing boat
+Hot-air balloon
+Helicopter
+Tram
+Taxi
+Traffic lights
+Zebra crossing
+Market
+Stamp
+Postcard
+Reading the newspaper
+Glasses
+Walking stick
+Tie
+Gloves
+Snowflake
+Thunderstorm
+Rainbow
+Sunset
+Full moon
+Shooting star
+Cuckoo clock
+Alarm clock
+Key
+Torch
+Candle
+Fireplace
+Garden gnome
+Bunch of flowers
+Sunflower
+Apple tree
+Picking strawberries
+Potato salad
+Afternoon tea
+Breakfast in bed
+Afternoon nap
+Packing a suitcase
+Sandcastle
+Deckchair
+Eating ice cream
+Photo album
+Cinema
+Circus
+Magician
+Police officer
+Doctor
+Teacher
+Farmer
+Milking a cow
+Tractor
+Feeding the chickens
+Hanging out the washing
+Cleaning the windows
+Baking bread
+Walking the dog
+Bird house
+Sewing machine
+Knitting socks
+Chopping wood
+Ice skating
+Sledging
+Baking a cake
+Mountain climbing
+Tennis
+Football
+Roller skating
+Lift
+Escalator
+Fridge
+Toaster
+
+[begriffe-kinder] Words to guess for children
+Dog
+Cat
+Elephant
+Giraffe
+Monkey
+Snake
+Frog
+Horse
+Cow
+Pig
+Rabbit
+Bird
+Fish
+Lion
+Penguin
+Crocodile
+Butterfly
+Bee
+Spider
+Snail
+Ball
+Doll
+Teddy bear
+Building blocks
+Bicycle
+Scooter
+Slide
+Swing
+Sandpit
+Trampoline
+Brushing teeth
+Banana
+Apple
+Ice cream
+Pizza
+Spaghetti
+Cake
+Sweets
+Pretzel
+Drinking milk
+Car
+Bus
+Train
+Aeroplane
+Rocket
+Ship
+Tractor
+Fire engine
+Digger
+Sun
+Moon
+Rain
+Snow
+Umbrella
+Flower
+Tree
+House
+Castle
+Princess
+Knight
+Pirate
+Dragon
+Witch
+Wizard
+Ghost
+Robot
+Superhero
+Clown
+Doctor
+Cook
+Teacher
+Tying shoelaces
+Sleeping
+Swimming
+Dancing
+Singing
+Painting
+Reading
+Playing football
+Hide and seek
+Birthday
+Christmas
+Easter egg hunt
+Present
+Glasses
+Woolly hat
+Wellies
+Backpack
+Telephone
+Guitar
+Drum
+Snowman
+Sandcastle
+Soap bubbles
+Flying a kite
+Jumping in puddles
+
+[darstellung] How to play
+Explain it without saying the word
+Act it out without speaking
+Draw it, no letters or numbers
+
+[aemter] Jobs
+Lay the table
+Clear the table
+Water the plants
+Open the windows
+Take out the rubbish
+Fetch the post
+Turn the calendar page
+Feed the animals
+Wash the dishes
+Dry the dishes
+Choose the songs
+Welcome the guests
+
+[entscheidung] Yes or no
+Yes
+No
+Yes
+No
+Yes
+No
+
+[muenze] Coin
+Heads
+Tails
+
+[fragen-kinder] What if …?
+What if you could fly?
+What would you do if you were invisible for a day?
+Which animal would you like to be, and why?
+What would you wish for from a fairy?
+If you could do magic, what would you do?
+What if animals could talk?
+What does your dream house look like?
+What would you take to a desert island?
+What is your favourite food, and why?
+What was the best thing about today?
+What made you laugh out loud recently?
+What would you like to be when you grow up?
+What would you like to invent?
+If you were the teacher for a day, what would you do?
+What would you do if you were as small as an ant?
+Which superpower would you like to have?
+Where would you go in a time machine?
+What is the funniest thing that has happened to you?
+Who is your hero?
+What do you like doing most with your family?
+What would you tell your pet if it could understand you?
+What if you had a dragon as a pet?
+What does being brave mean to you?
+What makes a good friend?
+What would you cook if you could cook anything?
+What if school was in the forest?
+Which new game would you invent?
+What would you do if you were king or queen?
+What helps you when you feel sad?
+What are you looking forward to?
+What does a perfect day look like for you?
+What would you do if you found a treasure?
+What do you like about summer, and about winter?
+What new thing have you learned?
+If you wrote a book, what would it be about?
+What if it rained sweets?
+Which sound do you like?
+What would a robot built by you look like?
+What if you lived in the sea?
+What would you tell aliens about the Earth?
+Which three things make you happy?
+What would you do if you were a grown-up for a day?
+What if trees could walk?
+Who would you like to say thank you to?
+What is your favourite place?
+Which animal would you like to stroke one day?
