@@ -103,8 +103,7 @@
         'Eigene Liste': 'Own list', 'Eingebaute Liste': 'Built-in list', 'Rechnen': 'Maths',
         'Mit Wiederholung': 'With repeats', 'alles bleibt im Topf': 'everything stays in', 'Jeder einmal': 'Each once', 'dann von vorn': 'then start again',
         'Nur einmal': 'Only once', 'bis zur neuen Runde': 'until a new round', 'Anpassen: {n}': 'Adjust: {n}', 'Darstellung': 'Display',
-        'Rad': 'Wheel', 'Walzen': 'Reels', 'Karte': 'Card',
-        'Rad zum Zuschauen, Walzen für mehrere Dinge auf einmal, Karte für lange Texte wie Fragen.': 'Wheel to watch, reels for several things at once, card for long texts such as questions.',
+        'Rad': 'Wheel', 'Karte': 'Card',
         'Gruppen': 'Groups', 'Anzahl der Gruppen': 'Number of groups', 'Buchstaben der ABC-Runde': 'Letters of the ABC round',
         'Ausgegraute Buchstaben werden übersprungen.': 'Greyed-out letters are skipped.', 
         'Klassisch: Stadt, Land, Fluss …': 'Classic: city, country, river …', 'Für Senioren': 'For seniors', 'Für Kinder': 'For children',
@@ -123,9 +122,7 @@
         'bis 10': 'up to 10', 'bis 20': 'up to 20', 'bis 100': 'up to 100', 'bis 1000': 'up to 1000', 'Ziehen': 'Draw', 'Wie viele auf einmal': 'How many at once',
         'Erst Antippen zeigt das Ergebnis, etwa für Begriffe raten': 'Only a tap shows the result, e.g. for guessing words',
         // Listen bearbeiten, Teilnehmer
-        
         'Alle an': 'All on', 'Alle aus': 'All off', 'Fertig': 'Done',
-        
         'Aus Datei': 'From file', 
         // Eigenes Rad
         'Name des Rads': 'Name of the wheel', 'Überschrift, z. B. Wer?': 'Heading, e.g. Who?', 'Überschrift über dem Ergebnis (freiwillig)': 'Heading above the result (optional)',
@@ -203,7 +200,7 @@
         'Über Drehsel': 'About Drehsel', 'Version {v}': 'Version {v}', 'Drehsel': 'Drehsel',
         'Glücksrad, Losbox und Würfel für Spiele mit Senioren und Kindern. Kostenlos, ohne Werbung, ohne Anmeldung. Freie Software, die du auch selbst hosten kannst.': 'Spinning wheel, lucky draw and dice for games with seniors and children. Free, no ads, no sign-up. Free software you can also host yourself.',
         'Mehr kostenlose Programme': 'More free programs', 'Wortsuchrätsel mit eigenen Wörtern, zum Ausdrucken': 'Word search puzzles with your own words, printable',
-        'Gemeinsame Einkaufslisten zum Selbsthosten': 'Shared shopping lists to host yourself', 'Alle Programme und Anleitungen': 'All programs and guides',
+        'Gemeinsame Einkaufslisten, gleich im Browser nutzen': 'Shared shopping lists, ready to use in your browser', 'Alle Programme und Anleitungen': 'All programs and guides',
         'Drehsel online': 'Drehsel online', 'Drehsel auf GitHub': 'Drehsel on GitHub', 'Quelltext, Anleitung zum Selbsthosten, Wünsche und Fehler melden': 'Source code, self-hosting guide, wishes and bug reports',
         'Spendier mir einen Kaffee': 'Buy me a coffee', 'Drehsel ist kostenlos und entsteht in meiner Freizeit': 'Drehsel is free and made in my spare time',
         'Lizenz: GNU AGPL v3. Schriften: Atkinson Hyperlegible Next, Andika (als „Fibel“), Lexend und Nunito unter der SIL Open Font License.': 'Licence: GNU AGPL v3. Fonts: Atkinson Hyperlegible Next, Andika (as “Fibel”), Lexend and Nunito under the SIL Open Font License.',
@@ -248,7 +245,6 @@
         // Version 1.2: Listen-Editor, Reiter, Anzeige, Stimmen, einzeln ziehen
         'Buchstabe und Kategorie drehen, alle schreiben los. Schwierige Buchstaben bleiben draußen.': 'Spin a letter and a category and everyone starts writing. Tricky letters stay out.',
         'Tafel': 'Board',
-        'Rad zum Zuschauen, Walzen für mehrere Dinge auf einmal, Karte für lange Texte wie Fragen, Tafel zum Abhaken wie beim Bingo.': 'Wheel to watch, reels for several things at once, card for long texts such as questions, board to tick off like in bingo.',
         'Mehrere Walzen': 'Several reels',
         'Alle zusammen': 'All together',
         'Ein Antippen zieht alles neu': 'One tap draws everything again',
@@ -322,10 +318,22 @@
         'Das Rad dreht über die ganze Fläche, danach steht das Ergebnis über die ganze Fläche. Erst das nächste Antippen dreht wieder. Umstellen unter Menü → Farben und Schrift → Anzeige.': 'The wheel spins across the whole screen, then the result fills the whole screen. Only the next tap spins again. Change it under Menu → Colours and text → Display.',
         'Einzeln ziehen': 'Draw one at a time',
         'Bei mehreren Walzen, etwa Buchstabe und Kategorie, lässt sich unter „Anpassen“ einstellen, dass Antippen einer Walze nur sie neu zieht. Am Rechner gehen dafür auch die Tasten 1 bis 6.': 'With several reels, such as letter and category, you can set under “Adjust” that tapping a reel draws only that one again. On a computer the keys 1 to 6 work too.',
-        'Der Regler-Knopf oben öffnet die Einstellungen des Spiels: Darstellung (Rad, Walzen, Karte, Tafel), welche Liste drin ist, ob etwas wiederkommen darf, Sanduhr und Vorlesen. Jede Walze kann auch eine andere eingebaute Liste nehmen oder eine ganz eigene.': 'The slider button at the top opens the game settings: display (wheel, reels, card, board), which list is used, whether things may come up again, timer and reading aloud. Every reel can also use another built-in list or one entirely of your own.',
+        'Der Regler-Knopf oben öffnet die Einstellungen des Spiels: Darstellung (Rad, Karte, Nur Ergebnis, Tafel), welche Liste drin ist, ob etwas wiederkommen darf, Sanduhr und Vorlesen. Jede Walze kann auch eine andere eingebaute Liste nehmen oder eine ganz eigene.': 'The slider button at the top opens the game settings: display (wheel, card, result only, board), which list is used, whether things may come up again, timer and reading aloud. Every reel can also use another built-in list or one entirely of your own.',
         'Jede Liste lässt sich bearbeiten: Häkchen weg heißt, der Eintrag bleibt stehen, wird aber nicht gezogen. Der Papierkorb nimmt ihn ganz raus. Neues wird an seinem Platz im Alphabet einsortiert. „Neue Liste“ legt weitere Fassungen an, etwa für Kinder und für Erwachsene, umgeschaltet wird mit einem Tipp auf den Reiter.': 'Every list can be edited: unticked entries stay in the list but are not drawn. The bin removes them completely. New entries are sorted into their place in the alphabet. “New list” creates further versions, for example for children and for adults, and one tap on the tab switches between them.',
         'Menü → Neues Rad: Namen geben, Einträge eintippen oder einfügen, fertig. Unter Menü → Teilnehmer gibt es mehrere Namenslisten, etwa je Gruppe. Unter Menü → Sicherung und Listen lassen sich Textdateien importieren und exportieren. Alles bleibt nur auf diesem Gerät.': 'Menu → New wheel: give it a name, type or paste the entries, done. Under Menu → Players you can keep several lists of names, for example one per group. Under Menu → Backup and lists you can import and export text files. Everything stays on this device only.',
         'Der Vorführmodus (Knopf mit den vier Ecken) zeigt nur noch Rad und Ergebnis, randvoll. Auf dem iPhone geht echtes Vollbild nur, wenn Drehsel als App auf dem Home-Bildschirm liegt. Antippen dreht, oben links geht es zurück. Beim Spiegeln vom iPad auf den Fernseher das iPad quer halten und im Kontrollzentrum die Drehsperre einschalten. Das iPad hat ein anderes Format als der Fernseher, deshalb bleiben links und rechts Ränder. Mit schwarzem Hintergrund fallen sie kaum auf. Als App installiert verschwinden auch die Leisten des Browsers.': 'Presentation mode (the button with four corners) shows only the wheel and the result, filling the screen. On an iPhone, true full screen only works when Drehsel is on the home screen as an app. Tap to spin, top left takes you back. When mirroring an iPad to a TV, hold the iPad sideways and turn on rotation lock in Control Centre. The iPad has a different shape from the TV, so there are borders left and right. With a black background they are hardly noticeable. Installed as an app, the browser bars disappear as well.',
         'Von Haus aus aus. Eingeschaltet wird unter Menü → Farben und Schrift → Vorlesen, dort lässt sich auch die Stimme wählen. Drehsel nimmt von selbst die beste Stimme des Geräts. Die Siri-Stimmen gibt Apple für Webseiten nicht frei.': 'Off by default. Turn it on under Menu → Colours and text → Read aloud, where you can also choose the voice. Drehsel picks the best voice on the device by itself. Apple does not make the Siri voices available to websites.',
+        // Version 1.3: Generator, Glücksrad, Nur Ergebnis
+        'Nur Ergebnis': 'Result only',
+        'Rad zum Zuschauen, Karte mit Überschrift, „Nur Ergebnis“ füllt den ganzen Bildschirm ohne alles andere.': 'Wheel to watch, card with a heading, “Result only” fills the whole screen with nothing else.',
+        'Tafel zum Abhaken wie beim Bingo.': 'Board to tick off like in bingo.',
+        'Eigene': 'Your own',
+        'Was wird gezogen?': 'What is drawn?',
+        'Überschriften über dem Ergebnis': 'Headings above the result',
+        'Etwa BUCHSTABE und KATEGORIE. Ohne sie wird das Ergebnis noch etwas größer.': 'Such as LETTER and CATEGORY. Without them the result gets a little bigger still.',
+        'Generator': 'Generator',
+        'Nur das Ergebnis, über den ganzen Bildschirm: eine Zahl, ein Buchstabe, ein Wort. Füttern mit Zahlen, Buchstaben, jeder Liste oder eigenen Einträgen.': 'Just the result, across the whole screen: a number, a letter, a word. Feed it with numbers, letters, any list or your own entries.',
+        'Glücksrad': 'Wheel of fortune',
+        'Ein Rad, so groß wie der Bildschirm. Füllen mit Zahlen, Buchstaben, jeder Liste oder eigenen Wörtern.': 'A wheel as big as the screen. Fill it with numbers, letters, any list or your own words.',
     };
 })();

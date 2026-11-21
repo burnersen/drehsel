@@ -389,7 +389,7 @@
 
     /* ---------- Räder prüfen (aus Sicherung, Datei oder Link) ---------- */
     const RULES = ['free', 'cycle', 'once'];
-    const VIEWS = ['wheel', 'reels', 'card', 'dice', 'bingo', 'abc', 'teams', 'duties'];
+    const VIEWS = ['wheel', 'card', 'solo', 'dice', 'bingo', 'abc', 'teams', 'duties'];
     function cleanSrc(s) {
         s = s && typeof s === 'object' ? s : {};
         switch (s.type) {
@@ -427,7 +427,8 @@
         const out = {
             id: /^[a-z0-9_-]{1,40}$/i.test(g.id || '') ? g.id : 'u' + Date.now().toString(36) + rnd(1296).toString(36),
             name: clip(g.name, 60) || 'Mein Rad', ic: /^[a-z0-9-]{1,20}$/.test(g.ic || '') ? g.ic : 'wheel', slots,
-            view: VIEWS.indexOf(g.view) >= 0 ? g.view : 'wheel', note: clip(g.note, 300),
+            // „Walzen“ gibt es nicht mehr, sie sind in der Karte aufgegangen
+            view: g.view === 'reels' ? 'card' : VIEWS.indexOf(g.view) >= 0 ? g.view : 'wheel', note: clip(g.note, 300),
         };
         if (g.timer && +g.timer.s > 0) out.timer = { s: Math.max(5, Math.min(3600, Math.round(+g.timer.s))), auto: !!g.timer.auto };
         if (g.groups) out.groups = Math.max(2, Math.min(12, Math.round(+g.groups)));
@@ -461,16 +462,20 @@
        tags: alle, senioren, kinder, gruppe, werkzeug. */
     const L = (list, label, rule, more) => Object.assign({ label, src: { type: 'list', list }, rule: rule || 'cycle' }, more || {});
     const GAMES = [
+        { id: 'generator', ic: 'star', tags: ['alle', 'werkzeug'], name: 'Generator', desc: 'Nur das Ergebnis, über den ganzen Bildschirm: eine Zahl, ein Buchstabe, ein Wort. Füttern mit Zahlen, Buchstaben, jeder Liste oder eigenen Einträgen.',
+            slots: [{ label: '', src: { type: 'numbers', from: 1, to: 100, step: 1 }, rule: 'free' }], view: 'solo', flex: true },
+        { id: 'rad', ic: 'wheel', tags: ['alle', 'werkzeug'], name: 'Glücksrad', desc: 'Ein Rad, so groß wie der Bildschirm. Füllen mit Zahlen, Buchstaben, jeder Liste oder eigenen Wörtern.',
+            slots: [{ label: '', src: { type: 'numbers', from: 1, to: 12, step: 1 }, rule: 'free' }], view: 'wheel', flex: true },
         { id: 'slf', ic: 'pen', tags: ['alle', 'senioren', 'kinder'], name: 'Stadt-Land-Fluss', desc: 'Buchstabe und Kategorie drehen, alle schreiben los. Schwierige Buchstaben bleiben draußen.',
             slots: [{ label: 'Buchstabe', src: { type: 'letters', ex: 'QXY' }, rule: 'cycle' }, L('slf-klassisch', 'Kategorie')], view: 'wheel', timer: { s: 0, auto: true } },
         { id: 'slf-mund', ic: 'chat', tags: ['alle', 'senioren', 'gruppe'], name: 'Nennt etwas mit …', desc: 'Buchstabe und Kategorie, wer zuerst etwas Passendes sagt. Stadt-Land-Fluss ohne Stift.',
-            slots: [{ label: 'Buchstabe', src: { type: 'letters', ex: 'QXYCJV' }, rule: 'cycle' }, L('slf-senioren', 'Kategorie')], view: 'reels' },
+            slots: [{ label: 'Buchstabe', src: { type: 'letters', ex: 'QXYCJV' }, rule: 'cycle' }, L('slf-senioren', 'Kategorie')], view: 'card' },
         { id: 'slf-kinder', ic: 'pen', tags: ['kinder'], name: 'Stadt-Land-Fluss für Kinder', desc: 'Leichte Buchstaben und Kategorien wie Tier, Farbe und Essen.',
-            slots: [{ label: 'Buchstabe', src: { type: 'letters', ex: 'CJQVXY' }, rule: 'cycle' }, L('slf-kinder', 'Kategorie')], view: 'reels' },
+            slots: [{ label: 'Buchstabe', src: { type: 'letters', ex: 'CJQVXY' }, rule: 'cycle' }, L('slf-kinder', 'Kategorie')], view: 'card' },
         { id: 'bingo', ic: 'grid', tags: ['alle', 'senioren', 'gruppe'], name: 'Bingo', desc: 'Zahlen von 1 bis 75 ohne Zurücklegen, mit Tafel und Ansage.',
             slots: [{ label: 'Zahl', src: { type: 'numbers', from: 1, to: 75, step: 1, bingo: true }, rule: 'once' }], view: 'bingo' },
         { id: 'begriffe', ic: 'mask', tags: ['alle', 'gruppe'], name: 'Begriffe raten', desc: 'Erklären, vormachen oder malen. Der Begriff bleibt verdeckt, bis man ihn antippt.',
-            slots: [L('begriffe', 'Begriff', 'cycle', { hide: true }), L('darstellung', 'So geht\'s', 'free')], view: 'reels', timer: { s: 60, auto: true } },
+            slots: [L('begriffe', 'Begriff', 'cycle', { hide: true }), L('darstellung', 'So geht\'s', 'free')], view: 'card', timer: { s: 60, auto: true } },
         { id: 'abc', ic: 'abc', tags: ['alle', 'senioren', 'gruppe'], name: 'ABC-Runde', desc: 'Ein Thema, dann reihum von A bis Z. Klassiker im Gedächtnistraining.',
             slots: [L('abc-themen', 'Thema')], view: 'abc' },
         { id: 'erinnerung', ic: 'album', tags: ['senioren', 'gruppe'], name: 'Erinnerungsrad', desc: 'Fragen zum Erzählen von früher. Jeder kann etwas beitragen, es gibt kein Falsch.',
@@ -482,11 +487,11 @@
         { id: 'lieder', ic: 'music', tags: ['senioren', 'gruppe'], name: 'Liederrad', desc: 'Bekannte Volkslieder zum gemeinsamen Singen.',
             slots: [L('volkslieder', 'Wir singen')], view: 'wheel' },
         { id: 'geschichten', ic: 'book', tags: ['kinder', 'gruppe'], name: 'Geschichten-Walzen', desc: 'Wer? Wo? Was passiert? Daraus wird eine Geschichte erzählt.',
-            slots: [L('wer', 'Wer?'), L('wo', 'Wo?'), L('was', 'Was passiert?')], view: 'reels' },
+            slots: [L('wer', 'Wer?'), L('wo', 'Wo?'), L('was', 'Was passiert?')], view: 'card' },
         { id: 'bewegung', ic: 'run', tags: ['kinder'], name: 'Bewegungsrad', desc: 'Hüpfen, strecken, balancieren. Toben für zwischendurch.',
             slots: [L('bewegung', 'Los geht\'s')], view: 'wheel' },
         { id: 'koerperfarben', ic: 'hand', tags: ['kinder', 'gruppe'], name: 'Hand, Fuß und Farbe', desc: 'Körperteil und Farbe drehen, dann auf die passende Farbe stellen oder legen.',
-            slots: [L('koerperteile', 'Körperteil', 'free'), L('farben', 'Farbe', 'free')], view: 'reels' },
+            slots: [L('koerperteile', 'Körperteil', 'free'), L('farben', 'Farbe', 'free')], view: 'card' },
         { id: 'rechnen', ic: 'calc', tags: ['kinder', 'senioren'], name: 'Rechen-Rad', desc: 'Kopfrechnen im Zahlenraum bis 20. Antippen zeigt das Ergebnis.',
             slots: [{ label: 'Rechne', src: { type: 'math', ops: ['+', '-'], max: 20 }, rule: 'free' }], view: 'card' },
         { id: 'gefuehle', ic: 'smile', tags: ['kinder'], name: 'Gefühle-Rad', desc: 'Zeig mal, wie du guckst, wenn du dich so fühlst.',
@@ -498,7 +503,7 @@
         { id: 'fragen-kinder', ic: 'chat', tags: ['kinder', 'gruppe'], name: 'Was wäre, wenn …?', desc: 'Fragen zum Erzählen und Fantasieren für Kinder.',
             slots: [L('fragen-kinder', 'Erzähl mal')], view: 'card' },
         { id: 'begriffe-kinder', ic: 'mask', tags: ['kinder'], name: 'Begriffe raten für Kinder', desc: 'Leichte Begriffe zum Erklären, Vormachen oder Malen.',
-            slots: [L('begriffe-kinder', 'Begriff', 'cycle', { hide: true }), L('darstellung', 'So geht\'s', 'free')], view: 'reels', timer: { s: 60, auto: true } },
+            slots: [L('begriffe-kinder', 'Begriff', 'cycle', { hide: true }), L('darstellung', 'So geht\'s', 'free')], view: 'card', timer: { s: 60, auto: true } },
         { id: 'wer', ic: 'person', tags: ['gruppe', 'werkzeug'], name: 'Wer ist dran?', desc: 'Namen eintragen, das Rad sucht aus. Jeder kommt einmal dran, dann geht es von vorn los.',
             slots: [{ label: 'Dran ist', src: { type: 'names' }, rule: 'cycle' }], view: 'wheel' },
         { id: 'gruppen', ic: 'people', tags: ['gruppe', 'werkzeug'], name: 'Gruppen einteilen', desc: 'Alle Namen gerecht auf Gruppen verteilen.',

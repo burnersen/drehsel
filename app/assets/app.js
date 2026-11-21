@@ -13,7 +13,7 @@
     const LINKS = {
         play: 'https://drehsel.burnersen.de/', github: 'https://github.com/burnersen/drehsel', web: 'https://tech.burnersen.de/',
         kofi: 'https://ko-fi.com/burnersen', suchsel: 'https://suchsel.burnersen.de/',
-        kaufen: { de: 'https://tech.burnersen.de/tools/kaufen/', en: 'https://tech.burnersen.de/en/tools/kaufen-en/' },
+        kaufen: 'https://kaufen.burnersen.de/',
     };
 
     /* ---------- Speicher ---------- */
@@ -29,7 +29,7 @@
         lang: navLang(), look: { mode: 'auto', l: 'klassisch', d: 'nacht', cl: null, cd: null }, font: 'atkinson',
         fs: { ui: 1, res: 1, wheel: 1, small: 1 }, fw: 800, caps: false,
         speed: 'normal', sound: true, vib: true, say: false, sayRate: .9, voice: '', black: true, wake: true, cur: 'slf', filter: 'all', seen: false, tvTip: false,
-        hist: false, count: true, countShow: false, bigRes: 'always',
+        hist: false, count: true, countShow: false, bigRes: 'always', labels: true,
     };
     const set = Object.assign({}, DEF, load('set', {}));
     set.look = Object.assign({}, DEF.look, set.look || {});
@@ -199,6 +199,7 @@
     }
     /** Was gezogen wird: Walzen auf „Leiste“ oder „Aus“ fallen heraus. allSlots behält alle (für die Einstellungen). */
     function effective(g) {
+        if (g.view === 'reels') g.view = 'card';    // Walzen sind in der Karte aufgegangen
         g.allSlots = g.slots;
         const act = g.slots.filter(s => !s.use);
         g.slots = act.length ? act : g.slots.slice(0, 1);
@@ -468,10 +469,10 @@
     const sayOn = () => game && game.say != null ? !!game.say : !!set.say;
     const speedMs = v => {
         const base = { slow: 6500, normal: 4200, fast: 2200, off: 0 }[set.speed];
-        const f = { wheel: 1, reels: .7, card: .55, dice: .4, bingo: .55, abc: .5, teams: .4, duties: .4 }[v] || 1;
+        const f = { wheel: 1, card: .62, solo: .62, dice: .4, bingo: .55, abc: .5, teams: .4, duties: .4 }[v] || 1;
         return base == null ? 4200 * f : base * f;
     };
-    const SPIN_LABEL = { wheel: N('Drehen'), reels: N('Drehen'), card: N('Ziehen'), dice: N('Würfeln'), bingo: N('Ziehen'), abc: N('Neues Thema'), teams: N('Einteilen'), duties: N('Verteilen') };
+    const SPIN_LABEL = { wheel: N('Drehen'), card: N('Ziehen'), solo: N('Ziehen'), dice: N('Würfeln'), bingo: N('Ziehen'), abc: N('Neues Thema'), teams: N('Einteilen'), duties: N('Verteilen') };
     const resText = (r, g) => r ? r.map((sel, k) => g.slots[k] && g.slots[k].hide ? '' : sel.map(s => (s.p ? s.p + ' ' : '') + s.t).join(', ')).filter(Boolean).join(' · ') : '';
 
     function model() {
@@ -485,7 +486,7 @@
             view: g.view, lang: set.lang, show: showMode, all, rev, open,
             slots: g.slots.map((s, k) => ({ label: s.label, hide: s.hide, seg: [] })),
             res: lastOk ? last.r : null, canUndo: !!(last && last.b), hint: t('Antippen zum Drehen'),
-            apart: g.mode === 'apart' && g.slots.length > 1,
+            apart: g.mode === 'apart' && g.slots.length > 1, labels: set.labels !== false,
             big: g.view === 'wheel' && (set.bigRes === 'always' || (set.bigRes === 'show' && showMode)),
         };
         // Was das Rad zeigt: direkt nach dem Drehen die Felder von vorher mit dem Gewinner, sonst was noch im Topf ist
@@ -772,9 +773,9 @@
             body.replaceChildren();
             if (g.desc) body.append(el('p.lead', { text: g.desc }));
             // Darstellung: Rad, Walzen, Karte und bei einer Walze auch die Tafel wie beim Bingo
-            if (['wheel', 'reels', 'card', 'bingo'].indexOf(g.view) >= 0) {
+            if (['wheel', 'card', 'solo', 'bingo'].indexOf(g.view) >= 0) {
                 const one = g.slots.length === 1 && !DR.endless(g.slots[0]);
-                const views = [['wheel', t('Rad')], ['reels', t('Walzen')], ['card', t('Karte')]].concat(one ? [['bingo', t('Tafel')]] : []);
+                const views = [['wheel', t('Rad')], ['card', t('Karte')], ['solo', t('Nur Ergebnis')]].concat(one ? [['bingo', t('Tafel')]] : []);
                 body.append(section(t('Darstellung'), seg(views, g.view, v => {
                     patchGame(g.id, (o, isB) => {
                         o.view = v;
@@ -783,11 +784,10 @@
                     });
                     lastSpin = null; paint();
                 }, one ? 'c4' : 'c3'),
-                note(one ? t('Rad zum Zuschauen, Walzen für mehrere Dinge auf einmal, Karte für lange Texte wie Fragen, Tafel zum Abhaken wie beim Bingo.')
-                    : t('Rad zum Zuschauen, Walzen für mehrere Dinge auf einmal, Karte für lange Texte wie Fragen.'))));
+                note(t('Rad zum Zuschauen, Karte mit Überschrift, „Nur Ergebnis“ füllt den ganzen Bildschirm ohne alles andere.') + (one ? ' ' + t('Tafel zum Abhaken wie beim Bingo.') : ''))));
             }
             // Mehrere Walzen: alle auf einmal oder jede für sich
-            if (g.slots.length > 1 && ['wheel', 'reels', 'card'].indexOf(g.view) >= 0) {
+            if (g.slots.length > 1 && ['wheel', 'card', 'solo'].indexOf(g.view) >= 0) {
                 body.append(section(t('Mehrere Walzen'), seg([['', t('Alle zusammen'), t('Ein Antippen zieht alles neu')], ['apart', t('Einzeln'), t('Antippen einer Walze zieht nur sie neu')]],
                     g.mode || '', v => patchGame(g.id, o => { o.mode = v || undefined; if (!v) delete o.mode; }))));
             }
@@ -885,6 +885,22 @@
         const src = sl.src;
         const items = DR.endless(sl) ? [] : DR.itemsOf(sl, ctx);
         const isB = !!builtin(g.id);
+        // Generator und Glücksrad: frei füttern mit Zahlen, Buchstaben, jeder Liste, eigenen Einträgen oder Namen
+        if (g.flex || !isB) {
+            const firstList = Object.keys(content[contentLang()] || {}).find(id => !/^alphabet/.test(id)) || 'slf-klassisch';
+            const kinds = [['numbers', t('Zahlen')], ['letters', t('Buchstaben')], ['list', t('Liste')], ['items', t('Eigene')], ['names', t('Namen')]];
+            if (kinds.some(x => x[0] === src.type)) {
+                sec.append(field(t('Was wird gezogen?'), seg(kinds, src.type, v => {
+                    if (v === src.type) return;
+                    const nsrc = v === 'numbers' ? { type: 'numbers', from: 1, to: 100, step: 1 } : v === 'letters' ? { type: 'letters', ex: '' } : v === 'list' ? { type: 'list', list: firstList }
+                        : v === 'items' ? { type: 'items', items: [] } : { type: 'names' };
+                    patchGame(g.id, (o, isB2) => { slotPatch(o, isB2, k).src = nsrc; });
+                    lastSpin = null;
+                    if (v === 'items') editSlotItems(g.id, k, repaint);
+                    repaint();
+                }, 'c5')));
+            }
+        }
         // Bei mehreren Walzen: ziehen, nur als Leiste zeigen (etwa die Kategorien zum Aufschreiben) oder weglassen
         if (all.length > 1) {
             sec.append(field(t('Diese Walze'), seg([['', t('Ziehen')], ['strip', t('Nur anzeigen'), t('alle als Leiste')], ['off', t('Aus')]], sl.use || '',
@@ -949,7 +965,7 @@
         // Regeln
         if (!DR.endless(sl) && g.view !== 'teams' && g.view !== 'duties' && sl.use !== 'strip') {
             sec.append(field(t('Ziehen'), seg(RULE_OPTS(), sl.rule || 'free', v => { patchGame(g.id, (o, isB2) => { slotPatch(o, isB2, k).rule = v; }); }, 'c3')));
-            if (['wheel', 'reels', 'card'].indexOf(g.view) >= 0 && items.length > 2) {
+            if (['wheel', 'card', 'solo'].indexOf(g.view) >= 0 && items.length > 2) {
                 sec.append(el('div.row', null, el('span', { text: t('Wie viele auf einmal') }), stepper(sl.pick || 1, 1, Math.min(20, items.length), v => patchGame(g.id, (o, isB2) => { slotPatch(o, isB2, k).pick = v; }))));
             }
             if (src.type !== 'names') sec.append(toggle(t('Verdeckt'), !!sl.hide, v => patchGame(g.id, (o, isB2) => { slotPatch(o, isB2, k).hide = v; }), t('Erst Antippen zeigt das Ergebnis, etwa für Begriffe raten')));
@@ -1207,7 +1223,7 @@
                 else card.append(note(t('Feineinstellungen wie Bereich, Buchstaben oder Rechenarten gibt es nach dem Speichern unter „Anpassen“.')));
                 slotsBox.append(card);
             });
-            if (g.slots.length < 6) slotsBox.append(btn(t('Weitere Walze dazu'), () => { g.slots.push({ label: '', src: { type: 'items', items: [] }, rule: 'cycle' }); if (g.view === 'wheel') g.view = 'reels'; paintSlots(); }, 'plus'));
+            if (g.slots.length < 6) slotsBox.append(btn(t('Weitere Walze dazu'), () => { g.slots.push({ label: '', src: { type: 'items', items: [] }, rule: 'cycle' }); if (g.view === 'wheel') g.view = 'card'; paintSlots(); }, 'plus'));
         };
         paintSlots();
         body.append(field(t('Name'), nameIn), field(t('Symbol'), icons), slotsBox,
@@ -1341,6 +1357,7 @@
                     'vibrate' in navigator ? toggle(t('Vibration'), set.vib, v => { set.vib = v; saveSet(); }) : null),
                 section(t('Anzeige'),
                     toggle(t('Zuletzt gezogene unten zeigen'), set.hist, v => { set.hist = v; saveSet(); }, t('Die letzten Ergebnisse klein unter dem aktuellen. Von Haus aus aus, dann bleibt mehr Platz.')),
+                    toggle(t('Überschriften über dem Ergebnis'), set.labels !== false, v => { set.labels = v; saveSet(); }, t('Etwa BUCHSTABE und KATEGORIE. Ohne sie wird das Ergebnis noch etwas größer.')),
                     toggle(t('Zähler „noch … von …“'), set.count, v => { set.count = v; saveSet(); }, t('Wie viele Einträge noch im Topf sind')),
                     field(t('Rad und Ergebnis bildschirmfüllend'), seg([['always', t('Immer')], ['show', t('Im Vorführmodus')], ['never', t('Nie')]], set.bigRes, v => { set.bigRes = v; saveSet(); }, 'c3')),
                     note(t('Das Rad dreht über die ganze Fläche, bleibt kurz stehen, dann zeigt sich das Ergebnis über die ganze Fläche. Erst das nächste Antippen dreht wieder. „Nie“ zeigt Rad und Ergebnis nebeneinander.'))),
@@ -1528,7 +1545,7 @@
             } catch (e) {}
         } else {
             games = DR.parseImport(text, (fname || '').replace(/\.[a-z0-9]+$/i, '') || t('Importiert')).map(x => DR.cleanGame({
-                name: x.name, ic: 'list', view: x.slots.length > 1 ? 'reels' : (x.slots[0].items.some(i => i.t.length > 24) ? 'card' : 'wheel'),
+                name: x.name, ic: 'list', view: x.slots.length > 1 ? 'card' : (x.slots[0].items.some(i => i.t.length > 24) ? 'card' : 'wheel'),
                 slots: x.slots.map(s => ({ label: x.slots.length > 1 ? s.label : '', src: { type: 'items', items: s.items }, rule: 'cycle' })),
             })).filter(Boolean);
         }
@@ -1757,7 +1774,7 @@
                 [t('Sanduhr'), t('Antippen startet und hält an, lange drücken setzt zurück.')],
                 [t('Rückgängig'), t('Unten rechts: die letzte Drehung zurücknehmen oder den Verlauf ansehen und eine neue Runde beginnen.')]]),
             el('h3', { text: t('Anpassen') }),
-            p(t('Der Regler-Knopf oben öffnet die Einstellungen des Spiels: Darstellung (Rad, Walzen, Karte, Tafel), welche Liste drin ist, ob etwas wiederkommen darf, Sanduhr und Vorlesen. Jede Walze kann auch eine andere eingebaute Liste nehmen oder eine ganz eigene.')),
+            p(t('Der Regler-Knopf oben öffnet die Einstellungen des Spiels: Darstellung (Rad, Karte, Nur Ergebnis, Tafel), welche Liste drin ist, ob etwas wiederkommen darf, Sanduhr und Vorlesen. Jede Walze kann auch eine andere eingebaute Liste nehmen oder eine ganz eigene.')),
             el('h3', { text: t('Eigene Listen') }),
             p(t('Jede Liste lässt sich bearbeiten: Häkchen weg heißt, der Eintrag bleibt stehen, wird aber nicht gezogen. Der Papierkorb nimmt ihn ganz raus. Neues wird an seinem Platz im Alphabet einsortiert. „Neue Liste“ legt weitere Fassungen an, etwa für Kinder und für Erwachsene, umgeschaltet wird mit einem Tipp auf den Reiter.')),
             p(t('Menü → Neues Rad: Namen geben, Einträge eintippen oder einfügen, fertig. Unter Menü → Teilnehmer gibt es mehrere Namenslisten, etwa je Gruppe. Unter Menü → Sicherung und Listen lassen sich Textdateien importieren und exportieren. Alles bleibt nur auf diesem Gerät.')),
@@ -1780,7 +1797,7 @@
             el('h3', { text: t('Mehr kostenlose Programme') }),
             el('div.menu', null,
                 a('grid', 'Suchsel', t('Wortsuchrätsel mit eigenen Wörtern, zum Ausdrucken'), LINKS.suchsel),
-                a('list', 'Kaufen', t('Gemeinsame Einkaufslisten zum Selbsthosten'), LINKS.kaufen[set.lang] || LINKS.kaufen.en),
+                a('list', 'Kaufen', t('Gemeinsame Einkaufslisten, gleich im Browser nutzen'), LINKS.kaufen),
                 a('globe', 'tech.burnersen.de', t('Alle Programme und Anleitungen'), LINKS.web)),
             el('h3', { text: t('Drehsel') }),
             el('div.menu', null,
