@@ -93,7 +93,7 @@
         const mut = ensure(mix(text, card, .38), card, 4.6);              // Nebentext
         const soft = mix(c.acc, card, dark ? .78 : .87);                 // Chips, Felder
         return {
-            '--bg': c.bg, '--card': card, '--text': ensure(text, card, 4.6), '--text-bg': ensure(text, c.bg, 4.6), '--acc': c.acc, '--on-acc': onAcc,
+            '--bg': c.bg, '--card': card, '--text': ensure(text, card, 4.6), '--text-bg': ensure(text, c.bg, 4.6), '--ink-bg': ensure(c.acc, c.bg, 4.6), '--mut-bg': ensure(mix(text, c.bg, .38), c.bg, 4.6), '--acc': c.acc, '--on-acc': onAcc,
             '--ink': ink, '--mut': mut, '--line': mix(text, card, dark ? .78 : .84), '--soft': soft, '--on-soft': ensure(c.acc, soft, 4.6),
             '--rim': c.rim, '--field': mix(c.bg, card, .5), '--warn': ensure(dark ? '#ffa94d' : '#b54708', card, 4.6),
             '--ok': ensure(dark ? '#8ce99a' : '#2b8a3e', card, 4.6), '--shadow': dark ? '0 1px 2px rgba(0,0,0,.4), 0 6px 20px rgba(0,0,0,.25)' : '0 1px 2px rgba(30,30,40,.06), 0 6px 20px rgba(30,30,40,.07)',

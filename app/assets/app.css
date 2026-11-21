@@ -93,7 +93,8 @@ svg { width: 1.4rem; height: 1.4rem; fill: none; stroke: currentColor; stroke-wi
 }
 #stage.port { flex-direction: column; }
 body.show #top { display: none; }
-body.show #stage { padding: calc(env(safe-area-inset-top) + .8rem) calc(env(safe-area-inset-right) + 1rem) calc(env(safe-area-inset-bottom) + .8rem) calc(env(safe-area-inset-left) + 1rem); gap: 1.2rem; }
+/* Vorführmodus: fast randlos, die Fläche gehört dem Ergebnis */
+body.show #stage { padding: calc(env(safe-area-inset-top) + .45rem) calc(env(safe-area-inset-right) + .45rem) calc(env(safe-area-inset-bottom) + .45rem) calc(env(safe-area-inset-left) + .45rem); gap: .45rem; }
 
 .res {
     flex: 1; min-height: 0; min-width: 0; display: flex; flex-direction: column; background: var(--card); color: var(--text);
@@ -105,11 +106,15 @@ body.show #stage { padding: calc(env(safe-area-inset-top) + .8rem) calc(env(safe
 }
 .val {
     flex: 1; min-height: 0; min-width: 0; display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 0 .25em;
-    text-align: center; overflow: hidden; color: var(--ink); font-weight: var(--fw-res); line-height: 1.1;
+    text-align: center; overflow: hidden; color: var(--ink); font-weight: var(--fw-res); line-height: 1.06;
     overflow-wrap: normal; word-break: normal; hyphens: manual; font-size: 3rem; letter-spacing: -.005em;
 }
 .val > span { max-width: 100%; }
-.caps .val > span, .caps .bigball span, .caps .letter .big { text-transform: uppercase; }
+/* Randvoll eingepasst (stage.js bigFit): eine Zeile, nach den Umrissen der Zeichen mittig verschoben */
+.ink { flex-wrap: nowrap !important; }
+.ink > span { white-space: nowrap; max-width: none !important; flex: none; line-height: 1; letter-spacing: 0; }
+i.bl { display: inline-block; width: 0; height: 0; vertical-align: baseline; }
+.caps .val > span, .caps .bigball .num, .caps .letter .big { text-transform: uppercase; }
 .val .pre { font-size: .32em; align-self: center; padding: .15em .45em; border-radius: .4em; background: var(--soft); color: var(--on-soft); margin-right: .2em; }
 .val.wait { color: var(--mut); font-weight: 700; }
 .val.covered { cursor: pointer; color: var(--mut); border: 2px dashed var(--line); border-radius: calc(var(--r) - 6px); margin: .3rem 0; }
@@ -134,22 +139,31 @@ body.show #stage { padding: calc(env(safe-area-inset-top) + .8rem) calc(env(safe
 
 .foot {
     flex: none; display: flex; align-items: center; justify-content: space-between; gap: .5rem; min-height: 2.4rem;
-    font-size: calc(.92rem * var(--fs-small)); color: var(--mut);
+    font-size: calc(.92rem * var(--fs-small)); color: var(--mut-bg, var(--mut));
 }
 .foot .info { display: flex; align-items: center; gap: .3rem .7rem; flex-wrap: wrap; min-width: 0; }
 .foot .hist { display: inline-flex; gap: .3rem; flex-wrap: wrap; }
 .foot .hist b { font-weight: 700; padding: .05rem .55rem; border-radius: 99px; background: var(--card); color: var(--text); box-shadow: var(--shadow); max-width: 12rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .foot .acts { display: flex; gap: .2rem; }
-.cats { flex: none; display: flex; flex-wrap: wrap; justify-content: center; gap: .35rem; font-size: calc(1rem * var(--fs-small)); }
+.strips { flex: none; display: flex; flex-direction: column; gap: .35rem; }
+.cats { flex: none; display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: .35rem; font-size: calc(1rem * var(--fs-small)); }
 .cats span { padding: .2rem .8rem; border-radius: 99px; background: var(--soft); color: var(--on-soft); font-weight: 700; }
+.cats b { color: var(--mut-bg, var(--mut)); font-size: .85em; text-transform: uppercase; letter-spacing: .06em; margin-right: .2rem; }
+#stage[class*=apart] .res, .res[data-slot] { cursor: pointer; }
 p.note { margin: .3rem 0; color: var(--mut); font-size: calc(.9rem * var(--fs-small)); }
-#stage > p.note, .panel > p.note { text-align: center; flex: none; margin: 0; }
+#stage > p.note, .panel > p.note { text-align: center; flex: none; margin: 0; color: var(--mut-bg, var(--mut)); }
 
 /* Rad */
 .v-wheel { align-items: stretch; }
-.wheels { flex: 0 0 var(--wsz, 50%); display: flex; align-items: center; justify-content: center; min-width: 0; min-height: 0; }
-.wbox { flex: 1; min-width: 0; min-height: 0; height: 100%; display: flex; align-items: center; justify-content: center; }
-.port .wheels { flex-basis: var(--wsz, 55%); width: 100%; }
+.wheels {
+    flex: 0 0 var(--wbasis, 50%); display: grid; grid-template-columns: repeat(var(--wcols, 1), var(--wsz, 1fr)); grid-auto-rows: var(--wsz, 1fr);
+    gap: 8px; align-content: center; justify-content: center; min-width: 0; min-height: 0;
+}
+.wbox { min-width: 0; min-height: 0; width: var(--wsz); height: var(--wsz); display: flex; align-items: center; justify-content: center; }
+.port .wheels { width: 100%; }
+/* Nach dem Drehen: das Ergebnis übernimmt die ganze Fläche, Antippen bringt das Rad zurück */
+#stage.big .wheels { display: none; }
+#stage.big .panel { animation: fadein .35s ease-out; }
 canvas.wheel { display: block; touch-action: none; cursor: pointer; }
 .panel { flex: 1; min-width: 0; min-height: 0; display: flex; flex-direction: column; gap: .6rem; }
 .results { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: .6rem; }
@@ -175,7 +189,7 @@ canvas.wheel { display: block; touch-action: none; cursor: pointer; }
 .die i.on { background: var(--ink); box-shadow: inset 0 .08em .1em rgba(0,0,0,.25); }
 .die.rolling { animation: shake .18s ease-in-out infinite alternate; }
 .dicebox.idle .die { opacity: .55; }
-.sum { flex: none; text-align: center; font-weight: 800; font-size: calc(1.6rem * var(--fs-small)); color: var(--ink); min-height: 1.5em; }
+.sum { flex: none; text-align: center; font-weight: 800; font-size: calc(1.6rem * var(--fs-small)); color: var(--ink-bg, var(--ink)); min-height: 1.5em; }
 
 /* Bingo */
 .v-bingo { align-items: stretch; }
@@ -187,20 +201,20 @@ canvas.wheel { display: block; touch-action: none; cursor: pointer; }
     font-weight: var(--fw-res); line-height: 1; overflow: hidden;
 }
 .bigball small { font-size: calc(1.2rem + 2vmin); opacity: .9; letter-spacing: .1em; }
-.bigball span { width: 70%; height: 55%; display: flex; align-items: center; justify-content: center; font-size: 5rem; }
+.bigball .num { width: 72%; height: 58%; display: flex; align-items: center; justify-content: center; flex-wrap: wrap; text-align: center; font-size: 5rem; overflow: hidden; line-height: 1.05; }
 .bigball.idle { opacity: .5; }
 .board {
-    flex: 1; min-width: 0; min-height: 0; display: grid; grid-template-columns: repeat(var(--cols, 16), var(--cell, 30px)); grid-auto-rows: var(--cell, 30px);
-    align-content: center; justify-content: center; font-size: calc(var(--cell, 30px) * .42); font-weight: 700;
+    flex: 1; min-width: 0; min-height: 0; display: grid; grid-template-columns: repeat(var(--cols, 16), var(--cw, 30px)); grid-template-rows: repeat(var(--rows, 5), var(--ch, 30px));
+    align-content: center; justify-content: center; font-size: var(--bfs, 12px); font-weight: 700;
 }
+.board.words span { border-radius: .4em; padding: 0 .2em; overflow: hidden; text-align: center; line-height: 1.05; overflow-wrap: anywhere; }
 .board span, .board .rowlab { display: grid; place-items: center; margin: 6%; border-radius: 22%; font-variant-numeric: tabular-nums; }
 .board span { background: var(--card); color: var(--mut); box-shadow: inset 0 0 0 1px var(--line); }
 .board span.on { background: var(--acc); color: var(--on-acc); box-shadow: none; }
 .board span.last { outline: .14em solid var(--rim); outline-offset: .06em; animation: pulse 1.2s ease-in-out 3; }
-.board .rowlab { color: var(--ink); font-size: 1.15em; }
+.board .rowlab { color: var(--ink-bg, var(--ink)); font-size: 1.15em; }
 .v-bingo .foot { position: absolute; left: .9rem; right: .9rem; bottom: .2rem; }
-.v-bingo { padding-bottom: 2.8rem !important; }
-body.show .v-bingo { padding-bottom: 2.8rem !important; }
+.v-bingo:not(.nofoot) { padding-bottom: 2.8rem !important; }
 
 /* ABC-Runde */
 .v-abc { flex-direction: column !important; }
@@ -208,14 +222,14 @@ body.show .v-bingo { padding-bottom: 2.8rem !important; }
 .letter { flex: 1; min-height: 0; display: flex; align-items: stretch; gap: .5rem; }
 .letter .big {
     flex: 1; min-width: 0; display: flex; align-items: center; justify-content: center; font-weight: var(--fw-res); color: var(--ink);
-    background: var(--card); border-radius: var(--r); box-shadow: var(--shadow); line-height: 1; overflow: hidden; font-size: 8rem;
+    background: var(--card); border-radius: var(--r); box-shadow: var(--shadow); line-height: 1; overflow: hidden; font-size: 8rem; padding: .3rem;
 }
 .letter .nav { flex: 0 0 min(14%, 6rem); border: 0; border-radius: var(--r); background: var(--soft); color: var(--on-soft); display: grid; place-items: center; }
 .letter .nav svg { width: 60%; height: 60%; max-width: 4rem; max-height: 4rem; stroke-width: 2.5; }
 .letter .nav:disabled { opacity: .35; }
 .strip { flex: none; display: flex; flex-wrap: wrap; justify-content: center; gap: .25rem; font-weight: 800; font-size: calc(1rem * var(--fs-small)); }
 .strip span { min-width: 1.9em; padding: .15em .3em; text-align: center; border-radius: .45em; background: var(--card); color: var(--text); box-shadow: inset 0 0 0 1px var(--line); }
-.strip span.done { color: var(--mut); text-decoration: line-through; background: transparent; }
+.strip span.done { color: var(--mut-bg, var(--mut)); text-decoration: line-through; background: transparent; }
 .strip span.cur { background: var(--acc); color: var(--on-acc); box-shadow: none; }
 
 /* Gruppen und Ämter */
@@ -256,6 +270,19 @@ body.show .timer { width: 7rem; height: 7rem; font-size: 2rem; top: calc(env(saf
     background: var(--card); color: var(--text); opacity: .35; display: grid; place-items: center; transition: opacity .2s;
 }
 .exitshow:hover, .exitshow:focus-visible { opacity: 1; }
+
+/* Vorführmodus: Überschriften, Leisten und Zähler wachsen mit dem Bildschirm, damit man sie auch von hinten lesen kann */
+body.show .res { padding: .25rem .5rem .45rem; }
+body.show .res .lab { font-size: calc(clamp(.85rem, 2.6vmin, 2.4rem) * var(--fs-small)); }
+body.show .res.reel { padding: .3rem .55rem .5rem; }
+body.show .reels:not(.card) .res.reel .val { margin: .25rem 0 .1rem; }
+body.show .cats { font-size: calc(clamp(1rem, 3vmin, 2.8rem) * var(--fs-small)); }
+body.show .foot { font-size: calc(clamp(.9rem, 2.2vmin, 2rem) * var(--fs-small)); min-height: 0; }
+body.show .ans:not(.open) { font-size: calc(clamp(1rem, 2.4vmin, 2rem) * var(--fs-small)); }
+body.show .strip { font-size: calc(clamp(1rem, 2.6vmin, 2.4rem) * var(--fs-small)); }
+body.show .sum { font-size: calc(clamp(1.6rem, 5vmin, 5rem) * var(--fs-small)); }
+body.show .v-abc .res.theme { flex-basis: 24%; }
+body.show .letter .nav { flex-basis: min(10%, 7rem); }
 
 /* ---------- Hinweise unten ---------- */
 .toast {
