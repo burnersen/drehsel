@@ -37,7 +37,7 @@ Gemacht für alle, die Gruppen beschäftigen: Betreuung im Seniorenheim, Kita, S
   <tr>
     <td align="center"><img src="docs/de/handy.png" alt="Am Handy: oben Buchstabe, unten Kategorie" width="200"><br><sub>Am Handy</sub></td>
     <td align="center"><img src="docs/de/eigene.png" alt="Neues Rad: Name, Symbol und Einträge" width="200"><br><sub>Eigene Räder in einer Minute</sub></td>
-    <td></td>
+    <td align="center"><img src="docs/de/drucken.png" alt="Drucken: Vorschau von zwei Bingo-Karten, daneben die Einstellungen" width="250"><br><sub>Bingo-Karten drucken, jede anders</sub></td>
   </tr>
 </table>
 
@@ -45,7 +45,7 @@ Gemacht für alle, die Gruppen beschäftigen: Betreuung im Seniorenheim, Kita, S
 
 ## Inhalt
 
-[Spiele](#spiele) · [So geht's](#so-gehts) · [Gut lesbar](#gut-lesbar) · [Eigene Listen](#eigene-listen) · [Fernseher, Beamer, Apple TV](#fernseher-beamer-apple-tv) · [Wo die Daten liegen](#wo-die-daten-liegen) · [Drei Wege zu Drehsel](#drei-wege-zu-drehsel) · [Voraussetzungen](#voraussetzungen) · [Installation](#installation) · [Updates](#updates) · [Aufbau](#aufbau) · [Listen und Sprachen erweitern](#listen-und-sprachen-erweitern) · [Lizenz](#lizenz)
+[Spiele](#spiele) · [So geht's](#so-gehts) · [Gut lesbar](#gut-lesbar) · [Eigene Listen](#eigene-listen) · [Drucken](#drucken) · [Fernseher, Beamer, Apple TV](#fernseher-beamer-apple-tv) · [Wo die Daten liegen](#wo-die-daten-liegen) · [Drei Wege zu Drehsel](#drei-wege-zu-drehsel) · [Voraussetzungen](#voraussetzungen) · [Installation](#installation) · [Updates](#updates) · [Aufbau](#aufbau) · [Listen und Sprachen erweitern](#listen-und-sprachen-erweitern) · [Lizenz](#lizenz)
 
 ## Spiele
 
@@ -109,6 +109,16 @@ Fisch
 ```
 
 Eine Zeile pro Eintrag. `[Name]` beginnt eine Liste, `== Name ==` ein Rad mit mehreren Walzen. Hinter `|` steht eine Auflösung, die erst beim Antippen erscheint. Mit `#rrggbb` am Zeilenende bekommt ein Feld seine eigene Farbe, etwa `Rot #e03131`. Zwei Spalten aus Excel werden zu Frage und Antwort.
+
+## Drucken
+
+Unter Menü → Drucken (oder „Drucken …“ beim Anpassen eines Spiels) entsteht ein A4-PDF, direkt im Browser, ohne fremde Bibliothek und ohne Netz. Die Vorschau zeigt genau, was aus dem Drucker kommt.
+
+- **Bingo-Karten, jede anders:** klassisch mit den Zahlen 1 bis 75 (B I N G O, Freifeld in der Mitte) oder aus jeder Liste, 3 × 3, 4 × 4 oder 5 × 5 Felder. Keine zwei Karten haben dieselben Einträge, auch nicht in anderer Anordnung, und jede unterscheidet sich möglichst stark von den anderen, damit selten mehrere auf einmal gewinnen. Gibt eine Liste nicht genug verschiedene Karten her, sagt Drehsel, wie viele möglich sind. 1, 2 oder 4 Karten pro Seite, Kartennummer und Serie, auf Wunsch eine Zeile für den Namen und eine Ziehliste für die Spielleitung.
+- **Stadt-Land-Fluss-Blatt:** quer, mit Spalten für Buchstabe, Kategorien und Punkte. Auf Wunsch bekommt jedes Blatt andere, zufällige Kategorien.
+- **Liste:** jede Liste in normaler, großer oder sehr großer Schrift, in 1 bis 3 Spalten, mit Nummern oder Kästchen, Auflösungen darunter oder am Ende.
+- **Karten zum Ausschneiden:** 4, 6, 8 oder 12 pro Seite mit Schnittlinien, etwa Erinnerungsfragen oder Begriffe, die Auflösung klein unten.
+- **Rechenblätter, jedes anders:** Plus, Minus, Mal, Geteilt im Zahlenraum bis 10, 20, 100 oder 1000. Jedes Blatt hat andere Aufgaben, die Lösungen stehen hinten.
 
 ## Fernseher, Beamer, Apple TV
 
@@ -185,7 +195,8 @@ index.php      Einstieg: Dateien ausliefern, Service Worker, Manifest, die Seite
 app/lib/       Einstellungen, Kopfzeilen, Updates (PHP)
 app/views/     die Hauptseite, auch Vorlage für die Offline-Datei
 app/assets/    die App im Browser:
-               engine.js  Zufall, Ziehen, Verlauf, Gruppen, Ämter, Teilen, eingebaute Spiele
+               engine.js  Zufall, Ziehen, Verlauf, Gruppen, Ämter, Teilen, Bingo-Karten, Rechenblätter, eingebaute Spiele
+               pdf.js     PDF ohne fremde Bibliothek, mit Vorschau; print.js die Druckvorlagen
                stage.js   Rad, Walzen, Karte, Würfel, Bingo-Tafel, Sanduhr
                look.js    Farbwelten und Kontrast-Automatik
                app.js     Bedienung, Fenster, Einstellungen, eigene Räder, Sicherung
@@ -214,7 +225,7 @@ Morgenstund hat | Gold im Mund
 Zum Prüfen:
 
 ```sh
-node tools/test-engine.js     # Zufall, Ziehen, Rückgängig, Gruppen, Ämter, Teilen
+node tools/test-engine.js     # Zufall, Ziehen, Rückgängig, Gruppen, Ämter, Teilen, Bingo-Karten, Rechenblätter
 node tools/check-lists.js     # doppelte Einträge, fehlende Listen
 node tools/check-i18n.js      # fehlende Übersetzungen
 php tools/build-release.php   # dist/drehsel-install.php, ZIP und drehsel-offline.html

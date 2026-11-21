@@ -460,3 +460,20 @@ ol.histlist li small { float: right; color: var(--mut); }
 @keyframes pulse { from { transform: scale(1); } to { transform: scale(1.08); } }
 @keyframes spinpulse { from { transform: scale(.85); } to { transform: scale(1.1); } }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+
+/* Drucken */
+.print .prevbox { display: flex; flex-direction: column; align-items: center; gap: .4rem; margin: .2rem 0 .6rem; }
+canvas.preview { border-radius: 4px; box-shadow: 0 2px 14px rgba(0, 0, 0, .22); cursor: zoom-in; background: #fff; max-width: 100%; }
+canvas.preview.big { cursor: zoom-out; }
+.pager { display: flex; align-items: center; gap: .5rem; font-weight: 700; font-size: .95rem; color: var(--mut); }
+.pager .iconbtn { background: var(--soft); color: var(--on-soft); }
+.pager .iconbtn:disabled { opacity: .35; }
+.seg.c5 { grid-template-columns: repeat(5, 1fr); }
+@media (max-width: 560px) { .seg.c5 { grid-template-columns: repeat(3, 1fr); } }
+.popts { margin-top: .4rem; }
+@media (min-width: 900px) {
+    .print { display: grid; grid-template-columns: minmax(0, 380px) minmax(0, 1fr); column-gap: 1.4rem; align-items: start; }
+    .print > .prevbox { grid-column: 1; grid-row: 1 / span 20; position: sticky; top: 0; }
+    .print > :not(.prevbox) { grid-column: 2; }
+    .print > .sec:first-of-type { margin-top: 0; }
+}

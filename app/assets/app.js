@@ -625,6 +625,7 @@
             menuItem('people', t('Teilnehmer'), go(showNames), t('Namen für Wer ist dran, Gruppen und Ämter')),
             menuItem('sliders', t('Dieses Spiel anpassen'), go(showGameSettings), game ? game.name : ''),
             menuItem('expand', t('Vorführmodus'), go(() => toggleShow(true)), t('Vollbild für Fernseher, Beamer und Tablet')),
+            menuItem('print', t('Drucken'), go(() => showPrint()), t('Bingo-Karten, Spielblätter, Listen und Rechenblätter als PDF')),
             menuItem('palette', t('Farben und Schrift'), go(showSettings), t('Farbwelten, eigene Farben, Schriftgrößen')),
             menuItem('save', t('Sicherung und Listen'), go(showData), t('Alles sichern, Listen importieren und exportieren')),
             menuItem('help', t('Hilfe'), go(showHelp)),
@@ -676,6 +677,7 @@
                 v => patchGame(g.id, o => { o.say = v === '' ? null : v === '1'; }), 'c3')));
             // Runde, Kopie, Teilen
             const acts = el('div.btns');
+            acts.append(btn(t('Drucken …'), () => { s.close(); setTimeout(() => showPrint(), 80); }, 'print'));
             acts.append(btn(t('Neue Runde'), () => { newRound(); }, 'undo'));
             if (b) acts.append(btn(t('Als eigenes Rad kopieren'), () => { s.close(); setTimeout(() => copyToOwn(g.id), 80); }, 'copy'));
             else acts.append(btn(t('Bearbeiten'), () => { s.close(); setTimeout(() => editOwn(g.id), 80); }, 'edit'));
@@ -1181,6 +1183,183 @@
                 Object.keys(localStorage).filter(k => k.startsWith('dr_')).forEach(k => localStorage.removeItem(k));
                 location.reload();
             }), 'trash', 'danger')))), { cls: 'narrow' });
+    }
+
+    /* ---------- Drucken: Bingo-Karten (jede anders), Stadt-Land-Fluss-Blatt, Listen, Karten zum Ausschneiden, Rechenblätter ---------- */
+    const PRINT_KINDS = [['bingo', N('Bingo-Karten')], ['slf', N('Stadt-Land-Fluss')], ['list', N('Liste')], ['cards', N('Karten')], ['math', N('Rechenblätter')]];
+    let pr = Object.assign({ count: 12, perPage: 2, size: 4, free: true, name: true, caller: true, classic: true, rows: 8, copies: 1, cats: 'slf-klassisch', catN: 7,
+        catMix: false, points: true, answers: 'end', textSize: 14, cols: 1, num: false, check: false, per: 8, cardAns: true, sheets: 5, tasks: 20, solutions: true,
+        ops: ['+', '-'], max: 20 }, load('print', {}));
+    function printKind(g) {
+        if (g.view === 'bingo') return 'bingo';
+        if (/^slf/.test(g.id) || g.cats) return 'slf';
+        if (g.slots.some(s => s.src.type === 'math')) return 'math';
+        if (g.view === 'card' || g.slots.some(s => s.hide)) return 'cards';
+        return 'list';
+    }
+    /** Woher die Einträge kommen können: die Walzen dieses Spiels, eigene Räder, eingebaute Listen */
+    function printSources() {
+        const out = [];
+        const add = (g, mine) => g.slots.forEach((s, k) => {
+            if (DR.endless(s)) return;
+            out.push(['g:' + g.id + ':' + k, (mine ? '' : '') + g.name + (g.slots.length > 1 ? ' · ' + (s.label || k + 1) : ''), () => DR.itemsOf(s, ctx)]);
+        });
+        add(game, true);
+        for (const o of own) if (o.id !== game.id) add(getGame(o.id), true);
+        const c = content[contentLang()] || {};
+        for (const id of Object.keys(c)) if (!/^alphabet/.test(id)) out.push(['l:' + id, c[id].name, () => (listFor(id) || { items: [] }).items]);
+        return out;
+    }
+    function showPrint(kind) {
+        const g = game;
+        const o = clone(pr);
+        o.kind = kind || printKind(g);
+        const mathSlot = g.slots.find(s => s.src.type === 'math');
+        if (mathSlot) { o.ops = mathSlot.src.ops || o.ops; o.max = mathSlot.src.max || o.max; }
+        const sources = printSources();
+        o.src = sources[0] ? sources[0][0] : '';
+        if (g.cats) o.cats = g.cats;
+        const cv = el('canvas.preview', { title: t('Antippen macht die Vorschau größer') });
+        const pager = el('div.pager');
+        const warn = el('p.warn', { hidden: true });
+        const info = el('p.note');
+        const opts = el('div.popts');
+        let page = 0, doc = null, timer2 = 0;
+        const titleIn = el('input', { type: 'text', maxlength: 80 });
+        const defaultTitle = () => o.kind === 'bingo' ? (o.classic && g.view === 'bingo' ? 'Bingo' : t('Bingo') + ': ' + srcName())
+            : o.kind === 'slf' ? t('Stadt-Land-Fluss') : o.kind === 'math' ? t('Rechnen') : srcName();
+        const srcName = () => { const s = sources.find(x => x[0] === o.src); return s ? s[1] : g.name; };
+        const srcItems = () => { const s = sources.find(x => x[0] === o.src); return s ? s[2]() : []; };
+        titleIn.addEventListener('input', () => { o.title = titleIn.value; later(); });
+        const later = () => { clearTimeout(timer2); timer2 = setTimeout(build, 180); };
+        function build() {
+            const title = (o.title || '').trim() || defaultTitle();
+            titleIn.placeholder = defaultTitle();
+            warn.hidden = true; info.textContent = '';
+            try {
+                if (o.kind === 'bingo') {
+                    const classic = o.classic && g.view === 'bingo' || (o.classic && o.src === 'classic');
+                    const items = srcItems();
+                    const r = classic ? DR.bingoCards({ classic: true, count: o.count }) : DR.bingoCards({ items, size: o.size, free: o.free, count: o.count });
+                    if (r.short) { warn.textContent = t('Für {n} × {n} Felder braucht die Liste mindestens {k} Einträge, es sind {m}. Kleinere Karten wählen oder Einträge ergänzen.', { n: r.size, k: r.size * r.size - (r.free ? 1 : 0), m: items.length }); warn.hidden = false; doc = null; return paint(); }
+                    if (r.cards.length < o.count) { warn.textContent = t('Aus diesen Einträgen gibt es nur {m} verschiedene Karten. Mehr Einträge oder kleinere Karten ergeben mehr.', { m: r.cards.length }); warn.hidden = false; }
+                    info.textContent = t('Keine zwei Karten sind gleich, und jede unterscheidet sich möglichst stark von den anderen.');
+                    const serie = Math.random().toString(36).slice(2, 6).toUpperCase();
+                    doc = DR.print.bingo({ cards: r, classic, title, perPage: o.perPage, name: o.name, serie: t('Serie {s}', { s: serie }),
+                        caller: o.caller ? (classic ? DR.range(75).map(i => ({ t: String(i + 1) })) : items) : null }, t);
+                } else if (o.kind === 'slf') {
+                    const l = listFor(o.cats);
+                    let cats = l ? l.items.map(x => x.t) : [];
+                    const n = Math.max(3, Math.min(10, o.catN | 0 || 7));
+                    if (o.catMix || cats.length > 10) {
+                        // Jedes Blatt eigene Kategorien: auch das wird nie zweimal gleich
+                        const D = DR.pdf.doc({ title });
+                        const copies = Math.max(1, o.copies | 0);
+                        const docs = [];
+                        for (let c = 0; c < copies; c++) docs.push(DR.print.slf({ cats: DR.shuffle(cats.slice()).slice(0, n), rows: o.rows, title, name: o.name, copies: 1, points: o.points }, t));
+                        for (const d of docs) for (const P of d.list) D.list.push(P);
+                        doc = D;
+                        info.textContent = t('Jedes Blatt bekommt {n} zufällige Kategorien.', { n });
+                    } else doc = DR.print.slf({ cats: cats.slice(0, 10), rows: o.rows, title, name: o.name, copies: o.copies, points: o.points }, t);
+                } else if (o.kind === 'list') {
+                    const items = srcItems();
+                    doc = DR.print.plainList({ title, sub: t('{n} Einträge', { n: items.length }), items, answers: o.answers, size: o.textSize, cols: o.cols, num: o.num, check: o.check }, t);
+                } else if (o.kind === 'cards') {
+                    doc = DR.print.cards({ title, items: srcItems(), per: o.per, answers: o.cardAns }, t);
+                } else {
+                    const sheets = DR.mathSheets({ ops: o.ops, max: o.max, n: o.tasks, count: o.sheets });
+                    info.textContent = t('Jedes Blatt hat andere Aufgaben.');
+                    doc = DR.print.math({ sheets, title, name: o.name, solutions: o.solutions }, t);
+                }
+            } catch (e) { doc = null; warn.textContent = String(e && e.message || e); warn.hidden = false; }
+            pr = Object.assign(pr, o); delete pr.title; delete pr.kind; delete pr.src;
+            save('print', pr);
+            paint();
+        }
+        function paint() {
+            const box = cv.parentElement ? cv.parentElement.getBoundingClientRect() : { width: 320 };
+            if (!doc || !doc.pages) { cv.hidden = true; pager.replaceChildren(); return; }
+            cv.hidden = false;
+            if (page >= doc.pages) page = 0;
+            const big = cv.classList.contains('big');
+            const PW = doc.W(page), PH = doc.H(page);
+            const cssW = Math.min(big ? innerWidth - 40 : (PW > PH ? 460 : 340), box.width || 320);
+            const cssH = cssW * PH / PW;
+            const dpr = Math.min(3, devicePixelRatio || 1) * (big ? 1.5 : 1);
+            cv.style.width = cssW + 'px'; cv.style.height = cssH + 'px';
+            cv.width = Math.round(cssW * dpr); cv.height = Math.round(cssH * dpr);
+            const c2 = cv.getContext('2d');
+            c2.setTransform(cv.width / PW, 0, 0, cv.height / PH, 0, 0);
+            doc.draw(c2, page);
+            pager.replaceChildren(
+                el('button.iconbtn.small', { type: 'button', 'aria-label': t('Zurück'), disabled: page <= 0 || null, onclick: () => { page--; paint(); } }, icon('left')),
+                el('span', { text: t('Seite {n} von {m}', { n: page + 1, m: doc.pages }) }),
+                el('button.iconbtn.small', { type: 'button', 'aria-label': t('Weiter'), disabled: page >= doc.pages - 1 || null, onclick: () => { page++; paint(); } }, icon('right')));
+        }
+        cv.addEventListener('click', () => { cv.classList.toggle('big'); paint(); });
+        const set2 = (k, v) => { o[k] = v; page = 0; later(); };
+        const srcSel = () => {
+            const sel = el('select', { onchange: () => { o.src = sel.value; o.title = ''; titleIn.value = ''; set2('src', sel.value); } },
+                sources.map(([v, l]) => el('option', { value: v, selected: v === o.src }, l)));
+            return field(t('Einträge aus'), sel);
+        };
+        function paintOpts() {
+            opts.replaceChildren();
+            const k = o.kind;
+            if (k === 'bingo') {
+                if (g.view === 'bingo') opts.append(seg([['1', t('Zahlen 1 bis 75')], ['0', t('Aus einer Liste')]], o.classic ? '1' : '0', v => { o.classic = v === '1'; paintOpts(); set2('classic', o.classic); }, 'c3'));
+                if (!(o.classic && g.view === 'bingo')) {
+                    opts.append(srcSel(), field(t('Felder'), seg([[3, '3 × 3'], [4, '4 × 4'], [5, '5 × 5']], o.size, v => { set2('size', +v); paintOpts(); }, 'c3')));
+                    if (o.size % 2) opts.append(toggle(t('Freifeld in der Mitte'), o.free, v => set2('free', v)));
+                }
+                opts.append(el('div.row', null, el('span', { text: t('Wie viele Karten') }), stepper(o.count, 1, 200, v => set2('count', v))),
+                    field(t('Karten pro Seite'), seg([[1, t('1 (groß)')], [2, '2'], [4, '4']], o.perPage, v => set2('perPage', +v), 'c3')),
+                    toggle(t('Zeile für den Namen'), o.name, v => set2('name', v)),
+                    toggle(t('Ziehliste für die Spielleitung'), o.caller, v => set2('caller', v), t('Alle Einträge zum Abhaken, als letzte Seite')));
+            } else if (k === 'slf') {
+                const sel = el('select', { onchange: () => set2('cats', sel.value) },
+                    [['slf-klassisch', t('Klassisch: Stadt, Land, Fluss …')], ['slf-senioren', t('Für Senioren')], ['slf-kinder', t('Für Kinder')]].map(([v, l]) => el('option', { value: v, selected: o.cats === v }, l)));
+                opts.append(field(t('Kategorien'), sel, el('div.btns.small', null, btn(t('Kategorien bearbeiten'), () => editBuiltinList(o.cats), 'edit'))),
+                    toggle(t('Jedes Blatt andere Kategorien'), o.catMix, v => set2('catMix', v), t('Zufällig aus der Liste, so ist jede Runde neu')),
+                    el('div.row', null, el('span', { text: t('Kategorien pro Blatt') }), stepper(o.catN, 3, 10, v => set2('catN', v))),
+                    el('div.row', null, el('span', { text: t('Runden (Zeilen)') }), stepper(o.rows, 3, 20, v => set2('rows', v))),
+                    el('div.row', null, el('span', { text: t('Wie viele Blätter') }), stepper(o.copies, 1, 60, v => set2('copies', v))),
+                    toggle(t('Spalte für Punkte'), o.points, v => set2('points', v)), toggle(t('Zeile für Name und Datum'), o.name, v => set2('name', v)));
+            } else if (k === 'list') {
+                opts.append(srcSel(),
+                    field(t('Schriftgröße'), seg([[12, t('Normal')], [16, t('Groß')], [22, t('Sehr groß')]], o.textSize, v => set2('textSize', +v), 'c3')),
+                    field(t('Spalten'), seg([[1, '1'], [2, '2'], [3, '3']], o.cols, v => set2('cols', +v), 'c3')),
+                    field(t('Auflösungen'), seg([['end', t('Am Ende')], ['inline', t('Darunter')], ['none', t('Ohne')]], o.answers, v => set2('answers', v), 'c3')),
+                    toggle(t('Nummern'), o.num, v => set2('num', v)), toggle(t('Kästchen zum Abhaken'), o.check, v => set2('check', v)));
+            } else if (k === 'cards') {
+                opts.append(srcSel(), field(t('Karten pro Seite'), seg([[4, '4'], [6, '6'], [8, '8'], [12, '12']], o.per, v => set2('per', +v), 'c4')),
+                    toggle(t('Auflösung auf der Karte'), o.cardAns, v => set2('cardAns', v), t('Klein unten, zum Umknicken')));
+            } else {
+                const chips = el('div.chips');
+                for (const [op, label] of [['+', t('Plus')], ['-', t('Minus')], ['×', t('Mal')], [':', t('Geteilt')]]) {
+                    chips.append(el('button.chip' + (o.ops.indexOf(op) >= 0 ? '.on' : ''), { type: 'button', onclick: () => {
+                        const next = o.ops.indexOf(op) >= 0 ? o.ops.filter(x => x !== op) : o.ops.concat(op);
+                        if (next.length) { o.ops = next; paintOpts(); later(); }
+                    } }, label));
+                }
+                opts.append(field(t('Rechenarten'), chips),
+                    field(t('Zahlenraum'), seg([[10, t('bis 10')], [20, t('bis 20')], [100, t('bis 100')], [1000, t('bis 1000')]], o.max, v => set2('max', +v), 'c4')),
+                    el('div.row', null, el('span', { text: t('Wie viele Blätter') }), stepper(o.sheets, 1, 60, v => set2('sheets', v))),
+                    el('div.row', null, el('span', { text: t('Aufgaben pro Blatt') }), stepper(o.tasks, 6, 40, v => set2('tasks', v), 2)),
+                    toggle(t('Lösungen hinten'), o.solutions, v => set2('solutions', v)), toggle(t('Zeile für Name und Datum'), o.name, v => set2('name', v)));
+            }
+        }
+        const kinds = seg(PRINT_KINDS.map(([v, l]) => [v, t(l)]), o.kind, v => { o.kind = v; o.title = ''; titleIn.value = ''; page = 0; paintOpts(); later(); }, 'c5');
+        paintOpts();
+        const fname = () => slug((o.title || '').trim() || defaultTitle()) + '.pdf';
+        const blob = () => new Blob([doc.bytes()], { type: 'application/pdf' });
+        const body = el('div.print', null, el('div.prevbox', null, cv, pager), warn, info,
+            section(t('Was drucken?'), kinds), field(t('Überschrift'), titleIn), opts);
+        const foot = el('div.btns', null,
+            btn(t('Als PDF'), () => { if (doc) shareOrDownload(blob(), fname()); }, 'download', 'primary'),
+            btn(t('Drucken'), () => { if (!doc) return; const u = URL.createObjectURL(blob()); const w = window.open(u, '_blank'); if (!w) download(blob(), fname()); setTimeout(() => URL.revokeObjectURL(u), 60000); }, 'print'));
+        sheet(t('Drucken'), body, { cls: 'wide', foot });
+        requestAnimationFrame(build);
     }
 
     /* ---------- Hilfe ---------- */

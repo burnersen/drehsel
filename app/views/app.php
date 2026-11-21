@@ -15,7 +15,7 @@ $drLists = [];
 foreach (drListLangs() as $l) $drLists[$l] = $drInline ? '' : drListUrl($l);
 $drScripts = [];
 foreach (drUiLangs() as $l) if ($l !== 'de') $drScripts[] = 'i18n-' . $l . '.js';
-array_push($drScripts, 'engine.js', 'look.js', 'stage.js', 'app.js');
+array_push($drScripts, 'engine.js', 'look.js', 'stage.js', 'pdf.js', 'print.js', 'app.js');
 ?><!DOCTYPE html>
 <html lang="<?= drLang() ?>" data-v="<?= h(DR_VERSION) ?>" data-lists="<?= h(json_encode($drLists, JSON_UNESCAPED_SLASHES)) ?>" data-langs="<?= h(json_encode(drUiLangs())) ?>"<?= $drInline ? ' data-offline="1"' : '' ?>>
 <head>

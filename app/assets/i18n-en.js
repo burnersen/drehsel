@@ -235,5 +235,22 @@
         'Jetzt installieren': 'Install now', 'So geht\'s auf diesem Gerät': 'How it works on this device', 'Anleitung für andere Geräte': 'Instructions for other devices',
         'Installiert! Starte Drehsel ab jetzt über das Symbol auf deinem Home-Bildschirm oder Desktop.': 'Installed! From now on, start Drehsel from the icon on your home screen or desktop.',
         'Eine neue Version von Drehsel ist da.': 'A new version of Drehsel is available.', 'Neu laden': 'Reload', 'Schließen': 'Close',
+        // Drucken
+        'Drucken': 'Print', 'Drucken …': 'Print …', 'Bingo-Karten, Spielblätter, Listen und Rechenblätter als PDF': 'Bingo cards, game sheets, lists and maths sheets as PDF',
+        'Bingo-Karten': 'Bingo cards', 'Liste': 'List', 'Karten': 'Cards', 'Rechenblätter': 'Maths sheets', 'Antippen macht die Vorschau größer': 'Tap to enlarge the preview',
+        'Für {n} × {n} Felder braucht die Liste mindestens {k} Einträge, es sind {m}. Kleinere Karten wählen oder Einträge ergänzen.': 'For {n} × {n} fields the list needs at least {k} entries, it has {m}. Choose smaller cards or add entries.',
+        'Aus diesen Einträgen gibt es nur {m} verschiedene Karten. Mehr Einträge oder kleinere Karten ergeben mehr.': 'These entries only make {m} different cards. More entries or smaller cards make more.',
+        'Keine zwei Karten sind gleich, und jede unterscheidet sich möglichst stark von den anderen.': 'No two cards are the same, and each one differs from the others as much as possible.',
+        'Serie {s}': 'Series {s}', 'Jedes Blatt bekommt {n} zufällige Kategorien.': 'Every sheet gets {n} random categories.', 'Jedes Blatt hat andere Aufgaben.': 'Every sheet has different sums.',
+        'Seite {n} von {m}': 'Page {n} of {m}', 'Einträge aus': 'Entries from', 'Zahlen 1 bis 75': 'Numbers 1 to 75', 'Aus einer Liste': 'From a list', 'Felder': 'Fields',
+        'Freifeld in der Mitte': 'Free space in the middle', 'Wie viele Karten': 'How many cards', 'Karten pro Seite': 'Cards per page', '1 (groß)': '1 (large)',
+        'Zeile für den Namen': 'Line for the name', 'Ziehliste für die Spielleitung': 'Caller\'s list', 'Alle Einträge zum Abhaken, als letzte Seite': 'All entries to tick off, as the last page',
+        'Kategorien': 'Categories', 'Jedes Blatt andere Kategorien': 'Different categories on every sheet', 'Zufällig aus der Liste, so ist jede Runde neu': 'Picked at random from the list, so every round is new',
+        'Kategorien pro Blatt': 'Categories per sheet', 'Runden (Zeilen)': 'Rounds (rows)', 'Wie viele Blätter': 'How many sheets', 'Spalte für Punkte': 'Column for points',
+        'Zeile für Name und Datum': 'Line for name and date', 'Schriftgröße': 'Text size', 'Groß': 'Large', 'Sehr groß': 'Very large', 'Spalten': 'Columns',
+        'Auflösungen': 'Answers', 'Am Ende': 'At the end', 'Darunter': 'Underneath', 'Ohne': 'None', 'Nummern': 'Numbers', 'Kästchen zum Abhaken': 'Boxes to tick',
+        'Auflösung auf der Karte': 'Answer on the card', 'Klein unten, zum Umknicken': 'Small at the bottom, to fold over', 'Aufgaben pro Blatt': 'Sums per sheet',
+        'Lösungen hinten': 'Answers at the back', 'Was drucken?': 'What to print?', 'Überschrift': 'Heading', 'Als PDF': 'As PDF',
+        'Datum': 'Date', 'Karte {n}': 'Card {n}', 'Frei': 'Free', '{n} Karten': '{n} cards', 'Punkte': 'Points', 'Summe': 'Total', 'Blatt {n}': 'Sheet {n}', 'Lösungen': 'Answers',
     };
 })();
