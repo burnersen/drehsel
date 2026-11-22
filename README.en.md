@@ -249,6 +249,12 @@ Drehsel is free and made in my spare time. If it makes you happy and you'd like 
 
 **More from me:** [Suchsel](https://suchsel.burnersen.de) (word search puzzles with your own words, printable), [Kaufen](https://kaufen.burnersen.de) (shared shopping lists) and more on [tech.burnersen.de](https://tech.burnersen.de/en/).
 
+## ⚠️ Disclaimer
+
+Drehsel is free hobby software, provided **"as is", without any warranty or condition of any kind**. It was built and tested with care, but you use it **at your own risk**.
+
+Where this README describes what Drehsel does, checks or never does, that is how it is designed to work, not a promise or guarantee: software can have bugs, and systems, services and other programs do not always behave as expected. As far as the applicable law allows, the author is not liable for any damages or data loss arising from the use of this software. See sections 15 and 16 of the [license](LICENSE).
+
 ## Licence
 
 GNU Affero General Public License v3.0, see [LICENSE](LICENSE). The fonts are licensed under the SIL Open Font License 1.1, see [app/licenses/](app/licenses/).

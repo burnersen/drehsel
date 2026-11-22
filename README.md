@@ -253,6 +253,12 @@ Drehsel ist kostenlos und entsteht in meiner Freizeit. Wenn es dir Freude macht 
 
 **Mehr von mir:** [Suchsel](https://suchsel.burnersen.de) (Wortsuchrätsel mit eigenen Wörtern, zum Ausdrucken), [Kaufen](https://kaufen.burnersen.de) (gemeinsame Einkaufslisten) und alles Weitere auf [tech.burnersen.de](https://tech.burnersen.de/).
 
+## ⚠️ Haftungsausschluss
+
+Drehsel ist kostenlose Hobby-Software und wird **so, wie es ist, ohne jede Gewähr** bereitgestellt. Es ist mit Sorgfalt gebaut und getestet, die Nutzung erfolgt aber **auf eigene Gefahr**.
+
+Wo diese Anleitung beschreibt, was Drehsel tut, prüft oder nie tut, steht dort, wie es gedacht und gebaut ist, keine Zusage und keine Garantie: Software kann Fehler haben, und Systeme, Dienste und andere Programme verhalten sich nicht immer wie erwartet. Soweit gesetzlich zulässig, haftet der Autor nicht für Schäden oder Datenverlust durch die Nutzung dieser Software. Siehe Abschnitte 15 und 16 der [Lizenz](LICENSE).
+
 ## Lizenz
 
 GNU Affero General Public License v3.0, siehe [LICENSE](LICENSE). Die Schriften stehen unter der SIL Open Font License 1.1, siehe [app/licenses/](app/licenses/).
